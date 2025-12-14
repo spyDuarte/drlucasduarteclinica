@@ -17,5 +17,8 @@
     "management"
   ],
   "author": "Dr. Lucas Duarte",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "gh-pages": "^6.3.0"
+  }
 }
