@@ -1,5 +1,9 @@
 # Sistema de Gestão de Consultório Médico
 
+[![Deploy to GitHub Pages](https://github.com/spyDuarte/drlucasduarteclinica/actions/workflows/deploy.yml/badge.svg)](https://github.com/spyDuarte/drlucasduarteclinica/actions/workflows/deploy.yml)
+
+**Demo Online:** [https://spyDuarte.github.io/drlucasduarteclinica](https://spyDuarte.github.io/drlucasduarteclinica)
+
 Sistema web completo para gerenciamento de consultório médico com 1 profissional médico e 1 secretária.
 
 ## Funcionalidades
@@ -103,6 +107,37 @@ npm run build
 ```
 
 Os arquivos serão gerados em `client/dist/`
+
+## Deploy no GitHub Pages
+
+### Deploy Automático (Recomendado)
+
+O projeto está configurado com GitHub Actions para deploy automático. A cada push na branch `main` ou `master`, o site é automaticamente atualizado.
+
+1. No repositório do GitHub, vá em **Settings** > **Pages**
+2. Em **Source**, selecione **GitHub Actions**
+3. Faça um push para a branch principal e o deploy será executado automaticamente
+
+### Deploy Manual
+
+```bash
+cd client
+npm run deploy
+```
+
+Este comando irá:
+1. Executar o build do projeto
+2. Publicar a pasta `dist` na branch `gh-pages`
+
+### Configuração do GitHub Pages
+
+Para que o GitHub Pages funcione corretamente:
+
+1. Vá em **Settings** > **Pages** no seu repositório
+2. Em **Source**, selecione:
+   - Para deploy automático: **GitHub Actions**
+   - Para deploy manual: **Deploy from a branch** e selecione `gh-pages`
+3. Aguarde alguns minutos e acesse: `https://seu-usuario.github.io/drlucasduarteclinica`
 
 ## Credenciais de Demonstração
 
