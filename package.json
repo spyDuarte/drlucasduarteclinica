@@ -1,0 +1,21 @@
+{
+  "name": "drlucasduarte-clinica",
+  "version": "1.0.0",
+  "description": "Sistema de Gestão de Consultório Médico - Dr. Lucas Duarte",
+  "private": true,
+  "scripts": {
+    "dev": "cd client && npm run dev",
+    "build": "cd client && npm run build",
+    "preview": "cd client && npm run preview",
+    "lint": "cd client && npm run lint"
+  },
+  "keywords": [
+    "clinic",
+    "medical",
+    "ehr",
+    "healthcare",
+    "management"
+  ],
+  "author": "Dr. Lucas Duarte",
+  "license": "MIT"
+}
