@@ -9,19 +9,22 @@ import {
   Calendar,
   Edit2,
   Trash2,
-  X,
   User,
   FileText
 } from 'lucide-react';
 import { formatDate, calculateAge, formatCPF, formatPhone } from '../utils/helpers';
+import { PatientModal } from '../components';
+import { useToast } from '../components/Toast';
 import type { Patient } from '../types';
 
 export default function Patients() {
   const { patients, addPatient, updatePatient, deletePatient } = useData();
+  const { showToast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingPatient, setEditingPatient] = useState<Patient | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const filteredPatients = patients.filter(patient =>
     patient.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -39,9 +42,28 @@ export default function Patients() {
     setEditingPatient(null);
   };
 
+  const handleSave = (data: Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>) => {
+    setIsLoading(true);
+    try {
+      if (editingPatient) {
+        updatePatient(editingPatient.id, data);
+        showToast('Paciente atualizado com sucesso!', 'success');
+      } else {
+        addPatient(data);
+        showToast('Paciente cadastrado com sucesso!', 'success');
+      }
+      handleCloseModal();
+    } catch {
+      showToast('Erro ao salvar paciente', 'error');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleDelete = (id: string) => {
     deletePatient(id);
     setShowDeleteConfirm(null);
+    showToast('Paciente excluído com sucesso!', 'success');
   };
 
   return (
@@ -144,22 +166,25 @@ export default function Patients() {
                         to={`/pacientes/${patient.id}`}
                         className="p-2 text-gray-500 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-colors"
                         title="Ver prontuário"
+                        aria-label={`Ver prontuário de ${patient.nome}`}
                       >
-                        <FileText className="w-5 h-5" />
+                        <FileText className="w-5 h-5" aria-hidden="true" />
                       </Link>
                       <button
                         onClick={() => handleOpenModal(patient)}
                         className="p-2 text-gray-500 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-colors"
                         title="Editar"
+                        aria-label={`Editar paciente ${patient.nome}`}
                       >
-                        <Edit2 className="w-5 h-5" />
+                        <Edit2 className="w-5 h-5" aria-hidden="true" />
                       </button>
                       <button
                         onClick={() => setShowDeleteConfirm(patient.id)}
                         className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                         title="Excluir"
+                        aria-label={`Excluir paciente ${patient.nome}`}
                       >
-                        <Trash2 className="w-5 h-5" />
+                        <Trash2 className="w-5 h-5" aria-hidden="true" />
                       </button>
                     </div>
                   </td>
@@ -175,14 +200,8 @@ export default function Patients() {
         <PatientModal
           patient={editingPatient}
           onClose={handleCloseModal}
-          onSave={(data) => {
-            if (editingPatient) {
-              updatePatient(editingPatient.id, data);
-            } else {
-              addPatient(data as any);
-            }
-            handleCloseModal();
-          }}
+          onSave={handleSave}
+          isLoading={isLoading}
         />
       )}
 
@@ -213,325 +232,6 @@ export default function Patients() {
           </div>
         </div>
       )}
-    </div>
-  );
-}
-
-// Patient Modal Component
-interface PatientModalProps {
-  patient: Patient | null;
-  onClose: () => void;
-  onSave: (data: Partial<Patient>) => void;
-}
-
-function PatientModal({ patient, onClose, onSave }: PatientModalProps) {
-  const [formData, setFormData] = useState({
-    nome: patient?.nome || '',
-    cpf: patient?.cpf || '',
-    dataNascimento: patient?.dataNascimento || '',
-    sexo: patient?.sexo || 'M',
-    telefone: patient?.telefone || '',
-    email: patient?.email || '',
-    logradouro: patient?.endereco?.logradouro || '',
-    numero: patient?.endereco?.numero || '',
-    complemento: patient?.endereco?.complemento || '',
-    bairro: patient?.endereco?.bairro || '',
-    cidade: patient?.endereco?.cidade || '',
-    estado: patient?.endereco?.estado || '',
-    cep: patient?.endereco?.cep || '',
-    convenioNome: patient?.convenio?.nome || '',
-    convenioNumero: patient?.convenio?.numero || '',
-    convenioValidade: patient?.convenio?.validade || '',
-    alergias: patient?.alergias?.join(', ') || '',
-    medicamentosEmUso: patient?.medicamentosEmUso?.join(', ') || '',
-    historicoFamiliar: patient?.historicoFamiliar || '',
-    observacoes: patient?.observacoes || ''
-  });
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const data: Partial<Patient> = {
-      nome: formData.nome,
-      cpf: formData.cpf,
-      dataNascimento: formData.dataNascimento,
-      sexo: formData.sexo as 'M' | 'F' | 'O',
-      telefone: formData.telefone,
-      email: formData.email || undefined,
-      endereco: {
-        logradouro: formData.logradouro,
-        numero: formData.numero,
-        complemento: formData.complemento || undefined,
-        bairro: formData.bairro,
-        cidade: formData.cidade,
-        estado: formData.estado,
-        cep: formData.cep
-      },
-      alergias: formData.alergias ? formData.alergias.split(',').map(a => a.trim()) : undefined,
-      medicamentosEmUso: formData.medicamentosEmUso ? formData.medicamentosEmUso.split(',').map(m => m.trim()) : undefined,
-      historicoFamiliar: formData.historicoFamiliar || undefined,
-      observacoes: formData.observacoes || undefined
-    };
-
-    if (formData.convenioNome) {
-      data.convenio = {
-        nome: formData.convenioNome,
-        numero: formData.convenioNumero,
-        validade: formData.convenioValidade
-      };
-    }
-
-    onSave(data);
-  };
-
-  return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-gray-900">
-            {patient ? 'Editar Paciente' : 'Novo Paciente'}
-          </h2>
-          <button
-            onClick={onClose}
-            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {/* Dados Pessoais */}
-          <div>
-            <h3 className="text-sm font-medium text-gray-700 mb-3">Dados Pessoais</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="md:col-span-2">
-                <label className="block text-sm text-gray-600 mb-1">Nome completo *</label>
-                <input
-                  type="text"
-                  value={formData.nome}
-                  onChange={e => setFormData({ ...formData, nome: e.target.value })}
-                  className="input-field"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm text-gray-600 mb-1">CPF *</label>
-                <input
-                  type="text"
-                  value={formData.cpf}
-                  onChange={e => setFormData({ ...formData, cpf: e.target.value })}
-                  className="input-field"
-                  placeholder="000.000.000-00"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm text-gray-600 mb-1">Data de nascimento *</label>
-                <input
-                  type="date"
-                  value={formData.dataNascimento}
-                  onChange={e => setFormData({ ...formData, dataNascimento: e.target.value })}
-                  className="input-field"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm text-gray-600 mb-1">Sexo *</label>
-                <select
-                  value={formData.sexo}
-                  onChange={e => setFormData({ ...formData, sexo: e.target.value as 'M' | 'F' | 'O' })}
-                  className="input-field"
-                >
-                  <option value="M">Masculino</option>
-                  <option value="F">Feminino</option>
-                  <option value="O">Outro</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm text-gray-600 mb-1">Telefone *</label>
-                <input
-                  type="tel"
-                  value={formData.telefone}
-                  onChange={e => setFormData({ ...formData, telefone: e.target.value })}
-                  className="input-field"
-                  placeholder="(00) 00000-0000"
-                  required
-                />
-              </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm text-gray-600 mb-1">Email</label>
-                <input
-                  type="email"
-                  value={formData.email}
-                  onChange={e => setFormData({ ...formData, email: e.target.value })}
-                  className="input-field"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Endereço */}
-          <div>
-            <h3 className="text-sm font-medium text-gray-700 mb-3">Endereço</h3>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="md:col-span-2">
-                <label className="block text-sm text-gray-600 mb-1">Logradouro</label>
-                <input
-                  type="text"
-                  value={formData.logradouro}
-                  onChange={e => setFormData({ ...formData, logradouro: e.target.value })}
-                  className="input-field"
-                />
-              </div>
-              <div>
-                <label className="block text-sm text-gray-600 mb-1">Número</label>
-                <input
-                  type="text"
-                  value={formData.numero}
-                  onChange={e => setFormData({ ...formData, numero: e.target.value })}
-                  className="input-field"
-                />
-              </div>
-              <div>
-                <label className="block text-sm text-gray-600 mb-1">Complemento</label>
-                <input
-                  type="text"
-                  value={formData.complemento}
-                  onChange={e => setFormData({ ...formData, complemento: e.target.value })}
-                  className="input-field"
-                />
-              </div>
-              <div>
-                <label className="block text-sm text-gray-600 mb-1">Bairro</label>
-                <input
-                  type="text"
-                  value={formData.bairro}
-                  onChange={e => setFormData({ ...formData, bairro: e.target.value })}
-                  className="input-field"
-                />
-              </div>
-              <div>
-                <label className="block text-sm text-gray-600 mb-1">Cidade</label>
-                <input
-                  type="text"
-                  value={formData.cidade}
-                  onChange={e => setFormData({ ...formData, cidade: e.target.value })}
-                  className="input-field"
-                />
-              </div>
-              <div>
-                <label className="block text-sm text-gray-600 mb-1">Estado</label>
-                <input
-                  type="text"
-                  value={formData.estado}
-                  onChange={e => setFormData({ ...formData, estado: e.target.value })}
-                  className="input-field"
-                  maxLength={2}
-                />
-              </div>
-              <div>
-                <label className="block text-sm text-gray-600 mb-1">CEP</label>
-                <input
-                  type="text"
-                  value={formData.cep}
-                  onChange={e => setFormData({ ...formData, cep: e.target.value })}
-                  className="input-field"
-                  placeholder="00000-000"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Convênio */}
-          <div>
-            <h3 className="text-sm font-medium text-gray-700 mb-3">Convênio (opcional)</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm text-gray-600 mb-1">Nome do convênio</label>
-                <input
-                  type="text"
-                  value={formData.convenioNome}
-                  onChange={e => setFormData({ ...formData, convenioNome: e.target.value })}
-                  className="input-field"
-                />
-              </div>
-              <div>
-                <label className="block text-sm text-gray-600 mb-1">Número da carteira</label>
-                <input
-                  type="text"
-                  value={formData.convenioNumero}
-                  onChange={e => setFormData({ ...formData, convenioNumero: e.target.value })}
-                  className="input-field"
-                />
-              </div>
-              <div>
-                <label className="block text-sm text-gray-600 mb-1">Validade</label>
-                <input
-                  type="date"
-                  value={formData.convenioValidade}
-                  onChange={e => setFormData({ ...formData, convenioValidade: e.target.value })}
-                  className="input-field"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Histórico Médico */}
-          <div>
-            <h3 className="text-sm font-medium text-gray-700 mb-3">Histórico Médico</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm text-gray-600 mb-1">Alergias (separadas por vírgula)</label>
-                <input
-                  type="text"
-                  value={formData.alergias}
-                  onChange={e => setFormData({ ...formData, alergias: e.target.value })}
-                  className="input-field"
-                  placeholder="Ex: Dipirona, Penicilina"
-                />
-              </div>
-              <div>
-                <label className="block text-sm text-gray-600 mb-1">Medicamentos em uso</label>
-                <input
-                  type="text"
-                  value={formData.medicamentosEmUso}
-                  onChange={e => setFormData({ ...formData, medicamentosEmUso: e.target.value })}
-                  className="input-field"
-                  placeholder="Ex: Losartana 50mg, Metformina 850mg"
-                />
-              </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm text-gray-600 mb-1">Histórico familiar</label>
-                <textarea
-                  value={formData.historicoFamiliar}
-                  onChange={e => setFormData({ ...formData, historicoFamiliar: e.target.value })}
-                  className="input-field"
-                  rows={2}
-                />
-              </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm text-gray-600 mb-1">Observações</label>
-                <textarea
-                  value={formData.observacoes}
-                  onChange={e => setFormData({ ...formData, observacoes: e.target.value })}
-                  className="input-field"
-                  rows={2}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Actions */}
-          <div className="flex gap-3 justify-end pt-4 border-t border-gray-200">
-            <button type="button" onClick={onClose} className="btn-secondary">
-              Cancelar
-            </button>
-            <button type="submit" className="btn-primary">
-              {patient ? 'Salvar alterações' : 'Cadastrar paciente'}
-            </button>
-          </div>
-        </form>
-      </div>
     </div>
   );
 }

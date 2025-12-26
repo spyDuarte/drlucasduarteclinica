@@ -1,8 +1,9 @@
-import React from 'react';
+import type { ReactNode } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { DataProvider } from './contexts/DataContext';
-import Layout from './components/Layout';
+import { Layout, LoadingSpinner, ErrorBoundary } from './components';
+import { ToastProvider } from './components/Toast';
 import {
   Login,
   Dashboard,
@@ -14,15 +15,11 @@ import {
 } from './pages';
 
 // Componente de rota protegida
-function ProtectedRoute({ children, allowedRoles }: { children: React.ReactNode; allowedRoles?: string[] }) {
+function ProtectedRoute({ children, allowedRoles }: { children: ReactNode; allowedRoles?: string[] }) {
   const { isAuthenticated, isLoading, user } = useAuth();
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sky-600"></div>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   if (!isAuthenticated) {
@@ -37,15 +34,11 @@ function ProtectedRoute({ children, allowedRoles }: { children: React.ReactNode;
 }
 
 // Componente de rota pública (redireciona se já estiver logado)
-function PublicRoute({ children }: { children: React.ReactNode }) {
+function PublicRoute({ children }: { children: ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sky-600"></div>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   if (isAuthenticated) {
@@ -109,12 +102,16 @@ function AppRoutes() {
 
 export default function App() {
   return (
-    <HashRouter>
-      <AuthProvider>
-        <DataProvider>
-          <AppRoutes />
-        </DataProvider>
-      </AuthProvider>
-    </HashRouter>
+    <ErrorBoundary>
+      <HashRouter>
+        <AuthProvider>
+          <DataProvider>
+            <ToastProvider>
+              <AppRoutes />
+            </ToastProvider>
+          </DataProvider>
+        </AuthProvider>
+      </HashRouter>
+    </ErrorBoundary>
   );
 }
