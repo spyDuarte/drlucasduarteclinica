@@ -1,6 +1,13 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
 import type { Patient, Appointment, MedicalRecord, Payment, DashboardStats } from '../types';
 import { generateId } from '../utils/helpers';
+import { STORAGE_KEYS } from '../constants/clinic';
+import {
+  DEMO_PATIENTS,
+  DEMO_MEDICAL_RECORDS,
+  generateDemoAppointments,
+  generateDemoPayments
+} from '../data/demoData';
 
 interface DataContextType {
   // Pacientes
@@ -37,242 +44,62 @@ interface DataContextType {
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
-// Dados de demonstração
-const DEMO_PATIENTS: Patient[] = [
-  {
-    id: '1',
-    nome: 'João Carlos Santos',
-    cpf: '123.456.789-00',
-    dataNascimento: '1985-03-15',
-    sexo: 'M',
-    telefone: '(11) 98765-4321',
-    email: 'joao.santos@email.com',
-    endereco: {
-      logradouro: 'Rua das Flores',
-      numero: '123',
-      bairro: 'Centro',
-      cidade: 'São Paulo',
-      estado: 'SP',
-      cep: '01234-567'
-    },
-    alergias: ['Dipirona'],
-    medicamentosEmUso: ['Losartana 50mg'],
-    createdAt: '2024-01-15T10:00:00Z',
-    updatedAt: '2024-01-15T10:00:00Z'
-  },
-  {
-    id: '2',
-    nome: 'Maria Fernanda Lima',
-    cpf: '987.654.321-00',
-    dataNascimento: '1990-07-22',
-    sexo: 'F',
-    telefone: '(11) 91234-5678',
-    email: 'maria.lima@email.com',
-    endereco: {
-      logradouro: 'Av. Paulista',
-      numero: '1000',
-      complemento: 'Apto 45',
-      bairro: 'Bela Vista',
-      cidade: 'São Paulo',
-      estado: 'SP',
-      cep: '01310-100'
-    },
-    convenio: {
-      nome: 'Unimed',
-      numero: '123456789',
-      validade: '2025-12-31'
-    },
-    createdAt: '2024-02-10T14:30:00Z',
-    updatedAt: '2024-02-10T14:30:00Z'
-  },
-  {
-    id: '3',
-    nome: 'Pedro Henrique Oliveira',
-    cpf: '456.789.123-00',
-    dataNascimento: '1978-11-08',
-    sexo: 'M',
-    telefone: '(11) 99876-5432',
-    endereco: {
-      logradouro: 'Rua Augusta',
-      numero: '500',
-      bairro: 'Consolação',
-      cidade: 'São Paulo',
-      estado: 'SP',
-      cep: '01305-000'
-    },
-    alergias: ['Penicilina', 'Ibuprofeno'],
-    medicamentosEmUso: ['Metformina 850mg', 'Atenolol 25mg'],
-    historicoFamiliar: 'Pai diabético, mãe hipertensa',
-    createdAt: '2024-03-05T09:15:00Z',
-    updatedAt: '2024-03-05T09:15:00Z'
-  }
-];
-
-const today = new Date().toISOString().split('T')[0];
-
-const DEMO_APPOINTMENTS: Appointment[] = [
-  {
-    id: '1',
-    patientId: '1',
-    data: today,
-    horaInicio: '09:00',
-    horaFim: '09:30',
-    tipo: 'retorno',
-    status: 'confirmada',
-    motivo: 'Acompanhamento de hipertensão',
-    valor: 250,
-    createdAt: '2024-12-10T10:00:00Z',
-    updatedAt: '2024-12-10T10:00:00Z'
-  },
-  {
-    id: '2',
-    patientId: '2',
-    data: today,
-    horaInicio: '10:00',
-    horaFim: '10:30',
-    tipo: 'primeira_consulta',
-    status: 'agendada',
-    motivo: 'Check-up geral',
-    convenio: true,
-    createdAt: '2024-12-11T14:00:00Z',
-    updatedAt: '2024-12-11T14:00:00Z'
-  },
-  {
-    id: '3',
-    patientId: '3',
-    data: today,
-    horaInicio: '11:00',
-    horaFim: '11:30',
-    tipo: 'retorno',
-    status: 'aguardando',
-    motivo: 'Revisão de exames',
-    valor: 200,
-    createdAt: '2024-12-12T16:00:00Z',
-    updatedAt: '2024-12-12T16:00:00Z'
-  }
-];
-
-const DEMO_MEDICAL_RECORDS: MedicalRecord[] = [
-  {
-    id: '1',
-    patientId: '1',
-    appointmentId: '1',
-    data: '2024-11-15',
-    subjetivo: {
-      queixaPrincipal: 'Cefaleia frequente há 2 semanas',
-      historicoDoencaAtual: 'Paciente refere dor de cabeça frontal, pulsátil, de intensidade moderada, que piora no final do dia. Nega náuseas ou vômitos. Associa com estresse no trabalho.',
-      revisaoSistemas: 'Nega alterações visuais, febre, rigidez de nuca.'
-    },
-    objetivo: {
-      sinaisVitais: {
-        pressaoArterial: '140/90',
-        frequenciaCardiaca: 78,
-        temperatura: 36.5,
-        peso: 82,
-        altura: 175,
-        imc: 26.8
-      },
-      exameFisico: 'BEG, corado, hidratado. ACV: RCR 2T BNF. AR: MVU sem RA. Abdome: flácido, indolor. Neurológico: sem déficits focais.'
-    },
-    avaliacao: {
-      hipotesesDiagnosticas: ['Cefaleia tensional', 'Hipertensão arterial sistêmica'],
-      cid10: ['G44.2', 'I10']
-    },
-    plano: {
-      conduta: 'Orientado sobre manejo do estresse. Ajuste de medicação anti-hipertensiva.',
-      prescricoes: [
-        {
-          id: '1',
-          medicamento: 'Losartana',
-          concentracao: '50mg',
-          formaFarmaceutica: 'Comprimido',
-          posologia: '1 comprimido pela manhã',
-          quantidade: '30 comprimidos',
-          duracao: '30 dias'
-        }
-      ],
-      solicitacaoExames: ['Hemograma completo', 'Glicemia de jejum', 'Perfil lipídico'],
-      retorno: '30 dias',
-      orientacoes: 'Dieta hipossódica, atividade física regular, controle de PA domiciliar.'
-    },
-    createdAt: '2024-11-15T10:30:00Z',
-    updatedAt: '2024-11-15T10:30:00Z'
-  }
-];
-
-const DEMO_PAYMENTS: Payment[] = [
-  {
-    id: '1',
-    patientId: '1',
-    appointmentId: '1',
-    valor: 250,
-    descricao: 'Consulta de retorno',
-    formaPagamento: 'pix',
-    status: 'pago',
-    dataPagamento: '2024-11-15',
-    numeroRecibo: 'REC-2024-001',
-    createdAt: '2024-11-15T11:00:00Z',
-    updatedAt: '2024-11-15T11:00:00Z'
-  },
-  {
-    id: '2',
-    patientId: '3',
-    valor: 200,
-    descricao: 'Consulta',
-    formaPagamento: 'cartao_credito',
-    status: 'pendente',
-    dataVencimento: today,
-    createdAt: '2024-12-12T16:30:00Z',
-    updatedAt: '2024-12-12T16:30:00Z'
-  }
-];
-
 export function DataProvider({ children }: { children: ReactNode }) {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [medicalRecords, setMedicalRecords] = useState<MedicalRecord[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
     // Carregar dados do localStorage ou usar dados de demonstração
-    const savedPatients = localStorage.getItem('clinica_patients');
-    const savedAppointments = localStorage.getItem('clinica_appointments');
-    const savedRecords = localStorage.getItem('clinica_records');
-    const savedPayments = localStorage.getItem('clinica_payments');
+    const savedPatients = localStorage.getItem(STORAGE_KEYS.PATIENTS);
+    const savedAppointments = localStorage.getItem(STORAGE_KEYS.APPOINTMENTS);
+    const savedRecords = localStorage.getItem(STORAGE_KEYS.RECORDS);
+    const savedPayments = localStorage.getItem(STORAGE_KEYS.PAYMENTS);
 
-    setPatients(savedPatients ? JSON.parse(savedPatients) : DEMO_PATIENTS);
-    setAppointments(savedAppointments ? JSON.parse(savedAppointments) : DEMO_APPOINTMENTS);
-    setMedicalRecords(savedRecords ? JSON.parse(savedRecords) : DEMO_MEDICAL_RECORDS);
-    setPayments(savedPayments ? JSON.parse(savedPayments) : DEMO_PAYMENTS);
+    try {
+      setPatients(savedPatients ? JSON.parse(savedPatients) : DEMO_PATIENTS);
+      setAppointments(savedAppointments ? JSON.parse(savedAppointments) : generateDemoAppointments());
+      setMedicalRecords(savedRecords ? JSON.parse(savedRecords) : DEMO_MEDICAL_RECORDS);
+      setPayments(savedPayments ? JSON.parse(savedPayments) : generateDemoPayments());
+    } catch {
+      // Se houver erro no parse, usar dados demo
+      setPatients(DEMO_PATIENTS);
+      setAppointments(generateDemoAppointments());
+      setMedicalRecords(DEMO_MEDICAL_RECORDS);
+      setPayments(generateDemoPayments());
+    }
+    setIsInitialized(true);
   }, []);
 
-  // Persistir dados no localStorage
+  // Persistir dados no localStorage (apenas após inicialização)
   useEffect(() => {
-    if (patients.length > 0) {
-      localStorage.setItem('clinica_patients', JSON.stringify(patients));
+    if (isInitialized && patients.length > 0) {
+      localStorage.setItem(STORAGE_KEYS.PATIENTS, JSON.stringify(patients));
     }
-  }, [patients]);
+  }, [patients, isInitialized]);
 
   useEffect(() => {
-    if (appointments.length > 0) {
-      localStorage.setItem('clinica_appointments', JSON.stringify(appointments));
+    if (isInitialized && appointments.length > 0) {
+      localStorage.setItem(STORAGE_KEYS.APPOINTMENTS, JSON.stringify(appointments));
     }
-  }, [appointments]);
+  }, [appointments, isInitialized]);
 
   useEffect(() => {
-    if (medicalRecords.length > 0) {
-      localStorage.setItem('clinica_records', JSON.stringify(medicalRecords));
+    if (isInitialized && medicalRecords.length > 0) {
+      localStorage.setItem(STORAGE_KEYS.RECORDS, JSON.stringify(medicalRecords));
     }
-  }, [medicalRecords]);
+  }, [medicalRecords, isInitialized]);
 
   useEffect(() => {
-    if (payments.length > 0) {
-      localStorage.setItem('clinica_payments', JSON.stringify(payments));
+    if (isInitialized && payments.length > 0) {
+      localStorage.setItem(STORAGE_KEYS.PAYMENTS, JSON.stringify(payments));
     }
-  }, [payments]);
+  }, [payments, isInitialized]);
 
   // Funções de Pacientes
-  const addPatient = (patientData: Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>) => {
+  const addPatient = useCallback((patientData: Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>) => {
     const now = new Date().toISOString();
     const newPatient: Patient = {
       ...patientData,
@@ -282,24 +109,24 @@ export function DataProvider({ children }: { children: ReactNode }) {
     };
     setPatients(prev => [...prev, newPatient]);
     return newPatient;
-  };
+  }, []);
 
-  const updatePatient = (id: string, patientData: Partial<Patient>) => {
+  const updatePatient = useCallback((id: string, patientData: Partial<Patient>) => {
     setPatients(prev => prev.map(p =>
       p.id === id
         ? { ...p, ...patientData, updatedAt: new Date().toISOString() }
         : p
     ));
-  };
+  }, []);
 
-  const deletePatient = (id: string) => {
+  const deletePatient = useCallback((id: string) => {
     setPatients(prev => prev.filter(p => p.id !== id));
-  };
+  }, []);
 
-  const getPatient = (id: string) => patients.find(p => p.id === id);
+  const getPatient = useCallback((id: string) => patients.find(p => p.id === id), [patients]);
 
   // Funções de Consultas
-  const addAppointment = (appointmentData: Omit<Appointment, 'id' | 'createdAt' | 'updatedAt'>) => {
+  const addAppointment = useCallback((appointmentData: Omit<Appointment, 'id' | 'createdAt' | 'updatedAt'>) => {
     const now = new Date().toISOString();
     const newAppointment: Appointment = {
       ...appointmentData,
@@ -309,32 +136,36 @@ export function DataProvider({ children }: { children: ReactNode }) {
     };
     setAppointments(prev => [...prev, newAppointment]);
     return newAppointment;
-  };
+  }, []);
 
-  const updateAppointment = (id: string, appointmentData: Partial<Appointment>) => {
+  const updateAppointment = useCallback((id: string, appointmentData: Partial<Appointment>) => {
     setAppointments(prev => prev.map(a =>
       a.id === id
         ? { ...a, ...appointmentData, updatedAt: new Date().toISOString() }
         : a
     ));
-  };
+  }, []);
 
-  const deleteAppointment = (id: string) => {
+  const deleteAppointment = useCallback((id: string) => {
     setAppointments(prev => prev.filter(a => a.id !== id));
-  };
+  }, []);
 
-  const getAppointment = (id: string) => appointments.find(a => a.id === id);
+  const getAppointment = useCallback((id: string) => appointments.find(a => a.id === id), [appointments]);
 
-  const getAppointmentsByDate = (date: string) =>
+  const getAppointmentsByDate = useCallback((date: string) =>
     appointments
       .filter(a => a.data === date)
-      .sort((a, b) => a.horaInicio.localeCompare(b.horaInicio));
+      .sort((a, b) => a.horaInicio.localeCompare(b.horaInicio)),
+    [appointments]
+  );
 
-  const getAppointmentsByPatient = (patientId: string) =>
-    appointments.filter(a => a.patientId === patientId);
+  const getAppointmentsByPatient = useCallback((patientId: string) =>
+    appointments.filter(a => a.patientId === patientId),
+    [appointments]
+  );
 
   // Funções de Prontuários
-  const addMedicalRecord = (recordData: Omit<MedicalRecord, 'id' | 'createdAt' | 'updatedAt'>) => {
+  const addMedicalRecord = useCallback((recordData: Omit<MedicalRecord, 'id' | 'createdAt' | 'updatedAt'>) => {
     const now = new Date().toISOString();
     const newRecord: MedicalRecord = {
       ...recordData,
@@ -344,21 +175,23 @@ export function DataProvider({ children }: { children: ReactNode }) {
     };
     setMedicalRecords(prev => [...prev, newRecord]);
     return newRecord;
-  };
+  }, []);
 
-  const updateMedicalRecord = (id: string, recordData: Partial<MedicalRecord>) => {
+  const updateMedicalRecord = useCallback((id: string, recordData: Partial<MedicalRecord>) => {
     setMedicalRecords(prev => prev.map(r =>
       r.id === id
         ? { ...r, ...recordData, updatedAt: new Date().toISOString() }
         : r
     ));
-  };
+  }, []);
 
-  const getMedicalRecordsByPatient = (patientId: string) =>
-    medicalRecords.filter(r => r.patientId === patientId);
+  const getMedicalRecordsByPatient = useCallback((patientId: string) =>
+    medicalRecords.filter(r => r.patientId === patientId),
+    [medicalRecords]
+  );
 
   // Funções de Pagamentos
-  const addPayment = (paymentData: Omit<Payment, 'id' | 'createdAt' | 'updatedAt'>) => {
+  const addPayment = useCallback((paymentData: Omit<Payment, 'id' | 'createdAt' | 'updatedAt'>) => {
     const now = new Date().toISOString();
     const newPayment: Payment = {
       ...paymentData,
@@ -368,21 +201,23 @@ export function DataProvider({ children }: { children: ReactNode }) {
     };
     setPayments(prev => [...prev, newPayment]);
     return newPayment;
-  };
+  }, []);
 
-  const updatePayment = (id: string, paymentData: Partial<Payment>) => {
+  const updatePayment = useCallback((id: string, paymentData: Partial<Payment>) => {
     setPayments(prev => prev.map(p =>
       p.id === id
         ? { ...p, ...paymentData, updatedAt: new Date().toISOString() }
         : p
     ));
-  };
+  }, []);
 
-  const getPaymentsByPatient = (patientId: string) =>
-    payments.filter(p => p.patientId === patientId);
+  const getPaymentsByPatient = useCallback((patientId: string) =>
+    payments.filter(p => p.patientId === patientId),
+    [payments]
+  );
 
-  // Dashboard Stats
-  const getDashboardStats = (): DashboardStats => {
+  // Dashboard Stats - memoizado para evitar recálculos desnecessários
+  const getDashboardStats = useCallback((): DashboardStats => {
     const now = new Date();
     const todayStr = now.toISOString().split('T')[0];
     const startOfWeek = new Date(now);
@@ -433,7 +268,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       receitaPendente,
       taxaComparecimento
     };
-  };
+  }, [appointments, patients, payments]);
 
   return (
     <DataContext.Provider value={{

@@ -1,5 +1,7 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
 import type { User, UserRole } from '../types';
+import { DEMO_USERS } from '../data/demoData';
+import { STORAGE_KEYS } from '../constants/clinic';
 
 interface AuthContextType {
   user: User | null;
@@ -12,39 +14,24 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Usuários de demonstração
-const DEMO_USERS: (User & { password: string })[] = [
-  {
-    id: '1',
-    nome: 'Dr. Lucas Duarte',
-    email: 'medico@clinica.com',
-    role: 'medico',
-    crm: 'CRM/SP 123456',
-    password: 'medico123'
-  },
-  {
-    id: '2',
-    nome: 'Maria Silva',
-    email: 'secretaria@clinica.com',
-    role: 'secretaria',
-    password: 'secretaria123'
-  }
-];
-
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     // Verificar se há usuário salvo no localStorage
-    const savedUser = localStorage.getItem('clinica_user');
+    const savedUser = localStorage.getItem(STORAGE_KEYS.USER);
     if (savedUser) {
-      setUser(JSON.parse(savedUser));
+      try {
+        setUser(JSON.parse(savedUser));
+      } catch {
+        localStorage.removeItem(STORAGE_KEYS.USER);
+      }
     }
     setIsLoading(false);
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const login = useCallback(async (email: string, password: string) => {
     setIsLoading(true);
 
     // Simular delay de rede
@@ -61,20 +48,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const { password: _, ...userWithoutPassword } = foundUser;
     setUser(userWithoutPassword);
-    localStorage.setItem('clinica_user', JSON.stringify(userWithoutPassword));
+    localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(userWithoutPassword));
     setIsLoading(false);
-  };
+  }, []);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     setUser(null);
-    localStorage.removeItem('clinica_user');
-  };
+    localStorage.removeItem(STORAGE_KEYS.USER);
+  }, []);
 
-  const hasPermission = (requiredRole: UserRole | UserRole[]) => {
+  const hasPermission = useCallback((requiredRole: UserRole | UserRole[]) => {
     if (!user) return false;
     const roles = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
     return roles.includes(user.role);
-  };
+  }, [user]);
 
   return (
     <AuthContext.Provider value={{
