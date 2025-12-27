@@ -17,8 +17,31 @@ interface FormErrors {
   telefone?: string;
 }
 
+interface PatientFormData {
+  nome: string;
+  cpf: string;
+  dataNascimento: string;
+  sexo: string;
+  telefone: string;
+  email: string;
+  logradouro: string;
+  numero: string;
+  complemento: string;
+  bairro: string;
+  cidade: string;
+  estado: string;
+  cep: string;
+  convenioNome: string;
+  convenioNumero: string;
+  convenioValidade: string;
+  alergias: string;
+  medicamentosEmUso: string;
+  historicoFamiliar: string;
+  observacoes: string;
+}
+
 export default function PatientModal({ patient, onClose, onSave, isLoading = false }: PatientModalProps) {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<PatientFormData>({
     nome: patient?.nome || '',
     cpf: patient?.cpf || '',
     dataNascimento: patient?.dataNascimento || '',

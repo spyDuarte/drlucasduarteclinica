@@ -16,7 +16,7 @@ import {
   getStatusColor,
   generateTimeSlots
 } from '../utils/helpers';
-import type { Appointment, AppointmentStatus, AppointmentType } from '../types';
+import type { Appointment, AppointmentStatus, AppointmentType, Patient } from '../types';
 
 const TIME_SLOTS = generateTimeSlots('08:00', '18:00', 30);
 
@@ -231,6 +231,19 @@ interface AppointmentModalProps {
   onDelete?: () => void;
 }
 
+interface AppointmentFormData {
+  patientId: string;
+  data: string;
+  horaInicio: string;
+  horaFim: string;
+  tipo: string;
+  status: string;
+  motivo: string;
+  valor: string;
+  convenio: boolean;
+  observacoes: string;
+}
+
 function AppointmentModal({
   appointment,
   selectedDate,
@@ -240,7 +253,7 @@ function AppointmentModal({
   onSave,
   onDelete
 }: AppointmentModalProps) {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<AppointmentFormData>({
     patientId: appointment?.patientId || '',
     data: appointment?.data || selectedDate,
     horaInicio: appointment?.horaInicio || selectedTime || '09:00',
