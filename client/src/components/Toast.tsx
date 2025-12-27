@@ -1,5 +1,5 @@
 import { useState, useEffect, createContext, useContext, useCallback, type ReactNode } from 'react';
-import { CheckCircle, XCircle, AlertCircle, X } from 'lucide-react';
+import { CheckCircle, XCircle, AlertTriangle, Info, X } from 'lucide-react';
 
 type ToastType = 'success' | 'error' | 'warning' | 'info';
 
@@ -18,22 +18,29 @@ const ToastContext = createContext<ToastContextType | undefined>(undefined);
 const icons = {
   success: CheckCircle,
   error: XCircle,
-  warning: AlertCircle,
-  info: AlertCircle,
+  warning: AlertTriangle,
+  info: Info,
 };
 
 const colors = {
-  success: 'bg-green-50 text-green-800 border-green-200',
-  error: 'bg-red-50 text-red-800 border-red-200',
-  warning: 'bg-yellow-50 text-yellow-800 border-yellow-200',
-  info: 'bg-blue-50 text-blue-800 border-blue-200',
+  success: 'bg-gradient-to-r from-emerald-50 to-emerald-50/80 text-emerald-800 border-emerald-200/50',
+  error: 'bg-gradient-to-r from-red-50 to-red-50/80 text-red-800 border-red-200/50',
+  warning: 'bg-gradient-to-r from-amber-50 to-amber-50/80 text-amber-800 border-amber-200/50',
+  info: 'bg-gradient-to-r from-blue-50 to-blue-50/80 text-blue-800 border-blue-200/50',
 };
 
-const iconColors = {
-  success: 'text-green-500',
-  error: 'text-red-500',
-  warning: 'text-yellow-500',
-  info: 'text-blue-500',
+const iconContainerColors = {
+  success: 'bg-emerald-100 text-emerald-600',
+  error: 'bg-red-100 text-red-600',
+  warning: 'bg-amber-100 text-amber-600',
+  info: 'bg-blue-100 text-blue-600',
+};
+
+const progressColors = {
+  success: 'bg-emerald-500',
+  error: 'bg-red-500',
+  warning: 'bg-amber-500',
+  info: 'bg-blue-500',
 };
 
 export function ToastProvider({ children }: { children: ReactNode }) {
@@ -51,7 +58,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
-      <div className="fixed bottom-4 right-4 z-50 space-y-2">
+      <div className="fixed bottom-4 right-4 z-50 space-y-3">
         {toasts.map(toast => (
           <ToastItem key={toast.id} toast={toast} onRemove={removeToast} />
         ))}
@@ -73,18 +80,40 @@ function ToastItem({ toast, onRemove }: { toast: Toast; onRemove: (id: string) =
 
   return (
     <div
-      className={`flex items-center gap-3 p-4 rounded-lg border shadow-lg min-w-[300px] max-w-md animate-slide-in ${colors[toast.type]}`}
+      className={`relative flex items-center gap-3 p-4 rounded-xl border shadow-xl shadow-gray-900/10 min-w-[320px] max-w-md animate-slide-in backdrop-blur-sm overflow-hidden ${colors[toast.type]}`}
       role="alert"
     >
-      <Icon className={`w-5 h-5 flex-shrink-0 ${iconColors[toast.type]}`} />
-      <p className="flex-1 text-sm">{toast.message}</p>
+      {/* Icon with container */}
+      <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${iconContainerColors[toast.type]}`}>
+        <Icon className="w-5 h-5" strokeWidth={2.5} />
+      </div>
+
+      {/* Message */}
+      <p className="flex-1 text-sm font-medium leading-snug">{toast.message}</p>
+
+      {/* Close button */}
       <button
         onClick={() => onRemove(toast.id)}
-        className="p-1 hover:bg-black/5 rounded transition-colors"
+        className="modal-close-icon flex-shrink-0"
         aria-label="Fechar notificação"
       >
         <X className="w-4 h-4" />
       </button>
+
+      {/* Progress bar */}
+      <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/5">
+        <div
+          className={`h-full ${progressColors[toast.type]} animate-progress`}
+          style={{ animation: 'progress 4s linear forwards' }}
+        />
+      </div>
+
+      <style>{`
+        @keyframes progress {
+          from { width: 100%; }
+          to { width: 0%; }
+        }
+      `}</style>
     </div>
   );
 }

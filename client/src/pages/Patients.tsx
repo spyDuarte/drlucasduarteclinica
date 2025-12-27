@@ -3,14 +3,15 @@ import { useData } from '../contexts/DataContext';
 import { Link } from 'react-router-dom';
 import {
   Search,
-  Plus,
   Phone,
   Mail,
   Calendar,
   Edit2,
   Trash2,
   User,
-  FileText
+  FileText,
+  Users,
+  UserPlus
 } from 'lucide-react';
 import { formatDate, calculateAge, formatCPF, formatPhone } from '../utils/helpers';
 import { PatientModal } from '../components';
@@ -70,35 +71,43 @@ export default function Patients() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Pacientes</h1>
-          <p className="text-gray-600">{patients.length} pacientes cadastrados</p>
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 bg-gradient-to-br from-sky-500 to-sky-600 rounded-2xl flex items-center justify-center shadow-lg shadow-sky-500/20">
+            <Users className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Pacientes</h1>
+            <p className="text-gray-500 flex items-center gap-2">
+              <span className="w-2 h-2 bg-emerald-500 rounded-full"></span>
+              {patients.length} pacientes cadastrados
+            </p>
+          </div>
         </div>
         <button
           onClick={() => handleOpenModal()}
-          className="btn-primary flex items-center gap-2"
+          className="btn-primary flex items-center gap-2 shadow-lg shadow-sky-500/20 hover:shadow-xl hover:shadow-sky-500/30 transition-all group"
         >
-          <Plus className="w-5 h-5" />
+          <UserPlus className="w-5 h-5 transition-transform group-hover:scale-110" />
           Novo Paciente
         </button>
       </div>
 
       {/* Search */}
-      <div className="relative max-w-md">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+      <div className="relative max-w-lg input-icon-wrapper group">
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 transition-colors duration-200 group-focus-within:text-sky-500" />
         <input
           type="text"
           value={searchTerm}
           onChange={e => setSearchTerm(e.target.value)}
           placeholder="Buscar por nome, CPF ou telefone..."
-          className="input-field pl-10"
+          className="w-full pl-12 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 outline-none transition-all duration-200 text-sm shadow-sm"
         />
       </div>
 
       {/* Patients List */}
-      <div className="card p-0 overflow-hidden">
+      <div className="card p-0 overflow-hidden shadow-lg">
         <table className="w-full">
-          <thead className="bg-gray-50 border-b border-gray-200">
+          <thead className="bg-gradient-to-r from-gray-50 to-gray-50/50 border-b border-gray-200">
             <tr>
               <th className="table-header">Paciente</th>
               <th className="table-header">Contato</th>
@@ -107,64 +116,84 @@ export default function Patients() {
               <th className="table-header text-right">Ações</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200">
+          <tbody className="divide-y divide-gray-100">
             {filteredPatients.length === 0 ? (
               <tr>
-                <td colSpan={5} className="text-center py-8 text-gray-500">
-                  {searchTerm ? 'Nenhum paciente encontrado' : 'Nenhum paciente cadastrado'}
+                <td colSpan={5} className="text-center py-12">
+                  <div className="w-16 h-16 mx-auto mb-3 bg-gray-100 rounded-2xl flex items-center justify-center">
+                    <User className="w-8 h-8 empty-state-icon" />
+                  </div>
+                  <p className="text-gray-600 font-medium">
+                    {searchTerm ? 'Nenhum paciente encontrado' : 'Nenhum paciente cadastrado'}
+                  </p>
+                  <p className="text-sm text-gray-400 mt-1">
+                    {searchTerm ? 'Tente uma busca diferente' : 'Cadastre seu primeiro paciente'}
+                  </p>
                 </td>
               </tr>
             ) : (
               filteredPatients.map(patient => (
-                <tr key={patient.id} className="hover:bg-gray-50">
+                <tr key={patient.id} className="hover:bg-sky-50/50 transition-colors group">
                   <td className="table-cell">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-sky-100 rounded-full flex items-center justify-center">
+                      <div className="w-11 h-11 bg-gradient-to-br from-sky-100 to-sky-50 rounded-xl flex items-center justify-center group-hover:from-sky-200 group-hover:to-sky-100 transition-all shadow-sm">
                         <User className="w-5 h-5 text-sky-600" />
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900">{patient.nome}</p>
+                        <p className="font-semibold text-gray-900 group-hover:text-sky-700 transition-colors">{patient.nome}</p>
                         <p className="text-sm text-gray-500">{formatCPF(patient.cpf)}</p>
                       </div>
                     </div>
                   </td>
                   <td className="table-cell">
-                    <div className="space-y-1">
-                      <p className="flex items-center gap-1 text-sm">
-                        <Phone className="w-4 h-4 text-gray-400" />
-                        {formatPhone(patient.telefone)}
+                    <div className="space-y-1.5">
+                      <p className="flex items-center gap-2 text-sm">
+                        <span className="w-6 h-6 bg-emerald-50 rounded-lg flex items-center justify-center">
+                          <Phone className="w-3.5 h-3.5 text-emerald-600" />
+                        </span>
+                        <span className="font-medium">{formatPhone(patient.telefone)}</span>
                       </p>
                       {patient.email && (
-                        <p className="flex items-center gap-1 text-sm text-gray-500">
-                          <Mail className="w-4 h-4 text-gray-400" />
+                        <p className="flex items-center gap-2 text-sm text-gray-500">
+                          <span className="w-6 h-6 bg-blue-50 rounded-lg flex items-center justify-center">
+                            <Mail className="w-3.5 h-3.5 text-blue-600" />
+                          </span>
                           {patient.email}
                         </p>
                       )}
                     </div>
                   </td>
                   <td className="table-cell">
-                    <div className="flex items-center gap-1">
-                      <Calendar className="w-4 h-4 text-gray-400" />
-                      <span>{formatDate(patient.dataNascimento)}</span>
-                      <span className="text-gray-500">
-                        ({calculateAge(patient.dataNascimento)} anos)
+                    <div className="flex items-center gap-2">
+                      <span className="w-7 h-7 bg-purple-50 rounded-lg flex items-center justify-center">
+                        <Calendar className="w-4 h-4 text-purple-600" />
                       </span>
+                      <div>
+                        <span className="font-medium">{formatDate(patient.dataNascimento)}</span>
+                        <span className="text-gray-400 ml-1">
+                          ({calculateAge(patient.dataNascimento)} anos)
+                        </span>
+                      </div>
                     </div>
                   </td>
                   <td className="table-cell">
                     {patient.convenio ? (
-                      <span className="text-green-600 font-medium">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-lg text-sm font-medium">
+                        <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
                         {patient.convenio.nome}
                       </span>
                     ) : (
-                      <span className="text-gray-400">Particular</span>
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-gray-100 text-gray-500 rounded-lg text-sm font-medium">
+                        <span className="w-1.5 h-1.5 bg-gray-400 rounded-full"></span>
+                        Particular
+                      </span>
                     )}
                   </td>
                   <td className="table-cell text-right">
-                    <div className="flex items-center justify-end gap-2">
+                    <div className="flex items-center justify-end gap-1">
                       <Link
                         to={`/pacientes/${patient.id}`}
-                        className="p-2 text-gray-500 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-colors"
+                        className="table-action-icon"
                         title="Ver prontuário"
                         aria-label={`Ver prontuário de ${patient.nome}`}
                       >
@@ -172,7 +201,7 @@ export default function Patients() {
                       </Link>
                       <button
                         onClick={() => handleOpenModal(patient)}
-                        className="p-2 text-gray-500 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-colors"
+                        className="table-action-icon"
                         title="Editar"
                         aria-label={`Editar paciente ${patient.nome}`}
                       >
@@ -180,7 +209,7 @@ export default function Patients() {
                       </button>
                       <button
                         onClick={() => setShowDeleteConfirm(patient.id)}
-                        className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        className="table-action-icon danger"
                         title="Excluir"
                         aria-label={`Excluir paciente ${patient.nome}`}
                       >
@@ -207,24 +236,27 @@ export default function Patients() {
 
       {/* Delete Confirmation */}
       {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 max-w-sm w-full mx-4">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full mx-4 shadow-2xl animate-scale-in">
+            <div className="w-14 h-14 mx-auto mb-4 bg-red-100 rounded-2xl flex items-center justify-center">
+              <Trash2 className="w-7 h-7 text-red-600" />
+            </div>
+            <h3 className="text-lg font-bold text-gray-900 mb-2 text-center">
               Confirmar exclusão
             </h3>
-            <p className="text-gray-600 mb-4">
+            <p className="text-gray-500 text-center mb-6">
               Tem certeza que deseja excluir este paciente? Esta ação não pode ser desfeita.
             </p>
-            <div className="flex gap-3 justify-end">
+            <div className="flex gap-3">
               <button
                 onClick={() => setShowDeleteConfirm(null)}
-                className="btn-secondary"
+                className="flex-1 btn-secondary py-2.5"
               >
                 Cancelar
               </button>
               <button
                 onClick={() => handleDelete(showDeleteConfirm)}
-                className="btn-danger"
+                className="flex-1 btn-danger py-2.5 shadow-lg shadow-red-500/20"
               >
                 Excluir
               </button>
