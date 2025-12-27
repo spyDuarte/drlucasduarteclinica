@@ -1,23 +1,30 @@
 import type { Patient, Appointment, MedicalRecord, Payment, User } from '../types';
 
-// Usuários de demonstração
-export const DEMO_USERS: (User & { password: string })[] = [
+/**
+ * Configuração de usuários de demonstração
+ * As credenciais podem ser sobrescritas por variáveis de ambiente
+ * para maior segurança em ambientes de produção
+ */
+const getDemoUsers = (): (User & { password: string })[] => [
   {
     id: '1',
-    nome: 'Dr. Lucas Duarte',
-    email: 'medico@clinica.com',
+    nome: import.meta.env.VITE_DEMO_DOCTOR_NAME || 'Dr. Lucas Duarte',
+    email: import.meta.env.VITE_DEMO_DOCTOR_EMAIL || 'medico@clinica.com',
     role: 'medico',
-    crm: 'CRM/SP 123456',
-    password: 'medico123'
+    crm: import.meta.env.VITE_DEMO_DOCTOR_CRM || 'CRM/SP 123456',
+    password: import.meta.env.VITE_DEMO_DOCTOR_PASSWORD || 'medico123'
   },
   {
     id: '2',
-    nome: 'Maria Silva',
-    email: 'secretaria@clinica.com',
+    nome: import.meta.env.VITE_DEMO_SECRETARY_NAME || 'Maria Silva',
+    email: import.meta.env.VITE_DEMO_SECRETARY_EMAIL || 'secretaria@clinica.com',
     role: 'secretaria',
-    password: 'secretaria123'
+    password: import.meta.env.VITE_DEMO_SECRETARY_PASSWORD || 'secretaria123'
   }
 ];
+
+// Usuários de demonstração (lazy initialization)
+export const DEMO_USERS: (User & { password: string })[] = getDemoUsers();
 
 // Pacientes de demonstração
 export const DEMO_PATIENTS: Patient[] = [
