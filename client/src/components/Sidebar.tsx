@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { UserRole } from '../types';
+import type { UserRole } from '../types';
 import {
   LayoutDashboard,
   Users,

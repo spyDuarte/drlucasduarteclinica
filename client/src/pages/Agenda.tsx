@@ -340,7 +340,7 @@ function AppointmentModal({
               <div className="mt-2 p-2 bg-gray-50 rounded-lg flex items-center gap-2 text-sm text-gray-600">
                 <Phone className="w-4 h-4" />
                 {selectedPatient.telefone}
-                {selectedPatient.alergias?.length > 0 && (
+                {selectedPatient.alergias && selectedPatient.alergias.length > 0 && (
                   <span className="ml-auto flex items-center gap-1 text-red-600">
                     <AlertCircle className="w-4 h-4" />
                     Alergias: {selectedPatient.alergias.join(', ')}

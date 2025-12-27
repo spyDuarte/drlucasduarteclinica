@@ -1,5 +1,5 @@
-import { LucideIcon } from 'lucide-react';
-import { ButtonHTMLAttributes, forwardRef } from 'react';
+import type { LucideIcon } from 'lucide-react';
+import { forwardRef, type ButtonHTMLAttributes } from 'react';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'success' | 'ghost' | 'outline';
 export type ButtonSize = 'sm' | 'md' | 'lg';

@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { EmptyState } from './EmptyState';
 import { TableSkeleton } from './Loading';
 import { FileX } from 'lucide-react';
