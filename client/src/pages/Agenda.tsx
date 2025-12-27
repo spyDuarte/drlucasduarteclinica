@@ -278,7 +278,7 @@ function AppointmentModal({
         horaFim: `${endHours.toString().padStart(2, '0')}:${endMins.toString().padStart(2, '0')}`
       }));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/set-state-in-effect
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formData.horaInicio]);
 
   const handleSubmit = (e: React.FormEvent) => {
