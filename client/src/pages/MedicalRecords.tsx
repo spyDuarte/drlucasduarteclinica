@@ -325,8 +325,38 @@ interface MedicalRecordModalProps {
   onSave: (data: Partial<MedicalRecord>) => void;
 }
 
+interface MedicalRecordFormData {
+  data: string;
+  queixaPrincipal: string;
+  historicoDoencaAtual: string;
+  revisaoSistemas: string;
+  pressaoArterial: string;
+  frequenciaCardiaca: string;
+  temperatura: string;
+  peso: string;
+  altura: string;
+  exameFisico: string;
+  examesComplementares: string;
+  hipotesesDiagnosticas: string;
+  cid10: string;
+  conduta: string;
+  prescricoes: Array<{ id: string; medicamento: string; concentracao?: string; formaFarmaceutica: string; posologia: string; quantidade: string; duracao?: string }>;
+  solicitacaoExames: string;
+  retorno: string;
+  orientacoes: string;
+}
+
+interface PrescriptionFormData {
+  medicamento: string;
+  concentracao: string;
+  formaFarmaceutica: string;
+  posologia: string;
+  quantidade: string;
+  duracao: string;
+}
+
 function MedicalRecordModal({ patientId, record, onClose, onSave }: MedicalRecordModalProps) {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<MedicalRecordFormData>({
     data: record?.data || new Date().toISOString().split('T')[0],
     // Subjective
     queixaPrincipal: record?.subjetivo?.queixaPrincipal || '',
@@ -351,7 +381,7 @@ function MedicalRecordModal({ patientId, record, onClose, onSave }: MedicalRecor
     orientacoes: record?.plano?.orientacoes || ''
   });
 
-  const [newPrescription, setNewPrescription] = useState({
+  const [newPrescription, setNewPrescription] = useState<PrescriptionFormData>({
     medicamento: '',
     concentracao: '',
     formaFarmaceutica: 'Comprimido',

@@ -19,7 +19,7 @@ import {
   translatePaymentStatus,
   getStatusColor
 } from '../utils/helpers';
-import type { Payment, PaymentMethod, PaymentStatus } from '../types';
+import type { Payment, PaymentMethod, PaymentStatus, Patient } from '../types';
 
 export default function Financial() {
   const { payments, patients, addPayment, updatePayment } = useData();
@@ -270,8 +270,19 @@ interface PaymentModalProps {
   onSave: (data: Partial<Payment>) => void;
 }
 
+interface PaymentFormData {
+  patientId: string;
+  valor: string;
+  descricao: string;
+  formaPagamento: string;
+  status: string;
+  dataPagamento: string;
+  dataVencimento: string;
+  observacoes: string;
+}
+
 function PaymentModal({ payment, patients, onClose, onSave }: PaymentModalProps) {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<PaymentFormData>({
     patientId: payment?.patientId || '',
     valor: payment?.valor?.toString() || '',
     descricao: payment?.descricao || 'Consulta',
