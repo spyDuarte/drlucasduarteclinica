@@ -252,7 +252,7 @@ export default function Financial() {
             if (editingPayment) {
               updatePayment(editingPayment.id, data);
             } else {
-              addPayment(data as any);
+              addPayment(data as Omit<Payment, 'id' | 'createdAt' | 'updatedAt'>);
             }
             handleCloseModal();
           }}
@@ -265,7 +265,7 @@ export default function Financial() {
 // Payment Modal
 interface PaymentModalProps {
   payment: Payment | null;
-  patients: any[];
+  patients: Patient[];
   onClose: () => void;
   onSave: (data: Partial<Payment>) => void;
 }

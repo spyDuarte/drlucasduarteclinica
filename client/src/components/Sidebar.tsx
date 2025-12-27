@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { UserRole } from '../types';
 import {
   LayoutDashboard,
   Users,
@@ -12,7 +13,12 @@ import {
 } from 'lucide-react';
 import { BrandIcon, NavIcon } from './Icon';
 
-const menuItems = [
+const menuItems: Array<{
+  path: string;
+  label: string;
+  icon: typeof LayoutDashboard;
+  roles: UserRole[];
+}> = [
   { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['medico', 'secretaria'] },
   { path: '/pacientes', label: 'Pacientes', icon: Users, roles: ['medico', 'secretaria'] },
   { path: '/agenda', label: 'Agenda', icon: Calendar, roles: ['medico', 'secretaria'] },
@@ -46,7 +52,7 @@ export default function Sidebar() {
           Menu Principal
         </p>
         {menuItems.map(item => {
-          const hasAccess = hasPermission(item.roles as any);
+          const hasAccess = hasPermission(item.roles);
           if (!hasAccess) return null;
 
           return (

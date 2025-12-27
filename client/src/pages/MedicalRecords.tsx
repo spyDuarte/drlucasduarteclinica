@@ -306,7 +306,7 @@ export default function MedicalRecords() {
             if (editingRecord) {
               updateMedicalRecord(editingRecord.id, data);
             } else {
-              addMedicalRecord(data as any);
+              addMedicalRecord(data as Omit<MedicalRecord, 'id' | 'createdAt' | 'updatedAt'>);
             }
             setShowNewRecord(false);
             setEditingRecord(null);
