@@ -45,7 +45,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       throw new Error('Email ou senha inválidos');
     }
 
-    const { password: _, ...userWithoutPassword } = foundUser;
+    const { password: _password, ...userWithoutPassword } = foundUser;
+    void _password; // Ignora a senha de propósito
     setUser(userWithoutPassword);
     localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(userWithoutPassword));
     setIsLoading(false);
