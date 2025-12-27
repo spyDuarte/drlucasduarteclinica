@@ -182,3 +182,538 @@ body {
 .animate-slide-in {
   animation: slide-in 0.3s ease-out;
 }
+
+/* ========================================
+   SISTEMA PROFISSIONAL DE ÍCONES
+   ======================================== */
+
+/* Animação de shake para alertas */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
+  20%, 40%, 60%, 80% { transform: translateX(2px); }
+}
+
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+/* Animação de float suave para ícones de destaque */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Animação de glow para ícones interativos */
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(2, 132, 199, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(2, 132, 199, 0.6), 0 0 30px rgba(2, 132, 199, 0.4);
+  }
+}
+
+/* Ícone de navegação - wrapper */
+.nav-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.625rem;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-icon-inactive {
+  background-color: transparent;
+  color: var(--color-gray-500, #6b7280);
+}
+
+.nav-icon-inactive:hover {
+  background-color: var(--color-gray-100, #f3f4f6);
+  color: var(--color-gray-700, #374151);
+}
+
+.nav-icon-active {
+  background-color: var(--color-sky-100, #e0f2fe);
+  color: var(--color-sky-600, #0284c7);
+  box-shadow: 0 2px 4px rgba(2, 132, 199, 0.15);
+}
+
+/* Ícones de estatísticas com efeito hover */
+.stat-icon-container {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.stat-icon-container:hover {
+  transform: scale(1.05) translateY(-2px);
+  box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.stat-icon {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.stat-icon-container:hover .stat-icon {
+  transform: scale(1.1);
+}
+
+/* Brand icon com animação sutil */
+.brand-icon-animated {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.brand-icon-animated:hover {
+  transform: scale(1.05);
+  box-shadow: 0 12px 28px -8px rgba(2, 132, 199, 0.4);
+}
+
+/* Sidebar atualizado para ícones profissionais */
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 0.75rem 1rem;
+  color: var(--color-gray-600, #4b5563);
+  border-radius: 0.75rem;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.sidebar-link::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 0;
+  background: linear-gradient(to bottom, var(--color-sky-500, #0ea5e9), var(--color-sky-600, #0284c7));
+  border-radius: 0 2px 2px 0;
+  transition: height 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar-link:hover {
+  background-color: var(--color-gray-50, #f9fafb);
+  color: var(--color-sky-600, #0284c7);
+  transform: translateX(2px);
+}
+
+.sidebar-link:hover svg {
+  transform: scale(1.1);
+}
+
+.sidebar-link.active {
+  background: linear-gradient(135deg, var(--color-sky-50, #f0f9ff), rgba(224, 242, 254, 0.7));
+  color: var(--color-sky-700, #0369a1);
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.08);
+}
+
+.sidebar-link.active::before {
+  height: 60%;
+}
+
+.sidebar-link.active svg {
+  filter: drop-shadow(0 1px 2px rgba(2, 132, 199, 0.3));
+}
+
+/* Botões com ícones - melhorias */
+.btn-primary svg,
+.btn-secondary svg,
+.btn-danger svg,
+.btn-success svg {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-primary:hover svg,
+.btn-secondary:hover svg,
+.btn-danger:hover svg,
+.btn-success:hover svg {
+  transform: scale(1.1);
+}
+
+.btn-primary:active svg,
+.btn-secondary:active svg,
+.btn-danger:active svg,
+.btn-success:active svg {
+  transform: scale(0.95);
+}
+
+/* Ícones de ação com ripple effect */
+.action-icon {
+  position: relative;
+  overflow: hidden;
+}
+
+.action-icon::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s, height 0.3s;
+}
+
+.action-icon:active::after {
+  width: 200%;
+  height: 200%;
+}
+
+/* Ícones de input com foco */
+.input-icon-wrapper {
+  position: relative;
+}
+
+.input-icon-wrapper svg {
+  transition: all 0.2s ease;
+}
+
+.input-icon-wrapper:focus-within svg {
+  color: var(--color-sky-600, #0284c7);
+  transform: scale(1.05);
+}
+
+/* Cards de estatísticas com gradientes melhorados */
+.stat-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100px;
+  height: 100px;
+  background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, transparent 70%);
+  transform: translate(30%, -30%);
+  pointer-events: none;
+}
+
+/* Indicador de notificação pulsante */
+.notification-dot {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.25rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  background-color: var(--color-red-500, #ef4444);
+  border-radius: 50%;
+  border: 2px solid white;
+  animation: notification-pulse 2s infinite;
+}
+
+@keyframes notification-pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+  }
+  50% {
+    transform: scale(1.1);
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0);
+  }
+}
+
+/* Ícone de pesquisa animado */
+.search-icon-animated {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.search-input:focus + .search-icon-animated,
+.search-input:focus ~ .search-icon-animated {
+  color: var(--color-sky-600, #0284c7);
+  transform: scale(1.1) rotate(-5deg);
+}
+
+/* Ícones em hover de cards */
+.card:hover .card-icon {
+  transform: scale(1.1) rotate(5deg);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Loading skeleton para ícones */
+.icon-skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  border-radius: 0.5rem;
+}
+
+@keyframes skeleton-loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Tooltip para ícones */
+.icon-tooltip {
+  position: relative;
+}
+
+.icon-tooltip::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-4px);
+  padding: 0.375rem 0.75rem;
+  background-color: var(--color-gray-900, #111827);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: 0.375rem;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease;
+  pointer-events: none;
+  z-index: 50;
+}
+
+.icon-tooltip:hover::after {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(-8px);
+}
+
+/* Empty state icon */
+.empty-state-icon {
+  color: var(--color-gray-300, #d1d5db);
+  animation: float 4s ease-in-out infinite;
+}
+
+/* Badge icon container */
+.badge-icon-container {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.badge-icon-container:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Table action icons */
+.table-action-icon {
+  padding: 0.375rem;
+  border-radius: 0.5rem;
+  color: var(--color-gray-400, #9ca3af);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.table-action-icon:hover {
+  color: var(--color-sky-600, #0284c7);
+  background-color: var(--color-sky-50, #f0f9ff);
+  transform: scale(1.1);
+}
+
+.table-action-icon.danger:hover {
+  color: var(--color-red-600, #dc2626);
+  background-color: var(--color-red-50, #fef2f2);
+}
+
+/* Form validation icons */
+.validation-icon-success {
+  color: var(--color-emerald-500, #10b981);
+  animation: pop-in 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.validation-icon-error {
+  color: var(--color-red-500, #ef4444);
+  animation: shake 0.4s ease-in-out;
+}
+
+@keyframes pop-in {
+  0% { transform: scale(0); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Header icons */
+.header-icon {
+  padding: 0.5rem;
+  border-radius: 0.625rem;
+  color: var(--color-gray-500, #6b7280);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.header-icon:hover {
+  color: var(--color-gray-700, #374151);
+  background-color: var(--color-gray-100, #f3f4f6);
+  transform: translateY(-1px);
+}
+
+.header-icon:active {
+  transform: translateY(0) scale(0.95);
+}
+
+/* Logout icon special styling */
+.logout-icon-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.875rem;
+  border-radius: 0.625rem;
+  color: var(--color-gray-600, #4b5563);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.logout-icon-btn:hover {
+  color: var(--color-red-600, #dc2626);
+  background-color: var(--color-red-50, #fef2f2);
+}
+
+.logout-icon-btn:hover svg {
+  transform: translateX(2px);
+}
+
+/* Calendar navigation icons */
+.calendar-nav-icon {
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  color: var(--color-gray-600, #4b5563);
+  background-color: var(--color-gray-100, #f3f4f6);
+  transition: all 0.2s ease;
+}
+
+.calendar-nav-icon:hover {
+  color: var(--color-sky-600, #0284c7);
+  background-color: var(--color-sky-100, #e0f2fe);
+  transform: scale(1.05);
+}
+
+.calendar-nav-icon:active {
+  transform: scale(0.95);
+}
+
+/* Modal close icon */
+.modal-close-icon {
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  color: var(--color-gray-400, #9ca3af);
+  transition: all 0.2s ease;
+}
+
+.modal-close-icon:hover {
+  color: var(--color-gray-600, #4b5563);
+  background-color: var(--color-gray-100, #f3f4f6);
+  transform: rotate(90deg);
+}
+
+/* Success checkmark animation */
+@keyframes checkmark-draw {
+  0% {
+    stroke-dashoffset: 100;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+.checkmark-animated {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: checkmark-draw 0.5s ease forwards;
+}
+
+/* Modal animations */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.2s ease-out;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Glass morphism effect for cards */
+.glass-card {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, var(--color-sky-600, #0284c7), var(--color-sky-400, #38bdf8));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Subtle card hover effect */
+.card-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px -12px rgba(0, 0, 0, 0.15);
+}
+
+/* Focus ring for accessibility */
+.focus-ring {
+  outline: none;
+}
+
+.focus-ring:focus-visible {
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.4);
+}
+
+/* Improved button states */
+.btn-primary,
+.btn-secondary,
+.btn-danger,
+.btn-success {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary::before,
+.btn-secondary::before,
+.btn-danger::before,
+.btn-success::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 50%);
+  pointer-events: none;
+}
