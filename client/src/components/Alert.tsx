@@ -17,35 +17,35 @@ export function Alert({ type, title, message, onClose, action }: AlertProps) {
   const config = {
     success: {
       icon: CheckCircle,
-      bgColor: 'bg-green-50',
-      borderColor: 'border-green-200',
-      iconColor: 'text-green-600',
-      textColor: 'text-green-800',
-      titleColor: 'text-green-900',
+      bgColor: 'bg-emerald-50',
+      borderColor: 'border-emerald-200',
+      iconColor: 'text-emerald-600',
+      textColor: 'text-emerald-800',
+      titleColor: 'text-emerald-900',
     },
     error: {
       icon: XCircle,
-      bgColor: 'bg-red-50',
-      borderColor: 'border-red-200',
-      iconColor: 'text-red-600',
-      textColor: 'text-red-800',
-      titleColor: 'text-red-900',
+      bgColor: 'bg-rose-50',
+      borderColor: 'border-rose-200',
+      iconColor: 'text-rose-600',
+      textColor: 'text-rose-800',
+      titleColor: 'text-rose-900',
     },
     warning: {
       icon: AlertCircle,
-      bgColor: 'bg-yellow-50',
-      borderColor: 'border-yellow-200',
-      iconColor: 'text-yellow-600',
-      textColor: 'text-yellow-800',
-      titleColor: 'text-yellow-900',
+      bgColor: 'bg-amber-50',
+      borderColor: 'border-amber-200',
+      iconColor: 'text-amber-600',
+      textColor: 'text-amber-800',
+      titleColor: 'text-amber-900',
     },
     info: {
       icon: Info,
-      bgColor: 'bg-blue-50',
-      borderColor: 'border-blue-200',
-      iconColor: 'text-blue-600',
-      textColor: 'text-blue-800',
-      titleColor: 'text-blue-900',
+      bgColor: 'bg-sky-50',
+      borderColor: 'border-sky-200',
+      iconColor: 'text-sky-600',
+      textColor: 'text-sky-800',
+      titleColor: 'text-sky-900',
     },
   };
 
@@ -90,7 +90,7 @@ export function FormError({ error }: FormErrorProps) {
   if (!error) return null;
 
   return (
-    <div className="flex items-center gap-2 text-red-600 text-sm mt-1 animate-in fade-in slide-in-from-top-1 duration-200">
+    <div className="flex items-center gap-2 text-rose-600 text-sm mt-1 animate-in fade-in slide-in-from-top-1 duration-200">
       <AlertCircle className="w-4 h-4 flex-shrink-0" />
       <span>{error}</span>
     </div>

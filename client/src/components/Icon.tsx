@@ -35,12 +35,12 @@ const backgroundSizeClasses: Record<IconSize, string> = {
 
 const variantClasses: Record<IconVariant, { icon: string; bg: string }> = {
   default: {
-    icon: 'text-gray-600',
-    bg: 'bg-gray-100'
+    icon: 'text-slate-600',
+    bg: 'bg-slate-100'
   },
   primary: {
-    icon: 'text-sky-600',
-    bg: 'bg-sky-50'
+    icon: 'text-primary-600',
+    bg: 'bg-primary-50'
   },
   success: {
     icon: 'text-emerald-600',
@@ -51,16 +51,16 @@ const variantClasses: Record<IconVariant, { icon: string; bg: string }> = {
     bg: 'bg-amber-50'
   },
   danger: {
-    icon: 'text-red-600',
-    bg: 'bg-red-50'
+    icon: 'text-rose-600',
+    bg: 'bg-rose-50'
   },
   info: {
-    icon: 'text-blue-600',
-    bg: 'bg-blue-50'
+    icon: 'text-sky-600',
+    bg: 'bg-sky-50'
   },
   muted: {
-    icon: 'text-gray-400',
-    bg: 'bg-gray-50'
+    icon: 'text-slate-400',
+    bg: 'bg-slate-50'
   }
 };
 
@@ -160,24 +160,24 @@ interface StatIconProps {
 
 const statColorClasses: Record<string, { icon: string; bg: string; gradient: string }> = {
   blue: {
-    icon: 'text-blue-600',
-    bg: 'bg-gradient-to-br from-blue-50 to-blue-100',
-    gradient: 'from-blue-500 to-blue-600'
+    icon: 'text-primary-600',
+    bg: 'bg-gradient-to-br from-primary-50 to-primary-100',
+    gradient: 'from-primary-500 to-primary-600'
   },
   green: {
-    icon: 'text-green-600',
-    bg: 'bg-gradient-to-br from-green-50 to-green-100',
-    gradient: 'from-green-500 to-green-600'
-  },
-  emerald: {
     icon: 'text-emerald-600',
     bg: 'bg-gradient-to-br from-emerald-50 to-emerald-100',
     gradient: 'from-emerald-500 to-emerald-600'
   },
+  emerald: {
+    icon: 'text-medical-600',
+    bg: 'bg-gradient-to-br from-medical-50 to-medical-100',
+    gradient: 'from-medical-500 to-medical-600'
+  },
   purple: {
-    icon: 'text-purple-600',
-    bg: 'bg-gradient-to-br from-purple-50 to-purple-100',
-    gradient: 'from-purple-500 to-purple-600'
+    icon: 'text-violet-600',
+    bg: 'bg-gradient-to-br from-violet-50 to-violet-100',
+    gradient: 'from-violet-500 to-violet-600'
   },
   amber: {
     icon: 'text-amber-600',
@@ -185,9 +185,9 @@ const statColorClasses: Record<string, { icon: string; bg: string; gradient: str
     gradient: 'from-amber-500 to-amber-600'
   },
   red: {
-    icon: 'text-red-600',
-    bg: 'bg-gradient-to-br from-red-50 to-red-100',
-    gradient: 'from-red-500 to-red-600'
+    icon: 'text-rose-600',
+    bg: 'bg-gradient-to-br from-rose-50 to-rose-100',
+    gradient: 'from-rose-500 to-rose-600'
   },
   sky: {
     icon: 'text-sky-600',
@@ -228,11 +228,11 @@ interface ActionIconProps {
 }
 
 const actionVariantClasses: Record<string, string> = {
-  primary: 'bg-sky-600 text-white hover:bg-sky-700 shadow-sm hover:shadow-md',
-  secondary: 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-800',
-  danger: 'bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700',
+  primary: 'bg-primary-600 text-white hover:bg-primary-700 shadow-sm hover:shadow-md',
+  secondary: 'bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-800',
+  danger: 'bg-rose-50 text-rose-600 hover:bg-rose-100 hover:text-rose-700',
   success: 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100 hover:text-emerald-700',
-  ghost: 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
+  ghost: 'text-slate-400 hover:text-slate-600 hover:bg-slate-100'
 };
 
 const actionSizeClasses: Record<string, { button: string; icon: string }> = {
@@ -264,7 +264,7 @@ export function ActionIcon({
         transition-all duration-200 ease-in-out
         transform active:scale-95
         disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none
-        focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2
+        focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2
       `.trim()}
     >
       <IconComponent
@@ -295,19 +295,19 @@ const statusColors: Record<string, { icon: string; bg: string; ring: string }> =
     ring: 'ring-amber-500'
   },
   error: {
-    icon: 'text-red-600',
-    bg: 'bg-red-100',
-    ring: 'ring-red-500'
+    icon: 'text-rose-600',
+    bg: 'bg-rose-100',
+    ring: 'ring-rose-500'
   },
   info: {
-    icon: 'text-blue-600',
-    bg: 'bg-blue-100',
-    ring: 'ring-blue-500'
+    icon: 'text-sky-600',
+    bg: 'bg-sky-100',
+    ring: 'ring-sky-500'
   },
   pending: {
-    icon: 'text-gray-600',
-    bg: 'bg-gray-100',
-    ring: 'ring-gray-500'
+    icon: 'text-slate-600',
+    bg: 'bg-slate-100',
+    ring: 'ring-slate-500'
   }
 };
 
@@ -359,10 +359,10 @@ export function BrandIcon({ icon: IconComponent, size = 'md', animated = true }:
   return (
     <div className={`
       ${sizeStyle.container}
-      bg-gradient-to-br from-sky-500 to-sky-700
+      bg-gradient-to-br from-primary-500 to-primary-700
       rounded-xl
       flex items-center justify-center
-      shadow-lg shadow-sky-500/25
+      shadow-lg shadow-primary-500/25
       ${animated ? 'brand-icon-animated' : ''}
     `}>
       <IconComponent
@@ -390,13 +390,13 @@ export function InputIcon({ icon: IconComponent, position = 'left', onClick }: I
     <div
       className={`
         absolute ${positionClass} top-1/2 -translate-y-1/2
-        ${onClick ? 'cursor-pointer hover:text-sky-600' : ''}
+        ${onClick ? 'cursor-pointer hover:text-primary-600' : ''}
         transition-colors duration-200
       `}
       onClick={onClick}
     >
       <IconComponent
-        className="w-5 h-5 text-gray-400"
+        className="w-5 h-5 text-slate-400"
         strokeWidth={2}
         aria-hidden="true"
       />
