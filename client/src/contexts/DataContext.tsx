@@ -93,20 +93,34 @@ export function DataProvider({ children }: { children: ReactNode }) {
     return generateDemoPayments();
   });
 
-  // Persistir dados no localStorage (consolidado com debounce)
+  // Função auxiliar para salvar dados no localStorage com tratamento de erros
+  const safeSetItem = (key: string, data: unknown) => {
+    try {
+      localStorage.setItem(key, JSON.stringify(data));
+    } catch (error) {
+      // Tratamento de erro para quota excedida ou outros problemas de storage
+      if (error instanceof DOMException && error.name === 'QuotaExceededError') {
+        console.warn(`[Storage] Quota excedida ao salvar ${key}. Considere limpar dados antigos.`);
+      } else {
+        console.error(`[Storage] Erro ao salvar ${key}:`, error);
+      }
+    }
+  };
+
+  // Persistir dados no localStorage (consolidado com debounce e tratamento de erros)
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       if (patients.length > 0) {
-        localStorage.setItem(STORAGE_KEYS.PATIENTS, JSON.stringify(patients));
+        safeSetItem(STORAGE_KEYS.PATIENTS, patients);
       }
       if (appointments.length > 0) {
-        localStorage.setItem(STORAGE_KEYS.APPOINTMENTS, JSON.stringify(appointments));
+        safeSetItem(STORAGE_KEYS.APPOINTMENTS, appointments);
       }
       if (medicalRecords.length > 0) {
-        localStorage.setItem(STORAGE_KEYS.RECORDS, JSON.stringify(medicalRecords));
+        safeSetItem(STORAGE_KEYS.RECORDS, medicalRecords);
       }
       if (payments.length > 0) {
-        localStorage.setItem(STORAGE_KEYS.PAYMENTS, JSON.stringify(payments));
+        safeSetItem(STORAGE_KEYS.PAYMENTS, payments);
       }
     }, 300); // Debounce de 300ms
 

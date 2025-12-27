@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useData } from '../contexts/DataContext';
 import { Link } from 'react-router-dom';
 import {
@@ -14,8 +14,9 @@ import {
   UserPlus
 } from 'lucide-react';
 import { formatDate, calculateAge, formatCPF, formatPhone } from '../utils/helpers';
-import { PatientModal } from '../components';
+import { PatientModal, ConfirmDialog, Pagination } from '../components';
 import { useToast } from '../components/Toast';
+import { useDebounce, usePagination } from '../hooks';
 import type { Patient } from '../types';
 
 export default function Patients() {
@@ -24,14 +25,27 @@ export default function Patients() {
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingPatient, setEditingPatient] = useState<Patient | null>(null);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
+  const [patientToDelete, setPatientToDelete] = useState<Patient | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const filteredPatients = patients.filter(patient =>
-    patient.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    patient.cpf.includes(searchTerm) ||
-    patient.telefone.includes(searchTerm)
-  );
+  // Debounce na busca para evitar filtragem excessiva durante digitação
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
+
+  // Filtrar pacientes com termo de busca "debounced"
+  const filteredPatients = useMemo(() => {
+    const term = debouncedSearchTerm.toLowerCase();
+    return patients.filter(patient =>
+      patient.nome.toLowerCase().includes(term) ||
+      patient.cpf.includes(debouncedSearchTerm) ||
+      patient.telefone.includes(debouncedSearchTerm)
+    );
+  }, [patients, debouncedSearchTerm]);
+
+  // Paginação
+  const pagination = usePagination(filteredPatients, {
+    initialPage: 1,
+    initialItemsPerPage: 10
+  });
 
   const handleOpenModal = (patient?: Patient) => {
     setEditingPatient(patient || null);
@@ -61,10 +75,12 @@ export default function Patients() {
     }
   };
 
-  const handleDelete = (id: string) => {
-    deletePatient(id);
-    setShowDeleteConfirm(null);
-    showToast('Paciente excluído com sucesso!', 'success');
+  const handleDelete = () => {
+    if (patientToDelete) {
+      deletePatient(patientToDelete.id);
+      setPatientToDelete(null);
+      showToast('Paciente excluído com sucesso!', 'success');
+    }
   };
 
   return (
@@ -117,7 +133,7 @@ export default function Patients() {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
-            {filteredPatients.length === 0 ? (
+            {pagination.paginatedItems.length === 0 ? (
               <tr>
                 <td colSpan={5} className="text-center py-12">
                   <div className="w-16 h-16 mx-auto mb-3 bg-gray-100 rounded-2xl flex items-center justify-center">
@@ -132,7 +148,7 @@ export default function Patients() {
                 </td>
               </tr>
             ) : (
-              filteredPatients.map(patient => (
+              pagination.paginatedItems.map(patient => (
                 <tr key={patient.id} className="hover:bg-sky-50/50 transition-colors group">
                   <td className="table-cell">
                     <div className="flex items-center gap-3">
@@ -208,7 +224,7 @@ export default function Patients() {
                         <Edit2 className="w-5 h-5" aria-hidden="true" />
                       </button>
                       <button
-                        onClick={() => setShowDeleteConfirm(patient.id)}
+                        onClick={() => setPatientToDelete(patient)}
                         className="table-action-icon danger"
                         title="Excluir"
                         aria-label={`Excluir paciente ${patient.nome}`}
@@ -222,6 +238,26 @@ export default function Patients() {
             )}
           </tbody>
         </table>
+
+        {/* Paginação */}
+        {pagination.totalItems > 0 && (
+          <Pagination
+            currentPage={pagination.currentPage}
+            totalPages={pagination.totalPages}
+            totalItems={pagination.totalItems}
+            startIndex={pagination.startIndex}
+            endIndex={pagination.endIndex}
+            onPageChange={pagination.setPage}
+            onFirstPage={pagination.firstPage}
+            onLastPage={pagination.lastPage}
+            onNextPage={pagination.nextPage}
+            onPreviousPage={pagination.previousPage}
+            canGoNext={pagination.canGoNext}
+            canGoPrevious={pagination.canGoPrevious}
+            itemsPerPage={pagination.itemsPerPage}
+            onItemsPerPageChange={pagination.setItemsPerPage}
+          />
+        )}
       </div>
 
       {/* Patient Modal */}
@@ -234,36 +270,24 @@ export default function Patients() {
         />
       )}
 
-      {/* Delete Confirmation */}
-      {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in">
-          <div className="bg-white rounded-2xl p-6 max-w-sm w-full mx-4 shadow-2xl animate-scale-in">
-            <div className="w-14 h-14 mx-auto mb-4 bg-red-100 rounded-2xl flex items-center justify-center">
-              <Trash2 className="w-7 h-7 text-red-600" />
-            </div>
-            <h3 className="text-lg font-bold text-gray-900 mb-2 text-center">
-              Confirmar exclusão
-            </h3>
-            <p className="text-gray-500 text-center mb-6">
-              Tem certeza que deseja excluir este paciente? Esta ação não pode ser desfeita.
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowDeleteConfirm(null)}
-                className="flex-1 btn-secondary py-2.5"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={() => handleDelete(showDeleteConfirm)}
-                className="flex-1 btn-danger py-2.5 shadow-lg shadow-red-500/20"
-              >
-                Excluir
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Diálogo de Confirmação de Exclusão */}
+      <ConfirmDialog
+        isOpen={!!patientToDelete}
+        onClose={() => setPatientToDelete(null)}
+        onConfirm={handleDelete}
+        title="Confirmar exclusão"
+        message={
+          patientToDelete ? (
+            <>
+              Tem certeza que deseja excluir o paciente{' '}
+              <strong>{patientToDelete.nome}</strong>? Esta ação não pode ser desfeita.
+            </>
+          ) : ''
+        }
+        confirmLabel="Excluir"
+        cancelLabel="Cancelar"
+        variant="danger"
+      />
     </div>
   );
 }

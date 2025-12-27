@@ -1,18 +1,27 @@
-import type { ReactNode } from 'react';
+import { lazy, Suspense, type ReactNode } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { DataProvider } from './contexts/DataContext';
 import { Layout, LoadingSpinner, ErrorBoundary } from './components';
 import { ToastProvider } from './components/Toast';
-import {
-  Login,
-  Dashboard,
-  Patients,
-  Agenda,
-  MedicalRecords,
-  Financial,
-  Reports
-} from './pages';
+
+// Lazy loading das páginas para melhor performance inicial
+const Login = lazy(() => import('./pages/Login'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Patients = lazy(() => import('./pages/Patients'));
+const Agenda = lazy(() => import('./pages/Agenda'));
+const MedicalRecords = lazy(() => import('./pages/MedicalRecords'));
+const Financial = lazy(() => import('./pages/Financial'));
+const Reports = lazy(() => import('./pages/Reports'));
+
+// Componente de loading para Suspense
+function PageLoader() {
+  return (
+    <div className="flex items-center justify-center min-h-[400px]">
+      <LoadingSpinner />
+    </div>
+  );
+}
 
 // Componente de rota protegida
 function ProtectedRoute({ children, allowedRoles }: { children: ReactNode; allowedRoles?: string[] }) {
@@ -50,53 +59,55 @@ function PublicRoute({ children }: { children: ReactNode }) {
 
 function AppRoutes() {
   return (
-    <Routes>
-      {/* Rota pública */}
-      <Route
-        path="/login"
-        element={
-          <PublicRoute>
-            <Login />
-          </PublicRoute>
-        }
-      />
-
-      {/* Rotas protegidas */}
-      <Route
-        path="/"
-        element={
-          <ProtectedRoute>
-            <Layout />
-          </ProtectedRoute>
-        }
-      >
-        <Route index element={<Navigate to="/dashboard" replace />} />
-        <Route path="dashboard" element={<Dashboard />} />
-        <Route path="pacientes" element={<Patients />} />
-        <Route path="pacientes/:patientId" element={<MedicalRecords />} />
-        <Route path="agenda" element={<Agenda />} />
+    <Suspense fallback={<PageLoader />}>
+      <Routes>
+        {/* Rota pública */}
         <Route
-          path="prontuarios"
+          path="/login"
           element={
-            <ProtectedRoute allowedRoles={['medico']}>
-              <Patients />
-            </ProtectedRoute>
+            <PublicRoute>
+              <Login />
+            </PublicRoute>
           }
         />
-        <Route path="financeiro" element={<Financial />} />
+
+        {/* Rotas protegidas */}
         <Route
-          path="relatorios"
+          path="/"
           element={
-            <ProtectedRoute allowedRoles={['medico']}>
-              <Reports />
+            <ProtectedRoute>
+              <Layout />
             </ProtectedRoute>
           }
-        />
-      </Route>
+        >
+          <Route index element={<Navigate to="/dashboard" replace />} />
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="pacientes" element={<Patients />} />
+          <Route path="pacientes/:patientId" element={<MedicalRecords />} />
+          <Route path="agenda" element={<Agenda />} />
+          <Route
+            path="prontuarios"
+            element={
+              <ProtectedRoute allowedRoles={['medico']}>
+                <Patients />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="financeiro" element={<Financial />} />
+          <Route
+            path="relatorios"
+            element={
+              <ProtectedRoute allowedRoles={['medico']}>
+                <Reports />
+              </ProtectedRoute>
+            }
+          />
+        </Route>
 
-      {/* Fallback */}
-      <Route path="*" element={<Navigate to="/dashboard" replace />} />
-    </Routes>
+        {/* Fallback */}
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      </Routes>
+    </Suspense>
   );
 }
 

@@ -936,3 +936,37 @@ textarea:disabled {
   visibility: visible;
   transform: translateX(-50%) translateY(-12px);
 }
+
+/* ========================================
+   PAGINAÇÃO
+   ======================================== */
+
+.pagination-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  height: 2rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-gray-600, #4b5563);
+  background-color: transparent;
+  transition: all 0.2s ease;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  color: var(--color-primary-600, #4650e5);
+  background-color: var(--color-primary-50, #f0f4ff);
+}
+
+.pagination-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pagination-btn:focus-visible {
+  outline: 2px solid var(--color-primary-500, #5a6cf0);
+  outline-offset: 2px;
+}

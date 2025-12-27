@@ -4,4 +4,6 @@ export { default as Sidebar } from './Sidebar';
 export { default as LoadingSpinner } from './LoadingSpinner';
 export { default as ErrorBoundary } from './ErrorBoundary';
 export { default as PatientModal } from './PatientModal';
+export { default as ConfirmDialog } from './ConfirmDialog';
+export { default as Pagination } from './Pagination';
 export { ToastProvider, useToast } from './Toast';
