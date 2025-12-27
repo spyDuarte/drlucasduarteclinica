@@ -15,21 +15,20 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
+  const [user, setUser] = useState<User | null>(() => {
     // Verificar se há usuário salvo no localStorage
     const savedUser = localStorage.getItem(STORAGE_KEYS.USER);
     if (savedUser) {
       try {
-        setUser(JSON.parse(savedUser));
+        return JSON.parse(savedUser);
       } catch {
         localStorage.removeItem(STORAGE_KEYS.USER);
+        return null;
       }
     }
-    setIsLoading(false);
-  }, []);
+    return null;
+  });
+  const [isLoading, setIsLoading] = useState(false);
 
   const login = useCallback(async (email: string, password: string) => {
     setIsLoading(true);
@@ -46,7 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       throw new Error('Email ou senha inválidos');
     }
 
-    const { password: _, ...userWithoutPassword } = foundUser;
+    const { password: _password, ...userWithoutPassword } = foundUser;
     setUser(userWithoutPassword);
     localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(userWithoutPassword));
     setIsLoading(false);
@@ -77,6 +76,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {

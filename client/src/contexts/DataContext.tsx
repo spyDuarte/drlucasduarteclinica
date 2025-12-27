@@ -45,38 +45,56 @@ interface DataContextType {
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
 export function DataProvider({ children }: { children: ReactNode }) {
-  const [patients, setPatients] = useState<Patient[]>([]);
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [medicalRecords, setMedicalRecords] = useState<MedicalRecord[]>([]);
-  const [payments, setPayments] = useState<Payment[]>([]);
-  const [isInitialized, setIsInitialized] = useState(false);
-
-  useEffect(() => {
-    // Carregar dados do localStorage ou usar dados de demonstração
+  const [patients, setPatients] = useState<Patient[]>(() => {
     const savedPatients = localStorage.getItem(STORAGE_KEYS.PATIENTS);
-    const savedAppointments = localStorage.getItem(STORAGE_KEYS.APPOINTMENTS);
-    const savedRecords = localStorage.getItem(STORAGE_KEYS.RECORDS);
-    const savedPayments = localStorage.getItem(STORAGE_KEYS.PAYMENTS);
-
-    try {
-      setPatients(savedPatients ? JSON.parse(savedPatients) : DEMO_PATIENTS);
-      setAppointments(savedAppointments ? JSON.parse(savedAppointments) : generateDemoAppointments());
-      setMedicalRecords(savedRecords ? JSON.parse(savedRecords) : DEMO_MEDICAL_RECORDS);
-      setPayments(savedPayments ? JSON.parse(savedPayments) : generateDemoPayments());
-    } catch {
-      // Se houver erro no parse, usar dados demo
-      setPatients(DEMO_PATIENTS);
-      setAppointments(generateDemoAppointments());
-      setMedicalRecords(DEMO_MEDICAL_RECORDS);
-      setPayments(generateDemoPayments());
+    if (savedPatients) {
+      try {
+        return JSON.parse(savedPatients);
+      } catch {
+        return DEMO_PATIENTS;
+      }
     }
-    setIsInitialized(true);
-  }, []);
+    return DEMO_PATIENTS;
+  });
+
+  const [appointments, setAppointments] = useState<Appointment[]>(() => {
+    const savedAppointments = localStorage.getItem(STORAGE_KEYS.APPOINTMENTS);
+    if (savedAppointments) {
+      try {
+        return JSON.parse(savedAppointments);
+      } catch {
+        return generateDemoAppointments();
+      }
+    }
+    return generateDemoAppointments();
+  });
+
+  const [medicalRecords, setMedicalRecords] = useState<MedicalRecord[]>(() => {
+    const savedRecords = localStorage.getItem(STORAGE_KEYS.RECORDS);
+    if (savedRecords) {
+      try {
+        return JSON.parse(savedRecords);
+      } catch {
+        return DEMO_MEDICAL_RECORDS;
+      }
+    }
+    return DEMO_MEDICAL_RECORDS;
+  });
+
+  const [payments, setPayments] = useState<Payment[]>(() => {
+    const savedPayments = localStorage.getItem(STORAGE_KEYS.PAYMENTS);
+    if (savedPayments) {
+      try {
+        return JSON.parse(savedPayments);
+      } catch {
+        return generateDemoPayments();
+      }
+    }
+    return generateDemoPayments();
+  });
 
   // Persistir dados no localStorage (consolidado com debounce)
   useEffect(() => {
-    if (!isInitialized) return;
-
     const timeoutId = setTimeout(() => {
       if (patients.length > 0) {
         localStorage.setItem(STORAGE_KEYS.PATIENTS, JSON.stringify(patients));
@@ -93,7 +111,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     }, 300); // Debounce de 300ms
 
     return () => clearTimeout(timeoutId);
-  }, [patients, appointments, medicalRecords, payments, isInitialized]);
+  }, [patients, appointments, medicalRecords, payments]);
 
   // Funções de Pacientes
   const addPatient = useCallback((patientData: Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>) => {
@@ -310,6 +328,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useData() {
   const context = useContext(DataContext);
   if (context === undefined) {

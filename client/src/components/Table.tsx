@@ -143,6 +143,7 @@ export function TableCell({ children, className = '' }: TableCellProps) {
 }
 
 // Export como object para facilitar importação
+// eslint-disable-next-line react-refresh/only-export-components
 export const TableComponents = {
   Container: TableContainer,
   Root: Table,
