@@ -32,12 +32,12 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     const baseClasses = 'inline-flex items-center justify-center gap-2 font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
 
     const variantClasses = {
-      primary: 'bg-sky-600 text-white hover:bg-sky-700 focus:ring-sky-500 active:bg-sky-800',
-      secondary: 'bg-gray-200 text-gray-700 hover:bg-gray-300 focus:ring-gray-400 active:bg-gray-400',
-      danger: 'bg-red-500 text-white hover:bg-red-600 focus:ring-red-500 active:bg-red-700',
-      success: 'bg-green-500 text-white hover:bg-green-600 focus:ring-green-500 active:bg-green-700',
-      ghost: 'bg-transparent text-gray-700 hover:bg-gray-100 focus:ring-gray-300',
-      outline: 'bg-transparent border-2 border-gray-300 text-gray-700 hover:border-gray-400 hover:bg-gray-50 focus:ring-gray-300',
+      primary: 'bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500 active:bg-primary-800',
+      secondary: 'bg-slate-200 text-slate-700 hover:bg-slate-300 focus:ring-slate-400 active:bg-slate-400',
+      danger: 'bg-rose-500 text-white hover:bg-rose-600 focus:ring-rose-500 active:bg-rose-700',
+      success: 'bg-emerald-500 text-white hover:bg-emerald-600 focus:ring-emerald-500 active:bg-emerald-700',
+      ghost: 'bg-transparent text-slate-700 hover:bg-slate-100 focus:ring-slate-300',
+      outline: 'bg-transparent border-2 border-slate-300 text-slate-700 hover:border-slate-400 hover:bg-slate-50 focus:ring-slate-300',
     };
 
     const sizeClasses = {

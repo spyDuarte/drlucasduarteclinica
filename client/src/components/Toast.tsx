@@ -24,23 +24,23 @@ const icons = {
 
 const colors = {
   success: 'bg-gradient-to-r from-emerald-50 to-emerald-50/80 text-emerald-800 border-emerald-200/50',
-  error: 'bg-gradient-to-r from-red-50 to-red-50/80 text-red-800 border-red-200/50',
+  error: 'bg-gradient-to-r from-rose-50 to-rose-50/80 text-rose-800 border-rose-200/50',
   warning: 'bg-gradient-to-r from-amber-50 to-amber-50/80 text-amber-800 border-amber-200/50',
-  info: 'bg-gradient-to-r from-blue-50 to-blue-50/80 text-blue-800 border-blue-200/50',
+  info: 'bg-gradient-to-r from-sky-50 to-sky-50/80 text-sky-800 border-sky-200/50',
 };
 
 const iconContainerColors = {
   success: 'bg-emerald-100 text-emerald-600',
-  error: 'bg-red-100 text-red-600',
+  error: 'bg-rose-100 text-rose-600',
   warning: 'bg-amber-100 text-amber-600',
-  info: 'bg-blue-100 text-blue-600',
+  info: 'bg-sky-100 text-sky-600',
 };
 
 const progressColors = {
   success: 'bg-emerald-500',
-  error: 'bg-red-500',
+  error: 'bg-rose-500',
   warning: 'bg-amber-500',
-  info: 'bg-blue-500',
+  info: 'bg-sky-500',
 };
 
 export function ToastProvider({ children }: { children: ReactNode }) {
