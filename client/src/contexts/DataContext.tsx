@@ -73,33 +73,36 @@ export function DataProvider({ children }: { children: ReactNode }) {
     setIsInitialized(true);
   }, []);
 
-  // Persistir dados no localStorage (apenas após inicialização)
+  // Persistir dados no localStorage (consolidado com debounce)
   useEffect(() => {
-    if (isInitialized && patients.length > 0) {
-      localStorage.setItem(STORAGE_KEYS.PATIENTS, JSON.stringify(patients));
-    }
-  }, [patients, isInitialized]);
+    if (!isInitialized) return;
 
-  useEffect(() => {
-    if (isInitialized && appointments.length > 0) {
-      localStorage.setItem(STORAGE_KEYS.APPOINTMENTS, JSON.stringify(appointments));
-    }
-  }, [appointments, isInitialized]);
+    const timeoutId = setTimeout(() => {
+      if (patients.length > 0) {
+        localStorage.setItem(STORAGE_KEYS.PATIENTS, JSON.stringify(patients));
+      }
+      if (appointments.length > 0) {
+        localStorage.setItem(STORAGE_KEYS.APPOINTMENTS, JSON.stringify(appointments));
+      }
+      if (medicalRecords.length > 0) {
+        localStorage.setItem(STORAGE_KEYS.RECORDS, JSON.stringify(medicalRecords));
+      }
+      if (payments.length > 0) {
+        localStorage.setItem(STORAGE_KEYS.PAYMENTS, JSON.stringify(payments));
+      }
+    }, 300); // Debounce de 300ms
 
-  useEffect(() => {
-    if (isInitialized && medicalRecords.length > 0) {
-      localStorage.setItem(STORAGE_KEYS.RECORDS, JSON.stringify(medicalRecords));
-    }
-  }, [medicalRecords, isInitialized]);
-
-  useEffect(() => {
-    if (isInitialized && payments.length > 0) {
-      localStorage.setItem(STORAGE_KEYS.PAYMENTS, JSON.stringify(payments));
-    }
-  }, [payments, isInitialized]);
+    return () => clearTimeout(timeoutId);
+  }, [patients, appointments, medicalRecords, payments, isInitialized]);
 
   // Funções de Pacientes
   const addPatient = useCallback((patientData: Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>) => {
+    // Validar CPF duplicado
+    const cpfExists = patients.some(p => p.cpf === patientData.cpf);
+    if (cpfExists) {
+      throw new Error('Já existe um paciente cadastrado com este CPF');
+    }
+
     const now = new Date().toISOString();
     const newPatient: Patient = {
       ...patientData,
@@ -109,15 +112,23 @@ export function DataProvider({ children }: { children: ReactNode }) {
     };
     setPatients(prev => [...prev, newPatient]);
     return newPatient;
-  }, []);
+  }, [patients]);
 
   const updatePatient = useCallback((id: string, patientData: Partial<Patient>) => {
+    // Validar CPF duplicado ao atualizar (exceto para o próprio paciente)
+    if (patientData.cpf) {
+      const cpfExists = patients.some(p => p.cpf === patientData.cpf && p.id !== id);
+      if (cpfExists) {
+        throw new Error('Já existe outro paciente cadastrado com este CPF');
+      }
+    }
+
     setPatients(prev => prev.map(p =>
       p.id === id
         ? { ...p, ...patientData, updatedAt: new Date().toISOString() }
         : p
     ));
-  }, []);
+  }, [patients]);
 
   const deletePatient = useCallback((id: string) => {
     setPatients(prev => prev.filter(p => p.id !== id));

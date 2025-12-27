@@ -206,7 +206,7 @@ export default function Agenda() {
             if (editingAppointment) {
               updateAppointment(editingAppointment.id, data);
             } else {
-              addAppointment(data as any);
+              addAppointment(data as Omit<Appointment, 'id' | 'createdAt' | 'updatedAt'>);
             }
             handleCloseModal();
           }}
@@ -225,7 +225,7 @@ interface AppointmentModalProps {
   appointment: Appointment | null;
   selectedDate: string;
   selectedTime: string | null;
-  patients: any[];
+  patients: Patient[];
   onClose: () => void;
   onSave: (data: Partial<Appointment>) => void;
   onDelete?: () => void;
