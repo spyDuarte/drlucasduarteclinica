@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
 import type { User, UserRole } from '../types';
 import { DEMO_USERS } from '../data/demoData';
 import { STORAGE_KEYS } from '../constants/clinic';
@@ -45,7 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       throw new Error('Email ou senha inválidos');
     }
 
-    const { password: _password, ...userWithoutPassword } = foundUser;
+    const { password: _, ...userWithoutPassword } = foundUser;
     setUser(userWithoutPassword);
     localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(userWithoutPassword));
     setIsLoading(false);
