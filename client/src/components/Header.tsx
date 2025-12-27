@@ -1,9 +1,13 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { LogOut, Bell, Search, CalendarDays, Sparkles } from 'lucide-react';
+import { LogOut, Bell, Search, CalendarDays, Sparkles, Menu } from 'lucide-react';
 import { formatRelativeDate } from '../utils/helpers';
 
-export default function Header() {
+interface HeaderProps {
+  onMenuClick: () => void;
+}
+
+export default function Header({ onMenuClick }: HeaderProps) {
   const { logout } = useAuth();
   const navigate = useNavigate();
 
@@ -20,9 +24,18 @@ export default function Header() {
   });
 
   return (
-    <header className="h-16 bg-white border-b border-gray-100 flex items-center justify-between px-6 shadow-sm">
+    <header className="h-16 bg-white border-b border-gray-100 flex items-center justify-between px-4 md:px-6 shadow-sm">
+      {/* Mobile menu button */}
+      <button
+        onClick={onMenuClick}
+        className="lg:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors"
+        aria-label="Abrir menu"
+      >
+        <Menu className="w-6 h-6 text-gray-600" />
+      </button>
+
       {/* Search */}
-      <div className="flex-1 max-w-lg">
+      <div className="flex-1 max-w-lg hidden md:block">
         <div className="relative input-icon-wrapper group">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 transition-colors duration-200 group-focus-within:text-sky-500" />
           <input
@@ -38,9 +51,9 @@ export default function Header() {
       </div>
 
       {/* Right side */}
-      <div className="flex items-center gap-2">
-        {/* Date Badge */}
-        <div className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-sky-50 to-blue-50 rounded-lg border border-sky-100">
+      <div className="flex items-center gap-1 md:gap-2">
+        {/* Date Badge - Hidden on mobile */}
+        <div className="hidden xl:flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-sky-50 to-blue-50 rounded-lg border border-sky-100">
           <CalendarDays className="w-4 h-4 text-sky-600" />
           <span className="text-sm font-medium text-gray-700">
             {formatRelativeDate(today)}
@@ -52,7 +65,7 @@ export default function Header() {
         </div>
 
         {/* Divider */}
-        <div className="w-px h-8 bg-gray-200 mx-2" />
+        <div className="hidden md:block w-px h-8 bg-gray-200 mx-2" />
 
         {/* Notifications */}
         <button
@@ -66,9 +79,9 @@ export default function Header() {
           </span>
         </button>
 
-        {/* Quick Actions */}
+        {/* Quick Actions - Hidden on small screens */}
         <button
-          className="header-icon group"
+          className="header-icon group hidden sm:flex"
           title="Ações rápidas"
         >
           <Sparkles className="w-5 h-5 transition-transform duration-200 group-hover:scale-110 group-hover:text-amber-500" />
@@ -81,7 +94,7 @@ export default function Header() {
           title="Sair do sistema"
         >
           <LogOut className="w-5 h-5 transition-all duration-200" />
-          <span className="text-sm font-medium">Sair</span>
+          <span className="hidden md:inline text-sm font-medium">Sair</span>
         </button>
       </div>
     </header>

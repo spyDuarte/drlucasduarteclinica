@@ -9,7 +9,8 @@ import {
   DollarSign,
   BarChart3,
   Stethoscope,
-  Activity
+  Activity,
+  X
 } from 'lucide-react';
 import { BrandIcon, NavIcon } from './Icon';
 
@@ -27,22 +28,44 @@ const menuItems: Array<{
   { path: '/relatorios', label: 'Relatórios', icon: BarChart3, roles: ['medico'] },
 ];
 
-export default function Sidebar() {
+interface SidebarProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const { user, hasPermission } = useAuth();
 
   return (
-    <aside className="w-64 bg-white border-r border-gray-200 flex flex-col shadow-sm">
+    <aside
+      className={`
+        fixed lg:static inset-y-0 left-0 z-50
+        w-64 bg-white border-r border-gray-200 flex flex-col shadow-sm
+        transform transition-transform duration-300 ease-in-out
+        ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+      `}
+    >
       {/* Logo */}
       <div className="p-6 border-b border-gray-100">
-        <div className="flex items-center gap-3">
-          <BrandIcon icon={Stethoscope} size="md" />
-          <div>
-            <h1 className="font-bold text-gray-900 tracking-tight">Dr. Lucas Duarte</h1>
-            <div className="flex items-center gap-1.5">
-              <Activity className="w-3 h-3 text-emerald-500" />
-              <p className="text-xs text-gray-500">Sistema Médico</p>
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <BrandIcon icon={Stethoscope} size="md" />
+            <div>
+              <h1 className="font-bold text-gray-900 tracking-tight">Dr. Lucas Duarte</h1>
+              <div className="flex items-center gap-1.5">
+                <Activity className="w-3 h-3 text-emerald-500" />
+                <p className="text-xs text-gray-500">Sistema Médico</p>
+              </div>
             </div>
           </div>
+          {/* Close button - Mobile only */}
+          <button
+            onClick={onClose}
+            className="lg:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            aria-label="Fechar menu"
+          >
+            <X className="w-5 h-5 text-gray-500" />
+          </button>
         </div>
       </div>
 
@@ -59,6 +82,7 @@ export default function Sidebar() {
             <NavLink
               key={item.path}
               to={item.path}
+              onClick={() => onClose()}
               className={({ isActive }) =>
                 `sidebar-link ${isActive ? 'active' : ''}`
               }
