@@ -1,6 +1,6 @@
-import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useMemo, type ReactNode } from 'react';
 import type { Patient, Appointment, MedicalRecord, Payment, DashboardStats } from '../types';
-import { generateId } from '../utils/helpers';
+import { generateId, doTimesOverlap, normalizeForSearch, sortBy } from '../utils/helpers';
 import { STORAGE_KEYS } from '../constants/clinic';
 import {
   DEMO_PATIENTS,
@@ -16,6 +16,8 @@ interface DataContextType {
   updatePatient: (id: string, patient: Partial<Patient>) => void;
   deletePatient: (id: string) => void;
   getPatient: (id: string) => Patient | undefined;
+  searchPatients: (query: string) => Patient[];
+  getPatientWithAppointments: (id: string) => (Patient & { appointments: Appointment[] }) | undefined;
 
   // Consultas
   appointments: Appointment[];
@@ -25,21 +27,31 @@ interface DataContextType {
   getAppointment: (id: string) => Appointment | undefined;
   getAppointmentsByDate: (date: string) => Appointment[];
   getAppointmentsByPatient: (patientId: string) => Appointment[];
+  checkAppointmentConflict: (date: string, horaInicio: string, horaFim: string, excludeId?: string) => boolean;
+  getUpcomingAppointments: (limit?: number) => Appointment[];
+  getTodayAppointments: () => Appointment[];
 
   // Prontuários
   medicalRecords: MedicalRecord[];
   addMedicalRecord: (record: Omit<MedicalRecord, 'id' | 'createdAt' | 'updatedAt'>) => MedicalRecord;
   updateMedicalRecord: (id: string, record: Partial<MedicalRecord>) => void;
   getMedicalRecordsByPatient: (patientId: string) => MedicalRecord[];
+  getLastMedicalRecord: (patientId: string) => MedicalRecord | undefined;
 
   // Pagamentos
   payments: Payment[];
   addPayment: (payment: Omit<Payment, 'id' | 'createdAt' | 'updatedAt'>) => Payment;
   updatePayment: (id: string, payment: Partial<Payment>) => void;
   getPaymentsByPatient: (patientId: string) => Payment[];
+  getPendingPayments: () => Payment[];
+  markPaymentAsPaid: (id: string) => void;
 
   // Dashboard
   getDashboardStats: () => DashboardStats;
+
+  // Utilitários
+  exportData: () => { patients: Patient[]; appointments: Appointment[]; medicalRecords: MedicalRecord[]; payments: Payment[] };
+  clearAllData: () => void;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -164,12 +176,68 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const deletePatient = useCallback((id: string) => {
     setPatients(prev => prev.filter(p => p.id !== id));
+    // Também remove consultas, prontuários e pagamentos relacionados
+    setAppointments(prev => prev.filter(a => a.patientId !== id));
+    setMedicalRecords(prev => prev.filter(r => r.patientId !== id));
+    setPayments(prev => prev.filter(p => p.patientId !== id));
   }, []);
 
   const getPatient = useCallback((id: string) => patients.find(p => p.id === id), [patients]);
 
+  // Busca textual em pacientes (nome, CPF, telefone, email)
+  const searchPatients = useCallback((query: string): Patient[] => {
+    if (!query.trim()) return patients;
+
+    const normalizedQuery = normalizeForSearch(query);
+    return patients.filter(patient => {
+      const searchableText = normalizeForSearch(
+        `${patient.nome} ${patient.cpf} ${patient.telefone} ${patient.email || ''}`
+      );
+      return searchableText.includes(normalizedQuery);
+    });
+  }, [patients]);
+
+  // Retorna paciente com suas consultas
+  const getPatientWithAppointments = useCallback((id: string) => {
+    const patient = patients.find(p => p.id === id);
+    if (!patient) return undefined;
+
+    const patientAppointments = appointments
+      .filter(a => a.patientId === id)
+      .sort((a, b) => b.data.localeCompare(a.data) || b.horaInicio.localeCompare(a.horaInicio));
+
+    return { ...patient, appointments: patientAppointments };
+  }, [patients, appointments]);
+
+  // Verifica conflito de horário
+  const checkAppointmentConflict = useCallback((
+    date: string,
+    horaInicio: string,
+    horaFim: string,
+    excludeId?: string
+  ): boolean => {
+    return appointments.some(apt => {
+      if (excludeId && apt.id === excludeId) return false;
+      if (apt.data !== date) return false;
+      if (apt.status === 'cancelada') return false;
+
+      return doTimesOverlap(horaInicio, horaFim, apt.horaInicio, apt.horaFim);
+    });
+  }, [appointments]);
+
   // Funções de Consultas
   const addAppointment = useCallback((appointmentData: Omit<Appointment, 'id' | 'createdAt' | 'updatedAt'>) => {
+    // Verificar conflito de horário
+    const hasConflict = checkAppointmentConflict(
+      appointmentData.data,
+      appointmentData.horaInicio,
+      appointmentData.horaFim
+    );
+
+    if (hasConflict) {
+      throw new Error('Já existe uma consulta agendada neste horário');
+    }
+
     const now = new Date().toISOString();
     const newAppointment: Appointment = {
       ...appointmentData,
@@ -179,7 +247,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     };
     setAppointments(prev => [...prev, newAppointment]);
     return newAppointment;
-  }, []);
+  }, [checkAppointmentConflict]);
 
   const updateAppointment = useCallback((id: string, appointmentData: Partial<Appointment>) => {
     setAppointments(prev => prev.map(a =>
@@ -207,6 +275,31 @@ export function DataProvider({ children }: { children: ReactNode }) {
     [appointments]
   );
 
+  // Consultas futuras ordenadas por data
+  const getUpcomingAppointments = useCallback((limit: number = 10): Appointment[] => {
+    const today = new Date().toISOString().split('T')[0];
+    const now = new Date().toTimeString().slice(0, 5);
+
+    return appointments
+      .filter(a => {
+        if (a.status === 'cancelada' || a.status === 'finalizada' || a.status === 'faltou') return false;
+        if (a.data > today) return true;
+        if (a.data === today && a.horaInicio >= now) return true;
+        return false;
+      })
+      .sort((a, b) => a.data.localeCompare(b.data) || a.horaInicio.localeCompare(b.horaInicio))
+      .slice(0, limit);
+  }, [appointments]);
+
+  // Consultas de hoje ordenadas por horário
+  const getTodayAppointments = useCallback((): Appointment[] => {
+    const today = new Date().toISOString().split('T')[0];
+    return sortBy(
+      appointments.filter(a => a.data === today && a.status !== 'cancelada'),
+      'horaInicio'
+    );
+  }, [appointments]);
+
   // Funções de Prontuários
   const addMedicalRecord = useCallback((recordData: Omit<MedicalRecord, 'id' | 'createdAt' | 'updatedAt'>) => {
     const now = new Date().toISOString();
@@ -229,9 +322,17 @@ export function DataProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const getMedicalRecordsByPatient = useCallback((patientId: string) =>
-    medicalRecords.filter(r => r.patientId === patientId),
+    medicalRecords
+      .filter(r => r.patientId === patientId)
+      .sort((a, b) => b.data.localeCompare(a.data)),
     [medicalRecords]
   );
+
+  // Retorna o último prontuário de um paciente
+  const getLastMedicalRecord = useCallback((patientId: string): MedicalRecord | undefined => {
+    const records = getMedicalRecordsByPatient(patientId);
+    return records[0]; // Já ordenado por data decrescente
+  }, [getMedicalRecordsByPatient]);
 
   // Funções de Pagamentos
   const addPayment = useCallback((paymentData: Omit<Payment, 'id' | 'createdAt' | 'updatedAt'>) => {
@@ -258,6 +359,23 @@ export function DataProvider({ children }: { children: ReactNode }) {
     payments.filter(p => p.patientId === patientId),
     [payments]
   );
+
+  // Retorna pagamentos pendentes
+  const getPendingPayments = useCallback((): Payment[] => {
+    return payments
+      .filter(p => p.status === 'pendente')
+      .sort((a, b) => (a.dataVencimento || a.createdAt).localeCompare(b.dataVencimento || b.createdAt));
+  }, [payments]);
+
+  // Marca um pagamento como pago
+  const markPaymentAsPaid = useCallback((id: string) => {
+    const now = new Date().toISOString();
+    setPayments(prev => prev.map(p =>
+      p.id === id
+        ? { ...p, status: 'pago' as const, dataPagamento: now.split('T')[0], updatedAt: now }
+        : p
+    ));
+  }, []);
 
   // Dashboard Stats - memoizado para evitar recálculos desnecessários
   const getDashboardStats = useCallback((): DashboardStats => {
@@ -313,30 +431,76 @@ export function DataProvider({ children }: { children: ReactNode }) {
     };
   }, [appointments, patients, payments]);
 
-  return (
-    <DataContext.Provider value={{
+  // Exporta todos os dados
+  const exportData = useCallback(() => {
+    return {
       patients,
-      addPatient,
-      updatePatient,
-      deletePatient,
-      getPatient,
       appointments,
-      addAppointment,
-      updateAppointment,
-      deleteAppointment,
-      getAppointment,
-      getAppointmentsByDate,
-      getAppointmentsByPatient,
       medicalRecords,
-      addMedicalRecord,
-      updateMedicalRecord,
-      getMedicalRecordsByPatient,
-      payments,
-      addPayment,
-      updatePayment,
-      getPaymentsByPatient,
-      getDashboardStats
-    }}>
+      payments
+    };
+  }, [patients, appointments, medicalRecords, payments]);
+
+  // Limpa todos os dados (volta ao estado inicial)
+  const clearAllData = useCallback(() => {
+    if (confirm('Tem certeza que deseja limpar todos os dados? Esta ação não pode ser desfeita.')) {
+      setPatients(DEMO_PATIENTS);
+      setAppointments(generateDemoAppointments());
+      setMedicalRecords(DEMO_MEDICAL_RECORDS);
+      setPayments(generateDemoPayments());
+
+      // Limpa localStorage
+      localStorage.removeItem(STORAGE_KEYS.PATIENTS);
+      localStorage.removeItem(STORAGE_KEYS.APPOINTMENTS);
+      localStorage.removeItem(STORAGE_KEYS.RECORDS);
+      localStorage.removeItem(STORAGE_KEYS.PAYMENTS);
+    }
+  }, []);
+
+  // Memoiza o valor do contexto para evitar re-renders desnecessários
+  const contextValue = useMemo(() => ({
+    patients,
+    addPatient,
+    updatePatient,
+    deletePatient,
+    getPatient,
+    searchPatients,
+    getPatientWithAppointments,
+    appointments,
+    addAppointment,
+    updateAppointment,
+    deleteAppointment,
+    getAppointment,
+    getAppointmentsByDate,
+    getAppointmentsByPatient,
+    checkAppointmentConflict,
+    getUpcomingAppointments,
+    getTodayAppointments,
+    medicalRecords,
+    addMedicalRecord,
+    updateMedicalRecord,
+    getMedicalRecordsByPatient,
+    getLastMedicalRecord,
+    payments,
+    addPayment,
+    updatePayment,
+    getPaymentsByPatient,
+    getPendingPayments,
+    markPaymentAsPaid,
+    getDashboardStats,
+    exportData,
+    clearAllData
+  }), [
+    patients, addPatient, updatePatient, deletePatient, getPatient, searchPatients, getPatientWithAppointments,
+    appointments, addAppointment, updateAppointment, deleteAppointment, getAppointment,
+    getAppointmentsByDate, getAppointmentsByPatient, checkAppointmentConflict, getUpcomingAppointments, getTodayAppointments,
+    medicalRecords, addMedicalRecord, updateMedicalRecord, getMedicalRecordsByPatient, getLastMedicalRecord,
+    payments, addPayment, updatePayment, getPaymentsByPatient, getPendingPayments, markPaymentAsPaid,
+    getDashboardStats, exportData, clearAllData
+  ]);
+
+  return (
+    <DataContext.Provider value={contextValue}>
       {children}
     </DataContext.Provider>
   );
