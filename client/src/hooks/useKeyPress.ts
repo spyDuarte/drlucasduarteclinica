@@ -36,7 +36,9 @@ export function useKeyPress(
   const { target = window, eventType = 'keydown', preventDefault = false } = options;
 
   const callbackRef = useRef(callback);
-  callbackRef.current = callback;
+  useEffect(() => {
+    callbackRef.current = callback;
+  });
 
   const handleKeyPress = useCallback(
     (event: KeyboardEvent) => {
@@ -111,7 +113,9 @@ export function useKeyPressMultiple(
   options: UseKeyPressOptions = {}
 ): void {
   const callbacksRef = useRef(keyCallbacks);
-  callbacksRef.current = keyCallbacks;
+  useEffect(() => {
+    callbacksRef.current = keyCallbacks;
+  });
 
   useEffect(() => {
     const { target = window, eventType = 'keydown', preventDefault = false } = options;
