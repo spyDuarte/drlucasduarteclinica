@@ -76,6 +76,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return Math.max(0, remaining);
   }, [sessionExpiresAt]);
 
+  const logout = useCallback(() => {
+    setUser(null);
+    setLastActivity(null);
+    localStorage.removeItem(STORAGE_KEYS.USER);
+    localStorage.removeItem(LAST_ACTIVITY_KEY);
+  }, []);
+
   // Verifica sessão expirada e faz logout automático
   useEffect(() => {
     if (!user) return;
@@ -105,7 +112,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         document.removeEventListener(event, handleActivity);
       });
     };
-  }, [user, getRemainingSessionTime, updateActivity]);
+  }, [user, getRemainingSessionTime, updateActivity, logout]);
 
   const login = useCallback(async (email: string, password: string) => {
     setIsLoading(true);
@@ -143,13 +150,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem(LAST_ACTIVITY_KEY, now.toISOString());
 
     setIsLoading(false);
-  }, []);
-
-  const logout = useCallback(() => {
-    setUser(null);
-    setLastActivity(null);
-    localStorage.removeItem(STORAGE_KEYS.USER);
-    localStorage.removeItem(LAST_ACTIVITY_KEY);
   }, []);
 
   const hasPermission = useCallback((requiredRole: UserRole | UserRole[]) => {

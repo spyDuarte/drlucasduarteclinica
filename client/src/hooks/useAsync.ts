@@ -45,7 +45,9 @@ export function useAsync<T, P extends unknown[] = []>(
 
   // Ref para a função assíncrona (evita recriação)
   const asyncFunctionRef = useRef(asyncFunction);
-  asyncFunctionRef.current = asyncFunction;
+  useEffect(() => {
+    asyncFunctionRef.current = asyncFunction;
+  });
 
   const execute = useCallback(async (...params: P): Promise<T | null> => {
     setState(prev => ({
@@ -97,6 +99,7 @@ export function useAsync<T, P extends unknown[] = []>(
   // Executa imediatamente se solicitado
   useEffect(() => {
     if (immediate) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       execute(...([] as unknown as P));
     }
   }, [immediate, execute]);

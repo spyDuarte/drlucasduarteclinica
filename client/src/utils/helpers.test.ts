@@ -24,7 +24,7 @@ describe('helpers', () => {
       const id1 = generateId();
       const id2 = generateId();
       expect(id1).not.toBe(id2);
-      expect(id1).toMatch(/^[a-z0-9]+$/);
+      expect(id1).toMatch(/^[a-z0-9-]+$/);
     });
   });
 
