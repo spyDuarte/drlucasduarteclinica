@@ -1,16 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Outlet, useLocation } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Header from './Header';
 
 export default function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const location = useLocation();
 
-  // Fechar sidebar ao mudar de rota (mobile)
-  useEffect(() => {
-    setSidebarOpen(false);
-  }, [location.pathname]);
+  // Nota: O fechamento da sidebar ao navegar é tratado pelo onClick
+  // nos links do Sidebar, não precisamos de useEffect aqui
 
   // Prevenir scroll do body quando sidebar estiver aberto (mobile)
   useEffect(() => {
