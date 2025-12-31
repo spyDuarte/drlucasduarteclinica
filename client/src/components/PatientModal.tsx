@@ -1,6 +1,5 @@
-import { useState } from 'react';
 import { X } from 'lucide-react';
-import { isValidCPF, formatCPF, formatPhone, formatCEP } from '../utils/helpers';
+import { usePatientForm } from '../hooks/usePatientForm';
 import type { Patient } from '../types';
 
 interface PatientModalProps {
@@ -10,150 +9,24 @@ interface PatientModalProps {
   isLoading?: boolean;
 }
 
-interface FormErrors {
-  nome?: string;
-  cpf?: string;
-  dataNascimento?: string;
-  telefone?: string;
-}
-
-interface PatientFormData {
-  nome: string;
-  cpf: string;
-  dataNascimento: string;
-  sexo: string;
-  telefone: string;
-  email: string;
-  logradouro: string;
-  numero: string;
-  complemento: string;
-  bairro: string;
-  cidade: string;
-  estado: string;
-  cep: string;
-  convenioNome: string;
-  convenioNumero: string;
-  convenioValidade: string;
-  alergias: string;
-  medicamentosEmUso: string;
-  historicoFamiliar: string;
-  observacoes: string;
-}
-
 export default function PatientModal({ patient, onClose, onSave, isLoading = false }: PatientModalProps) {
-  const [formData, setFormData] = useState<PatientFormData>({
-    nome: patient?.nome || '',
-    cpf: patient?.cpf || '',
-    dataNascimento: patient?.dataNascimento || '',
-    sexo: patient?.sexo || 'M',
-    telefone: patient?.telefone || '',
-    email: patient?.email || '',
-    logradouro: patient?.endereco?.logradouro || '',
-    numero: patient?.endereco?.numero || '',
-    complemento: patient?.endereco?.complemento || '',
-    bairro: patient?.endereco?.bairro || '',
-    cidade: patient?.endereco?.cidade || '',
-    estado: patient?.endereco?.estado || '',
-    cep: patient?.endereco?.cep || '',
-    convenioNome: patient?.convenio?.nome || '',
-    convenioNumero: patient?.convenio?.numero || '',
-    convenioValidade: patient?.convenio?.validade || '',
-    alergias: patient?.alergias?.join(', ') || '',
-    medicamentosEmUso: patient?.medicamentosEmUso?.join(', ') || '',
-    historicoFamiliar: patient?.historicoFamiliar || '',
-    observacoes: patient?.observacoes || ''
-  });
-
-  const [errors, setErrors] = useState<FormErrors>({});
-
-  const validateForm = (): boolean => {
-    const newErrors: FormErrors = {};
-
-    if (!formData.nome.trim()) {
-      newErrors.nome = 'Nome é obrigatório';
-    }
-
-    if (!formData.cpf.trim()) {
-      newErrors.cpf = 'CPF é obrigatório';
-    } else if (!isValidCPF(formData.cpf)) {
-      newErrors.cpf = 'CPF inválido';
-    }
-
-    if (!formData.dataNascimento) {
-      newErrors.dataNascimento = 'Data de nascimento é obrigatória';
-    }
-
-    if (!formData.telefone.trim()) {
-      newErrors.telefone = 'Telefone é obrigatório';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleCPFChange = (value: string) => {
-    const formatted = formatCPF(value);
-    setFormData({ ...formData, cpf: formatted });
-    if (errors.cpf) {
-      setErrors({ ...errors, cpf: undefined });
-    }
-  };
-
-  const handlePhoneChange = (value: string) => {
-    const formatted = formatPhone(value);
-    setFormData({ ...formData, telefone: formatted });
-    if (errors.telefone) {
-      setErrors({ ...errors, telefone: undefined });
-    }
-  };
-
-  const handleCEPChange = (value: string) => {
-    const formatted = formatCEP(value);
-    setFormData({ ...formData, cep: formatted });
-  };
+  const {
+    formData,
+    errors,
+    updateField,
+    handleCPFChange,
+    handlePhoneChange,
+    handleCEPChange,
+    validateForm,
+    buildPatientData
+  } = usePatientForm(patient);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!validateForm()) {
-      return;
+    if (validateForm()) {
+      onSave(buildPatientData());
     }
-
-    const data: Omit<Patient, 'id' | 'createdAt' | 'updatedAt'> = {
-      nome: formData.nome,
-      cpf: formData.cpf,
-      dataNascimento: formData.dataNascimento,
-      sexo: formData.sexo as 'M' | 'F' | 'O',
-      telefone: formData.telefone,
-      email: formData.email || undefined,
-      endereco: {
-        logradouro: formData.logradouro,
-        numero: formData.numero,
-        complemento: formData.complemento || undefined,
-        bairro: formData.bairro,
-        cidade: formData.cidade,
-        estado: formData.estado,
-        cep: formData.cep
-      },
-      alergias: formData.alergias ? formData.alergias.split(',').map(a => a.trim()) : undefined,
-      medicamentosEmUso: formData.medicamentosEmUso ? formData.medicamentosEmUso.split(',').map(m => m.trim()) : undefined,
-      historicoFamiliar: formData.historicoFamiliar || undefined,
-      observacoes: formData.observacoes || undefined
-    };
-
-    if (formData.convenioNome) {
-      data.convenio = {
-        nome: formData.convenioNome,
-        numero: formData.convenioNumero,
-        validade: formData.convenioValidade
-      };
-    }
-
-    onSave(data);
   };
-
-  const inputClassName = (error?: string) =>
-    `input-field ${error ? 'border-red-500 focus:ring-red-500' : ''}`;
 
   return (
     <div
@@ -178,72 +51,43 @@ export default function PatientModal({ patient, onClose, onSave, isLoading = fal
 
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {/* Dados Pessoais */}
-          <div>
-            <h3 className="text-sm font-medium text-gray-700 mb-3">Dados Pessoais</h3>
+          <FormSection title="Dados Pessoais">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="md:col-span-2">
-                <label htmlFor="nome" className="block text-sm text-gray-600 mb-1">
-                  Nome completo *
-                </label>
-                <input
+                <FormInput
                   id="nome"
-                  type="text"
+                  label="Nome completo *"
                   value={formData.nome}
-                  onChange={e => {
-                    setFormData({ ...formData, nome: e.target.value });
-                    if (errors.nome) setErrors({ ...errors, nome: undefined });
-                  }}
-                  className={inputClassName(errors.nome)}
-                  aria-invalid={!!errors.nome}
-                  aria-describedby={errors.nome ? 'nome-error' : undefined}
+                  onChange={v => updateField('nome', v)}
+                  error={errors.nome}
+                  errorId="nome-error"
                 />
-                {errors.nome && (
-                  <p id="nome-error" className="mt-1 text-sm text-red-600">{errors.nome}</p>
-                )}
               </div>
-              <div>
-                <label htmlFor="cpf" className="block text-sm text-gray-600 mb-1">CPF *</label>
-                <input
-                  id="cpf"
-                  type="text"
-                  value={formData.cpf}
-                  onChange={e => handleCPFChange(e.target.value)}
-                  className={inputClassName(errors.cpf)}
-                  placeholder="000.000.000-00"
-                  maxLength={14}
-                  aria-invalid={!!errors.cpf}
-                  aria-describedby={errors.cpf ? 'cpf-error' : undefined}
-                />
-                {errors.cpf && (
-                  <p id="cpf-error" className="mt-1 text-sm text-red-600">{errors.cpf}</p>
-                )}
-              </div>
-              <div>
-                <label htmlFor="dataNascimento" className="block text-sm text-gray-600 mb-1">
-                  Data de nascimento *
-                </label>
-                <input
-                  id="dataNascimento"
-                  type="date"
-                  value={formData.dataNascimento}
-                  onChange={e => {
-                    setFormData({ ...formData, dataNascimento: e.target.value });
-                    if (errors.dataNascimento) setErrors({ ...errors, dataNascimento: undefined });
-                  }}
-                  className={inputClassName(errors.dataNascimento)}
-                  aria-invalid={!!errors.dataNascimento}
-                  aria-describedby={errors.dataNascimento ? 'data-error' : undefined}
-                />
-                {errors.dataNascimento && (
-                  <p id="data-error" className="mt-1 text-sm text-red-600">{errors.dataNascimento}</p>
-                )}
-              </div>
+              <FormInput
+                id="cpf"
+                label="CPF *"
+                value={formData.cpf}
+                onChange={handleCPFChange}
+                error={errors.cpf}
+                errorId="cpf-error"
+                placeholder="000.000.000-00"
+                maxLength={14}
+              />
+              <FormInput
+                id="dataNascimento"
+                label="Data de nascimento *"
+                type="date"
+                value={formData.dataNascimento}
+                onChange={v => updateField('dataNascimento', v)}
+                error={errors.dataNascimento}
+                errorId="data-error"
+              />
               <div>
                 <label htmlFor="sexo" className="block text-sm text-gray-600 mb-1">Sexo *</label>
                 <select
                   id="sexo"
                   value={formData.sexo}
-                  onChange={e => setFormData({ ...formData, sexo: e.target.value as 'M' | 'F' | 'O' })}
+                  onChange={e => updateField('sexo', e.target.value)}
                   className="input-field"
                 >
                   <option value="M">Masculino</option>
@@ -251,209 +95,144 @@ export default function PatientModal({ patient, onClose, onSave, isLoading = fal
                   <option value="O">Outro</option>
                 </select>
               </div>
-              <div>
-                <label htmlFor="telefone" className="block text-sm text-gray-600 mb-1">Telefone *</label>
-                <input
-                  id="telefone"
-                  type="tel"
-                  value={formData.telefone}
-                  onChange={e => handlePhoneChange(e.target.value)}
-                  className={inputClassName(errors.telefone)}
-                  placeholder="(00) 00000-0000"
-                  maxLength={15}
-                  aria-invalid={!!errors.telefone}
-                  aria-describedby={errors.telefone ? 'telefone-error' : undefined}
-                />
-                {errors.telefone && (
-                  <p id="telefone-error" className="mt-1 text-sm text-red-600">{errors.telefone}</p>
-                )}
-              </div>
+              <FormInput
+                id="telefone"
+                label="Telefone *"
+                type="tel"
+                value={formData.telefone}
+                onChange={handlePhoneChange}
+                error={errors.telefone}
+                errorId="telefone-error"
+                placeholder="(00) 00000-0000"
+                maxLength={15}
+              />
               <div className="md:col-span-2">
-                <label htmlFor="email" className="block text-sm text-gray-600 mb-1">Email</label>
-                <input
+                <FormInput
                   id="email"
+                  label="Email"
                   type="email"
                   value={formData.email}
-                  onChange={e => setFormData({ ...formData, email: e.target.value })}
-                  className="input-field"
+                  onChange={v => updateField('email', v)}
                 />
               </div>
             </div>
-          </div>
+          </FormSection>
 
           {/* Endereço */}
-          <div>
-            <h3 className="text-sm font-medium text-gray-700 mb-3">Endereço</h3>
+          <FormSection title="Endereço">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="md:col-span-2">
-                <label htmlFor="logradouro" className="block text-sm text-gray-600 mb-1">Logradouro</label>
-                <input
+                <FormInput
                   id="logradouro"
-                  type="text"
+                  label="Logradouro"
                   value={formData.logradouro}
-                  onChange={e => setFormData({ ...formData, logradouro: e.target.value })}
-                  className="input-field"
+                  onChange={v => updateField('logradouro', v)}
                 />
               </div>
-              <div>
-                <label htmlFor="numero" className="block text-sm text-gray-600 mb-1">Número</label>
-                <input
-                  id="numero"
-                  type="text"
-                  value={formData.numero}
-                  onChange={e => setFormData({ ...formData, numero: e.target.value })}
-                  className="input-field"
-                />
-              </div>
-              <div>
-                <label htmlFor="complemento" className="block text-sm text-gray-600 mb-1">Complemento</label>
-                <input
-                  id="complemento"
-                  type="text"
-                  value={formData.complemento}
-                  onChange={e => setFormData({ ...formData, complemento: e.target.value })}
-                  className="input-field"
-                />
-              </div>
-              <div>
-                <label htmlFor="bairro" className="block text-sm text-gray-600 mb-1">Bairro</label>
-                <input
-                  id="bairro"
-                  type="text"
-                  value={formData.bairro}
-                  onChange={e => setFormData({ ...formData, bairro: e.target.value })}
-                  className="input-field"
-                />
-              </div>
-              <div>
-                <label htmlFor="cidade" className="block text-sm text-gray-600 mb-1">Cidade</label>
-                <input
-                  id="cidade"
-                  type="text"
-                  value={formData.cidade}
-                  onChange={e => setFormData({ ...formData, cidade: e.target.value })}
-                  className="input-field"
-                />
-              </div>
-              <div>
-                <label htmlFor="estado" className="block text-sm text-gray-600 mb-1">Estado</label>
-                <input
-                  id="estado"
-                  type="text"
-                  value={formData.estado}
-                  onChange={e => setFormData({ ...formData, estado: e.target.value })}
-                  className="input-field"
-                  maxLength={2}
-                />
-              </div>
-              <div>
-                <label htmlFor="cep" className="block text-sm text-gray-600 mb-1">CEP</label>
-                <input
-                  id="cep"
-                  type="text"
-                  value={formData.cep}
-                  onChange={e => handleCEPChange(e.target.value)}
-                  className="input-field"
-                  placeholder="00000-000"
-                  maxLength={9}
-                />
-              </div>
+              <FormInput
+                id="numero"
+                label="Número"
+                value={formData.numero}
+                onChange={v => updateField('numero', v)}
+              />
+              <FormInput
+                id="complemento"
+                label="Complemento"
+                value={formData.complemento}
+                onChange={v => updateField('complemento', v)}
+              />
+              <FormInput
+                id="bairro"
+                label="Bairro"
+                value={formData.bairro}
+                onChange={v => updateField('bairro', v)}
+              />
+              <FormInput
+                id="cidade"
+                label="Cidade"
+                value={formData.cidade}
+                onChange={v => updateField('cidade', v)}
+              />
+              <FormInput
+                id="estado"
+                label="Estado"
+                value={formData.estado}
+                onChange={v => updateField('estado', v)}
+                maxLength={2}
+              />
+              <FormInput
+                id="cep"
+                label="CEP"
+                value={formData.cep}
+                onChange={handleCEPChange}
+                placeholder="00000-000"
+                maxLength={9}
+              />
             </div>
-          </div>
+          </FormSection>
 
           {/* Convênio */}
-          <div>
-            <h3 className="text-sm font-medium text-gray-700 mb-3">Convênio (opcional)</h3>
+          <FormSection title="Convênio (opcional)">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label htmlFor="convenioNome" className="block text-sm text-gray-600 mb-1">Nome do convênio</label>
-                <input
-                  id="convenioNome"
-                  type="text"
-                  value={formData.convenioNome}
-                  onChange={e => setFormData({ ...formData, convenioNome: e.target.value })}
-                  className="input-field"
-                />
-              </div>
-              <div>
-                <label htmlFor="convenioNumero" className="block text-sm text-gray-600 mb-1">Número da carteira</label>
-                <input
-                  id="convenioNumero"
-                  type="text"
-                  value={formData.convenioNumero}
-                  onChange={e => setFormData({ ...formData, convenioNumero: e.target.value })}
-                  className="input-field"
-                />
-              </div>
-              <div>
-                <label htmlFor="convenioValidade" className="block text-sm text-gray-600 mb-1">Validade</label>
-                <input
-                  id="convenioValidade"
-                  type="date"
-                  value={formData.convenioValidade}
-                  onChange={e => setFormData({ ...formData, convenioValidade: e.target.value })}
-                  className="input-field"
-                />
-              </div>
+              <FormInput
+                id="convenioNome"
+                label="Nome do convênio"
+                value={formData.convenioNome}
+                onChange={v => updateField('convenioNome', v)}
+              />
+              <FormInput
+                id="convenioNumero"
+                label="Número da carteira"
+                value={formData.convenioNumero}
+                onChange={v => updateField('convenioNumero', v)}
+              />
+              <FormInput
+                id="convenioValidade"
+                label="Validade"
+                type="date"
+                value={formData.convenioValidade}
+                onChange={v => updateField('convenioValidade', v)}
+              />
             </div>
-          </div>
+          </FormSection>
 
           {/* Histórico Médico */}
-          <div>
-            <h3 className="text-sm font-medium text-gray-700 mb-3">Histórico Médico</h3>
+          <FormSection title="Histórico Médico">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="alergias" className="block text-sm text-gray-600 mb-1">
-                  Alergias (separadas por vírgula)
-                </label>
-                <input
-                  id="alergias"
-                  type="text"
-                  value={formData.alergias}
-                  onChange={e => setFormData({ ...formData, alergias: e.target.value })}
-                  className="input-field"
-                  placeholder="Ex: Dipirona, Penicilina"
-                />
-              </div>
-              <div>
-                <label htmlFor="medicamentos" className="block text-sm text-gray-600 mb-1">
-                  Medicamentos em uso
-                </label>
-                <input
-                  id="medicamentos"
-                  type="text"
-                  value={formData.medicamentosEmUso}
-                  onChange={e => setFormData({ ...formData, medicamentosEmUso: e.target.value })}
-                  className="input-field"
-                  placeholder="Ex: Losartana 50mg, Metformina 850mg"
-                />
-              </div>
+              <FormInput
+                id="alergias"
+                label="Alergias (separadas por vírgula)"
+                value={formData.alergias}
+                onChange={v => updateField('alergias', v)}
+                placeholder="Ex: Dipirona, Penicilina"
+              />
+              <FormInput
+                id="medicamentos"
+                label="Medicamentos em uso"
+                value={formData.medicamentosEmUso}
+                onChange={v => updateField('medicamentosEmUso', v)}
+                placeholder="Ex: Losartana 50mg, Metformina 850mg"
+              />
               <div className="md:col-span-2">
-                <label htmlFor="historicoFamiliar" className="block text-sm text-gray-600 mb-1">
-                  Histórico familiar
-                </label>
-                <textarea
+                <FormTextarea
                   id="historicoFamiliar"
+                  label="Histórico familiar"
                   value={formData.historicoFamiliar}
-                  onChange={e => setFormData({ ...formData, historicoFamiliar: e.target.value })}
-                  className="input-field"
+                  onChange={v => updateField('historicoFamiliar', v)}
                   rows={2}
                 />
               </div>
               <div className="md:col-span-2">
-                <label htmlFor="observacoes" className="block text-sm text-gray-600 mb-1">
-                  Observações
-                </label>
-                <textarea
+                <FormTextarea
                   id="observacoes"
+                  label="Observações"
                   value={formData.observacoes}
-                  onChange={e => setFormData({ ...formData, observacoes: e.target.value })}
-                  className="input-field"
+                  onChange={v => updateField('observacoes', v)}
                   rows={2}
                 />
               </div>
             </div>
-          </div>
+          </FormSection>
 
           {/* Actions */}
           <div className="flex gap-3 justify-end pt-4 border-t border-gray-200">
@@ -480,6 +259,88 @@ export default function PatientModal({ patient, onClose, onSave, isLoading = fal
           </div>
         </form>
       </div>
+    </div>
+  );
+}
+
+// Sub-components
+interface FormSectionProps {
+  title: string;
+  children: React.ReactNode;
+}
+
+function FormSection({ title, children }: FormSectionProps) {
+  return (
+    <div>
+      <h3 className="text-sm font-medium text-gray-700 mb-3">{title}</h3>
+      {children}
+    </div>
+  );
+}
+
+interface FormInputProps {
+  id: string;
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  type?: string;
+  error?: string;
+  errorId?: string;
+  placeholder?: string;
+  maxLength?: number;
+}
+
+function FormInput({
+  id,
+  label,
+  value,
+  onChange,
+  type = 'text',
+  error,
+  errorId,
+  placeholder,
+  maxLength
+}: FormInputProps) {
+  return (
+    <div>
+      <label htmlFor={id} className="block text-sm text-gray-600 mb-1">{label}</label>
+      <input
+        id={id}
+        type={type}
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        className={`input-field ${error ? 'border-red-500 focus:ring-red-500' : ''}`}
+        placeholder={placeholder}
+        maxLength={maxLength}
+        aria-invalid={!!error}
+        aria-describedby={error && errorId ? errorId : undefined}
+      />
+      {error && errorId && (
+        <p id={errorId} className="mt-1 text-sm text-red-600">{error}</p>
+      )}
+    </div>
+  );
+}
+
+interface FormTextareaProps {
+  id: string;
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  rows?: number;
+}
+
+function FormTextarea({ id, label, value, onChange, rows = 3 }: FormTextareaProps) {
+  return (
+    <div>
+      <label htmlFor={id} className="block text-sm text-gray-600 mb-1">{label}</label>
+      <textarea
+        id={id}
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        className="input-field"
+        rows={rows}
+      />
     </div>
   );
 }

@@ -22,3 +22,7 @@ export { useAsync, useLoading, useMultipleLoading } from './useAsync';
 
 // Hooks de modal
 export { useModal, useConfirm, useMultipleModals } from './useModal';
+
+// Hooks de formulário específicos
+export { usePatientForm } from './usePatientForm';
+export type { PatientFormData, FormErrors } from './usePatientForm';
