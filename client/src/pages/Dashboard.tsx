@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useData } from '../contexts/DataContext';
 import { useAuth } from '../contexts/AuthContext';
 import { Link } from 'react-router-dom';
@@ -19,8 +20,14 @@ import { formatCurrency, translateAppointmentStatus, getStatusColor } from '../u
 export default function Dashboard() {
   const { getDashboardStats, getAppointmentsByDate, patients } = useData();
   const { user } = useAuth();
-  const stats = getDashboardStats();
-  const todayAppointments = getAppointmentsByDate(new Date().toISOString().split('T')[0]);
+
+  // Memoizar stats para evitar recálculo desnecessário
+  const stats = useMemo(() => getDashboardStats(), [getDashboardStats]);
+
+  // Memoizar consultas do dia
+  const todayAppointments = useMemo(() => {
+    return getAppointmentsByDate(new Date().toISOString().split('T')[0]);
+  }, [getAppointmentsByDate]);
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -103,11 +110,11 @@ export default function Dashboard() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-5">
         {statCards.map((stat, index) => (
           <div
             key={stat.label}
-            className="group relative bg-white rounded-2xl p-6 border border-slate-100 hover:border-slate-200 shadow-sm hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300 cursor-default overflow-hidden"
+            className="group relative bg-white rounded-xl md:rounded-2xl p-4 md:p-6 border border-slate-100 hover:border-slate-200 shadow-sm hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300 cursor-default overflow-hidden"
             style={{ animationDelay: `${index * 100}ms` }}
           >
             {/* Background gradient effect */}
@@ -116,20 +123,20 @@ export default function Dashboard() {
             {/* Decorative element */}
             <div className={`absolute -top-10 -right-10 w-32 h-32 bg-gradient-to-br ${stat.gradient} opacity-5 rounded-full group-hover:opacity-10 group-hover:scale-150 transition-all duration-500`} />
 
-            <div className="relative flex items-start justify-between">
-              <div className="space-y-3">
-                <div className={`w-14 h-14 bg-gradient-to-br ${stat.gradient} rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300`}>
-                  <stat.icon className="w-7 h-7 text-white" />
+            <div className="relative flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+              <div className="space-y-2 md:space-y-3">
+                <div className={`w-10 h-10 md:w-14 md:h-14 bg-gradient-to-br ${stat.gradient} rounded-xl md:rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300`}>
+                  <stat.icon className="w-5 h-5 md:w-7 md:h-7 text-white" />
                 </div>
                 <div>
-                  <p className="text-3xl font-bold text-slate-900 group-hover:text-slate-800 transition-colors">
+                  <p className="text-xl md:text-3xl font-bold text-slate-900 group-hover:text-slate-800 transition-colors">
                     {stat.value}
                   </p>
-                  <p className="text-sm text-slate-500 font-medium mt-0.5">{stat.label}</p>
+                  <p className="text-xs md:text-sm text-slate-500 font-medium mt-0.5 line-clamp-1">{stat.label}</p>
                 </div>
               </div>
 
-              <div className={`flex items-center gap-1.5 text-xs font-bold px-2.5 py-1.5 rounded-full ${stat.trendUp ? 'text-emerald-700 bg-emerald-100' : 'text-rose-700 bg-rose-100'}`}>
+              <div className={`hidden sm:flex items-center gap-1.5 text-xs font-bold px-2.5 py-1.5 rounded-full ${stat.trendUp ? 'text-emerald-700 bg-emerald-100' : 'text-rose-700 bg-rose-100'}`}>
                 <TrendingUp className={`w-3.5 h-3.5 ${!stat.trendUp && 'rotate-180'}`} />
                 {stat.trend}
               </div>

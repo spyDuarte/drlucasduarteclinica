@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useData } from '../contexts/DataContext';
+import { useToast } from '../components/Toast';
 import {
   ChevronLeft,
   ChevronRight,
@@ -7,7 +8,8 @@ import {
   User,
   X,
   Phone,
-  AlertCircle
+  AlertCircle,
+  Calendar
 } from 'lucide-react';
 import {
   formatDate,
@@ -22,6 +24,7 @@ const TIME_SLOTS = generateTimeSlots('08:00', '18:00', 30);
 
 export default function Agenda() {
   const { patients, addAppointment, updateAppointment, deleteAppointment, getAppointmentsByDate } = useData();
+  const { showToast } = useToast();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showModal, setShowModal] = useState(false);
   const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null);
@@ -61,42 +64,50 @@ export default function Agenda() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Agenda</h1>
-          <p className="text-gray-600">Gerencie as consultas do dia</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center shadow-lg shadow-primary-500/20">
+            <Calendar className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h1 className="text-xl md:text-2xl font-bold text-gray-900">Agenda</h1>
+            <p className="text-sm text-gray-600">Gerencie as consultas do dia</p>
+          </div>
         </div>
         <button
           onClick={() => handleOpenModal()}
-          className="btn-primary flex items-center gap-2"
+          className="btn-primary flex items-center justify-center gap-2 w-full sm:w-auto"
         >
           <Plus className="w-5 h-5" />
-          Nova Consulta
+          <span>Nova Consulta</span>
         </button>
       </div>
 
       {/* Date Navigation */}
       <div className="card">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-2">
           <button
             onClick={() => navigateDay(-1)}
-            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg"
+            className="p-2 md:p-3 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-xl transition-colors"
+            aria-label="Dia anterior"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
 
-          <div className="text-center">
-            <p className="text-sm text-gray-500">{formatRelativeDate(selectedDate)}</p>
-            <p className="text-xl font-semibold text-gray-900">
-              {formatDate(selectedDate, "EEEE, dd 'de' MMMM 'de' yyyy")}
+          <div className="text-center flex-1 min-w-0">
+            <p className="text-xs md:text-sm text-primary-600 font-medium">{formatRelativeDate(selectedDate)}</p>
+            <p className="text-sm md:text-xl font-semibold text-gray-900 truncate">
+              <span className="hidden sm:inline">{formatDate(selectedDate, "EEEE, dd 'de' MMMM 'de' yyyy")}</span>
+              <span className="sm:hidden">{formatDate(selectedDate, "EEE, dd/MM/yyyy")}</span>
             </p>
           </div>
 
           <button
             onClick={() => navigateDay(1)}
-            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg"
+            className="p-2 md:p-3 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-xl transition-colors"
+            aria-label="Próximo dia"
           >
             <ChevronRight className="w-5 h-5" />
           </button>
@@ -111,13 +122,14 @@ export default function Agenda() {
 
       {/* Schedule Grid */}
       <div className="card p-0 overflow-hidden">
-        <div className="bg-gray-50 border-b border-gray-200 px-4 py-3">
-          <h2 className="font-medium text-gray-900">
-            {dayAppointments.length} consulta(s) agendada(s)
+        <div className="bg-gradient-to-r from-gray-50 to-gray-50/50 border-b border-gray-200 px-4 py-3">
+          <h2 className="font-medium text-gray-900 flex items-center gap-2">
+            <span className="w-2 h-2 bg-primary-500 rounded-full"></span>
+            {dayAppointments.length} consulta{dayAppointments.length !== 1 ? 's' : ''} agendada{dayAppointments.length !== 1 ? 's' : ''}
           </h2>
         </div>
 
-        <div className="divide-y divide-gray-100">
+        <div className="divide-y divide-gray-100 max-h-[60vh] overflow-y-auto">
           {TIME_SLOTS.map(time => {
             const appointment = getAppointmentAtTime(time);
             const patient = appointment ? patients.find(p => p.id === appointment.patientId) : null;
@@ -130,31 +142,31 @@ export default function Agenda() {
                 }`}
               >
                 {/* Time */}
-                <div className="w-20 p-4 border-r border-gray-100 flex items-center justify-center">
-                  <span className="text-sm font-medium text-gray-500">{time}</span>
+                <div className="w-14 md:w-20 p-2 md:p-4 border-r border-gray-100 flex items-center justify-center flex-shrink-0">
+                  <span className="text-xs md:text-sm font-medium text-gray-500">{time}</span>
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 p-4">
+                <div className="flex-1 p-2 md:p-4 min-w-0">
                   {appointment ? (
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                       <div
-                        className="flex items-center gap-4 flex-1 cursor-pointer"
+                        className="flex items-center gap-2 md:gap-4 flex-1 cursor-pointer min-w-0"
                         onClick={() => handleOpenModal(appointment)}
                       >
-                        <div className="w-10 h-10 bg-sky-100 rounded-full flex items-center justify-center">
-                          <User className="w-5 h-5 text-sky-600" />
+                        <div className="w-8 h-8 md:w-10 md:h-10 bg-sky-100 rounded-full flex items-center justify-center flex-shrink-0">
+                          <User className="w-4 h-4 md:w-5 md:h-5 text-sky-600" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium text-gray-900">
+                          <p className="font-medium text-gray-900 text-sm md:text-base truncate">
                             {patient?.nome || 'Paciente não encontrado'}
                           </p>
-                          <div className="flex items-center gap-2 text-sm text-gray-500">
-                            <span>{translateAppointmentType(appointment.tipo)}</span>
+                          <div className="flex items-center gap-1 md:gap-2 text-xs md:text-sm text-gray-500">
+                            <span className="truncate">{translateAppointmentType(appointment.tipo)}</span>
                             {appointment.motivo && (
                               <>
-                                <span>•</span>
-                                <span className="truncate">{appointment.motivo}</span>
+                                <span className="hidden sm:inline">•</span>
+                                <span className="hidden sm:inline truncate">{appointment.motivo}</span>
                               </>
                             )}
                           </div>
@@ -162,11 +174,11 @@ export default function Agenda() {
                       </div>
 
                       {/* Status Actions */}
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 ml-10 sm:ml-0">
                         <select
                           value={appointment.status}
                           onChange={e => handleStatusChange(appointment.id, e.target.value as AppointmentStatus)}
-                          className={`status-badge ${getStatusColor(appointment.status)} border-0 cursor-pointer`}
+                          className={`status-badge ${getStatusColor(appointment.status)} border-0 cursor-pointer text-xs md:text-sm`}
                         >
                           <option value="agendada">Agendada</option>
                           <option value="confirmada">Confirmada</option>
@@ -181,10 +193,10 @@ export default function Agenda() {
                   ) : (
                     <button
                       onClick={() => handleOpenModal(undefined, time)}
-                      className="w-full h-full flex items-center justify-center text-gray-400 hover:text-sky-600 transition-colors"
+                      className="w-full h-full flex items-center justify-center text-gray-400 hover:text-sky-600 transition-colors py-1"
                     >
-                      <Plus className="w-5 h-5" />
-                      <span className="ml-2 text-sm">Agendar</span>
+                      <Plus className="w-4 h-4 md:w-5 md:h-5" />
+                      <span className="ml-1 md:ml-2 text-xs md:text-sm">Agendar</span>
                     </button>
                   )}
                 </div>
@@ -203,15 +215,22 @@ export default function Agenda() {
           patients={patients}
           onClose={handleCloseModal}
           onSave={(data) => {
-            if (editingAppointment) {
-              updateAppointment(editingAppointment.id, data);
-            } else {
-              addAppointment(data as Omit<Appointment, 'id' | 'createdAt' | 'updatedAt'>);
+            try {
+              if (editingAppointment) {
+                updateAppointment(editingAppointment.id, data);
+                showToast('Consulta atualizada com sucesso!', 'success');
+              } else {
+                addAppointment(data as Omit<Appointment, 'id' | 'createdAt' | 'updatedAt'>);
+                showToast('Consulta agendada com sucesso!', 'success');
+              }
+              handleCloseModal();
+            } catch (error) {
+              showToast(error instanceof Error ? error.message : 'Erro ao salvar consulta', 'error');
             }
-            handleCloseModal();
           }}
           onDelete={editingAppointment ? () => {
             deleteAppointment(editingAppointment.id);
+            showToast('Consulta excluída com sucesso!', 'success');
             handleCloseModal();
           } : undefined}
         />

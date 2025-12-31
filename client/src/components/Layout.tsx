@@ -1,10 +1,38 @@
-import { useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import { useState, useEffect, useCallback } from 'react';
+import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Header from './Header';
 
 export default function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const location = useLocation();
+
+  // Fechar sidebar ao mudar de rota (mobile)
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [location.pathname]);
+
+  // Prevenir scroll do body quando sidebar estiver aberto (mobile)
+  useEffect(() => {
+    if (sidebarOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [sidebarOpen]);
+
+  // Handler com useCallback para evitar re-renders
+  const handleOpenSidebar = useCallback(() => {
+    setSidebarOpen(true);
+  }, []);
+
+  const handleCloseSidebar = useCallback(() => {
+    setSidebarOpen(false);
+  }, []);
 
   return (
     <div className="flex h-screen overflow-hidden bg-gradient-to-br from-slate-50 via-slate-50 to-white">
@@ -32,21 +60,21 @@ export default function Layout() {
       </div>
 
       {/* Mobile sidebar backdrop with blur */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-slate-900/50 backdrop-blur-md z-40 lg:hidden transition-all duration-300 animate-fade-in"
-          onClick={() => setSidebarOpen(false)}
-          aria-hidden="true"
-        />
-      )}
+      <div
+        className={`fixed inset-0 bg-slate-900/50 backdrop-blur-md z-40 lg:hidden transition-all duration-300 ${
+          sidebarOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        }`}
+        onClick={handleCloseSidebar}
+        aria-hidden="true"
+      />
 
       {/* Sidebar */}
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <Sidebar isOpen={sidebarOpen} onClose={handleCloseSidebar} />
 
       {/* Main content */}
       <div className="flex-1 flex flex-col overflow-hidden relative z-10">
-        <Header onMenuClick={() => setSidebarOpen(true)} />
-        <main className="flex-1 overflow-y-auto scroll-smooth">
+        <Header onMenuClick={handleOpenSidebar} />
+        <main className="flex-1 overflow-y-auto scroll-smooth overscroll-contain">
           <div className="p-4 md:p-6 lg:p-8 max-w-[1600px] mx-auto animate-fade-in">
             <Outlet />
           </div>
