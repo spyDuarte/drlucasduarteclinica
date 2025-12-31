@@ -76,20 +76,80 @@ export interface Appointment {
 
 // Prontuário Eletrônico baseado em SOAP (Subjetivo, Objetivo, Avaliação, Plano)
 // Metodologia amplamente aceita na literatura médica
+// Referência: CFM Resolução 1638/2002, HL7 FHIR R4, SBIS
+
+export type TipoAtendimento =
+  | 'consulta'
+  | 'retorno'
+  | 'urgencia'
+  | 'emergencia'
+  | 'teleconsulta'
+  | 'procedimento'
+  | 'avaliacao_pre_operatoria'
+  | 'pos_operatorio';
+
+export type EstadoGeral =
+  | 'bom'
+  | 'regular'
+  | 'ruim'
+  | 'grave'
+  | 'gravissimo';
+
+export type NivelConsciencia =
+  | 'consciente_orientado'
+  | 'consciente_desorientado'
+  | 'sonolento'
+  | 'torporoso'
+  | 'comatoso';
+
 export interface MedicalRecord {
   id: string;
   patientId: string;
   appointmentId?: string;
   data: string;
+
+  // Informações gerais do atendimento
+  tipoAtendimento?: TipoAtendimento;
+  localAtendimento?: string;
+  medicoResponsavel?: string;
+  crmMedico?: string;
+  duracaoConsulta?: number; // em minutos
+
   // SOAP Notes - Método padronizado de documentação clínica
   subjetivo: {
     queixaPrincipal: string;
+    duracaoSintomas?: string;
     historicoDoencaAtual: string;
+    fatoresMelhora?: string;
+    fatoresPiora?: string;
+    sintomasAssociados?: string;
+    tratamentosPrevios?: string;
+    impactoQualidadeVida?: string;
     revisaoSistemas?: string;
+    // Anamnese complementar
+    habitosVida?: {
+      tabagismo?: string;
+      etilismo?: string;
+      atividadeFisica?: string;
+      alimentacao?: string;
+      sono?: string;
+      estresse?: string;
+    };
+    historicoPatologicoPregrasso?: string;
+    cirurgiasAnteriores?: string[];
+    internacoesPrevias?: string;
+    vacinacao?: string;
   };
+
   objetivo: {
+    estadoGeral?: EstadoGeral;
+    nivelConsciencia?: NivelConsciencia;
+    escalaGlasgow?: number;
+
     sinaisVitais: {
       pressaoArterial?: string;
+      pressaoArterialDeitado?: string;
+      pressaoArterialEmPe?: string;
       frequenciaCardiaca?: number;
       frequenciaRespiratoria?: number;
       temperatura?: number;
@@ -97,23 +157,103 @@ export interface MedicalRecord {
       peso?: number;
       altura?: number;
       imc?: number;
+      circunferenciaAbdominal?: number;
+      circunferenciaPescoco?: number;
+      glicemiaCapilar?: number;
+      escalaDor?: number; // EVA 0-10
     };
+
+    // Exame físico estruturado por sistemas
+    exameFisicoGeral?: string;
     exameFisico: string;
+    exameFisicoDetalhado?: {
+      cabecaPescoco?: string;
+      olhos?: string;
+      ouvidos?: string;
+      nariz?: string;
+      boca?: string;
+      tireoide?: string;
+      cardiovascular?: string;
+      pulmonar?: string;
+      abdome?: string;
+      genitourinario?: string;
+      musculoesqueletico?: string;
+      neurologico?: string;
+      pele?: string;
+      extremidades?: string;
+      linfatico?: string;
+      psiquiatrico?: string;
+    };
+
     examesComplementares?: string;
+    resultadosExames?: {
+      nome: string;
+      data: string;
+      resultado: string;
+      valorReferencia?: string;
+      observacao?: string;
+    }[];
   };
+
   avaliacao: {
     hipotesesDiagnosticas: string[];
-    cid10?: string[]; // Classificação Internacional de Doenças
+    diagnosticoPrincipal?: string;
+    diagnosticosSecundarios?: string[];
+    cid10?: string[]; // Classificação Internacional de Doenças - OBRIGATÓRIO
+    diagnosticoDiferencial?: string[];
+    gravidade?: 'leve' | 'moderada' | 'grave' | 'critica';
+    estadiamento?: string;
+    prognostico?: string;
+    riscoCircurgico?: string;
+    classificacaoRisco?: string; // Manchester, ESI, etc.
   };
+
   plano: {
     conduta: string;
     prescricoes?: Prescription[];
+    prescricoesNaoMedicamentosas?: string[];
     solicitacaoExames?: string[];
-    encaminhamentos?: string[];
+    procedimentosRealizados?: {
+      nome: string;
+      descricao?: string;
+      materiaisUtilizados?: string;
+      intercorrencias?: string;
+    }[];
+    encaminhamentos?: {
+      especialidade: string;
+      motivo: string;
+      urgencia?: 'eletivo' | 'urgente' | 'emergencia';
+      profissionalDestino?: string;
+    }[];
+
+    // Atestados e documentos
+    atestadoEmitido?: boolean;
+    tipoAtestado?: 'atestado_medico' | 'declaracao_comparecimento' | 'laudo';
+    diasAfastamento?: number;
+
+    // Acompanhamento
     retorno?: string;
+    dataRetorno?: string;
+    metasTerapeuticas?: string[];
+    alertasCuidados?: string[];
     orientacoes?: string;
+    orientacoesAlimentares?: string;
+    restricoesAtividades?: string;
+
+    // Plano terapêutico
+    objetivosTratamento?: string;
+    duracaoEstimadaTratamento?: string;
+    criteriosAlta?: string;
   };
+
+  // Informações adicionais
+  intercorrencias?: string;
+  observacoesEnfermagem?: string;
+  consentimentoInformado?: boolean;
+  termoConsentimento?: string;
+
   assinaturaDigital?: string;
+  dataHoraAssinatura?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -126,6 +266,8 @@ export interface Prescription {
   posologia: string;
   quantidade: string;
   duracao?: string;
+  viaAdministracao?: string;
+  usoControlado?: boolean;
   observacoes?: string;
 }
 
