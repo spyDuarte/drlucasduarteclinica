@@ -1,6 +1,6 @@
 import { AlertTriangle, AlertCircle, Info, Activity, Heart, Wind, Thermometer, Droplets } from 'lucide-react';
 import { validateVitalSign, validateAllVitalSigns, calculateIMC, interpretBloodPressure } from '../utils/clinicalValidations';
-import { useEffect, useState } from 'react';
+import { useMemo, useEffect } from 'react';
 
 interface VitalSignsValidatorProps {
   vitalSigns: {
@@ -18,12 +18,26 @@ interface VitalSignsValidatorProps {
 }
 
 export function VitalSignsValidator({ vitalSigns, onAlertGenerated }: VitalSignsValidatorProps) {
-  const [alerts, setAlerts] = useState<Array<{ field: string; message: string; severity: string }>>([]);
-  const [imcInfo, setImcInfo] = useState<{ imc: number; classification: string; risk: string } | null>(null);
-  const [bpInfo, setBpInfo] = useState<{ classification: string; severity: string; recommendations: string[] } | null>(null);
+  const imcInfo = useMemo(() => {
+    if (vitalSigns.peso && vitalSigns.altura) {
+      return calculateIMC(vitalSigns.peso, vitalSigns.altura);
+    }
+    return null;
+  }, [vitalSigns.peso, vitalSigns.altura]);
 
-  useEffect(() => {
-    // Valida todos os sinais vitais
+  const bpInfo = useMemo(() => {
+    if (vitalSigns.pressaoArterial) {
+      const paMatch = vitalSigns.pressaoArterial.match(/(\d+)\s*[x/]\s*(\d+)/);
+      if (paMatch) {
+        const systolic = parseInt(paMatch[1]);
+        const diastolic = parseInt(paMatch[2]);
+        return interpretBloodPressure(systolic, diastolic);
+      }
+    }
+    return null;
+  }, [vitalSigns.pressaoArterial]);
+
+  const alerts = useMemo(() => {
     const validation = validateAllVitalSigns(vitalSigns);
 
     const newAlerts: Array<{ field: string; message: string; severity: string }> = [
@@ -31,45 +45,30 @@ export function VitalSignsValidator({ vitalSigns, onAlertGenerated }: VitalSigns
       ...validation.warnings.map(w => ({ ...w, severity: 'warning' }))
     ];
 
-    // Calcula IMC se peso e altura estiverem disponíveis
-    if (vitalSigns.peso && vitalSigns.altura) {
-      const imc = calculateIMC(vitalSigns.peso, vitalSigns.altura);
-      setImcInfo(imc);
-
-      if (imc.risk === 'aumentado' || imc.risk === 'alto' || imc.risk === 'muito_alto') {
-        newAlerts.push({
-          field: 'imc',
-          message: `IMC ${imc.imc} - ${imc.classification} (Risco ${imc.risk.replace('_', ' ')})`,
-          severity: imc.risk === 'muito_alto' ? 'warning' : 'info'
-        });
-      }
+    if (imcInfo && (imcInfo.risk === 'aumentado' || imcInfo.risk === 'alto' || imcInfo.risk === 'muito_alto')) {
+      newAlerts.push({
+        field: 'imc',
+        message: `IMC ${imcInfo.imc} - ${imcInfo.classification} (Risco ${imcInfo.risk.replace('_', ' ')})`,
+        severity: imcInfo.risk === 'muito_alto' ? 'warning' : 'info'
+      });
     }
 
-    // Interpreta pressão arterial
-    if (vitalSigns.pressaoArterial) {
-      const paMatch = vitalSigns.pressaoArterial.match(/(\d+)\s*[x\/]\s*(\d+)/);
-      if (paMatch) {
-        const systolic = parseInt(paMatch[1]);
-        const diastolic = parseInt(paMatch[2]);
-        const bpInterpretation = interpretBloodPressure(systolic, diastolic);
-        setBpInfo(bpInterpretation);
-
-        if (bpInterpretation.severity !== 'normal') {
-          newAlerts.push({
-            field: 'pressaoArterial',
-            message: `PA: ${bpInterpretation.classification}`,
-            severity: bpInterpretation.severity
-          });
-        }
-      }
+    if (bpInfo && bpInfo.severity !== 'normal') {
+      newAlerts.push({
+        field: 'pressaoArterial',
+        message: `PA: ${bpInfo.classification}`,
+        severity: bpInfo.severity
+      });
     }
 
-    setAlerts(newAlerts);
+    return newAlerts;
+  }, [vitalSigns, imcInfo, bpInfo]);
 
-    if (onAlertGenerated && newAlerts.length > 0) {
-      onAlertGenerated(newAlerts);
+  useEffect(() => {
+    if (onAlertGenerated && alerts.length > 0) {
+      onAlertGenerated(alerts);
     }
-  }, [vitalSigns, onAlertGenerated]);
+  }, [alerts, onAlertGenerated]);
 
   if (alerts.length === 0 && !imcInfo && !bpInfo) {
     return null;
