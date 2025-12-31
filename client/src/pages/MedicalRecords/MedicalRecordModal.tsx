@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
   Stethoscope,
   X,
@@ -6,20 +7,27 @@ import {
   ChevronUp,
   ChevronDown,
   ClipboardList,
-  FileCheck
+  FileCheck,
+  Paperclip
 } from 'lucide-react';
-import type { MedicalRecord } from '../../types';
+import type { MedicalRecord, MedicalRecordAttachment } from '../../types';
 import { useMedicalRecordForm, type FormErrors } from './useMedicalRecordForm';
 import type { PrescriptionData } from './types';
+import { VitalSignsValidator } from '../../components/VitalSignsValidator';
+import { DrugInteractionChecker } from '../../components/DrugInteractionChecker';
+import { OrientationTemplateSelector } from '../../components/OrientationTemplateSelector';
+import { MedicalAttachments } from '../../components/MedicalAttachments';
+import { generateId } from '../../utils/helpers';
 
 interface MedicalRecordModalProps {
   patientId: string;
+  patient?: { medicamentosEmUso?: string[] };
   record: MedicalRecord | null;
   onClose: () => void;
   onSave: (data: Partial<MedicalRecord>) => void;
 }
 
-export function MedicalRecordModal({ patientId, record, onClose, onSave }: MedicalRecordModalProps) {
+export function MedicalRecordModal({ patientId, patient, record, onClose, onSave }: MedicalRecordModalProps) {
   const {
     formData,
     updateField,
@@ -34,6 +42,26 @@ export function MedicalRecordModal({ patientId, record, onClose, onSave }: Medic
     validateForm
   } = useMedicalRecordForm(record);
 
+  // Estado para anexos
+  const [attachments, setAttachments] = useState<MedicalRecordAttachment[]>(
+    record?.attachments || []
+  );
+
+  // Handlers para anexos
+  const handleAddAttachment = (attachment: Omit<MedicalRecordAttachment, 'id' | 'medicalRecordId' | 'uploadedAt'>) => {
+    const newAttachment: MedicalRecordAttachment = {
+      ...attachment,
+      id: generateId(),
+      medicalRecordId: record?.id || 'temp',
+      uploadedAt: new Date().toISOString()
+    };
+    setAttachments(prev => [...prev, newAttachment]);
+  };
+
+  const handleRemoveAttachment = (id: string) => {
+    setAttachments(prev => prev.filter(a => a.id !== id));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -46,7 +74,27 @@ export function MedicalRecordModal({ patientId, record, onClose, onSave }: Medic
       return;
     }
 
-    onSave(buildRecordData(patientId));
+    const recordData = buildRecordData(patientId);
+    const now = new Date().toISOString();
+
+    // Adiciona anexos
+    const finalData = {
+      ...recordData,
+      attachments,
+      // Adiciona auditoria
+      audit: record?.audit
+        ? {
+            ...record.audit,
+            lastEditedBy: 'Usuário Atual', // TODO: pegar do contexto de autenticação
+            lastEditedAt: now,
+          }
+        : {
+            createdBy: 'Usuário Atual', // TODO: pegar do contexto de autenticação
+            createdAt: now,
+          },
+    };
+
+    onSave(finalData);
   };
 
   return (
@@ -108,6 +156,14 @@ export function MedicalRecordModal({ patientId, record, onClose, onSave }: Medic
             addPrescription={addPrescription}
             removePrescription={removePrescription}
             formErrors={formErrors}
+            patient={patient}
+          />
+
+          {/* Anexos e Documentos */}
+          <AttachmentsSection
+            attachments={attachments}
+            onAdd={handleAddAttachment}
+            onRemove={handleRemoveAttachment}
           />
 
           {/* Actions */}
@@ -426,6 +482,21 @@ function ObjectiveSection({ formData, updateField, expandedSections, toggleSecti
           </div>
         </div>
 
+        {/* Validação de Sinais Vitais */}
+        <VitalSignsValidator
+          vitalSigns={{
+            pressaoArterial: formData.pressaoArterial,
+            frequenciaCardiaca: formData.frequenciaCardiaca ? Number(formData.frequenciaCardiaca) : undefined,
+            frequenciaRespiratoria: formData.frequenciaRespiratoria ? Number(formData.frequenciaRespiratoria) : undefined,
+            temperatura: formData.temperatura ? Number(formData.temperatura) : undefined,
+            saturacaoO2: formData.saturacaoO2 ? Number(formData.saturacaoO2) : undefined,
+            peso: formData.peso ? Number(formData.peso) : undefined,
+            altura: formData.altura ? Number(formData.altura) : undefined,
+            glicemiaCapilar: formData.glicemiaCapilar ? Number(formData.glicemiaCapilar) : undefined,
+            escalaDor: formData.escalaDor ? Number(formData.escalaDor) : undefined,
+          }}
+        />
+
         <div className={formErrors.exameFisico ? 'field-error' : ''}>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Exame físico geral <span className="text-red-500">*</span>
@@ -545,9 +616,10 @@ interface PlanSectionProps extends ExpandableSectionProps {
   addPrescription: () => void;
   removePrescription: (index: number) => void;
   formErrors: FormErrors;
+  patient?: { medicamentosEmUso?: string[] };
 }
 
-function PlanSection({ formData, updateField, expandedSections, toggleSection, newPrescription, setNewPrescription, addPrescription, removePrescription, formErrors }: PlanSectionProps) {
+function PlanSection({ formData, updateField, expandedSections, toggleSection, newPrescription, setNewPrescription, addPrescription, removePrescription, formErrors, patient }: PlanSectionProps) {
   return (
     <div className="soap-section-p rounded-xl p-5">
       <div className="flex items-center gap-3 mb-4">
@@ -582,6 +654,24 @@ function PlanSection({ formData, updateField, expandedSections, toggleSection, n
           addPrescription={addPrescription}
           removePrescription={removePrescription}
         />
+
+        {/* Verificação de Interações Medicamentosas */}
+        {formData.prescricoes.length > 0 && (
+          <DrugInteractionChecker
+            prescriptions={formData.prescricoes.map(p => ({
+              id: generateId(),
+              medicamento: p.medicamento,
+              concentracao: p.concentracao,
+              formaFarmaceutica: p.formaFarmaceutica,
+              posologia: p.posologia,
+              quantidade: p.quantidade,
+              duracao: p.duracao,
+              viaAdministracao: p.viaAdministracao,
+              usoControlado: p.usoControlado,
+            }))}
+            patientMedications={patient?.medicamentosEmUso || []}
+          />
+        )}
 
         <InputField label="Prescrições não medicamentosas (separadas por vírgula)" value={formData.prescricoesNaoMedicamentosas} onChange={v => updateField('prescricoesNaoMedicamentosas', v)} placeholder="Repouso, dieta, fisioterapia, etc." isSmall={false} />
 
@@ -648,12 +738,21 @@ function PlanSection({ formData, updateField, expandedSections, toggleSection, n
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Orientações ao paciente</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Orientações ao paciente</label>
+
+          {/* Seletor de Templates */}
+          <OrientationTemplateSelector
+            currentCIDs={formData.cid10.split(',').map(c => c.trim()).filter(Boolean)}
+            currentOrientation={formData.orientacoes}
+            onSelect={(content) => updateField('orientacoes', content)}
+            onAppend={(content) => updateField('orientacoes', formData.orientacoes + content)}
+          />
+
           <textarea
             value={formData.orientacoes}
             onChange={e => updateField('orientacoes', e.target.value)}
-            className="input-field"
-            rows={2}
+            className="input-field mt-2"
+            rows={4}
             placeholder="Instruções gerais para o paciente..."
           />
         </div>
@@ -727,6 +826,30 @@ function PlanSection({ formData, updateField, expandedSections, toggleSection, n
           </span>
         </label>
       </div>
+    </div>
+  );
+}
+
+// Anexos Section
+interface AttachmentsSectionProps {
+  attachments: MedicalRecordAttachment[];
+  onAdd: (attachment: Omit<MedicalRecordAttachment, 'id' | 'medicalRecordId' | 'uploadedAt'>) => void;
+  onRemove: (id: string) => void;
+}
+
+function AttachmentsSection({ attachments, onAdd, onRemove }: AttachmentsSectionProps) {
+  return (
+    <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-5 border border-indigo-200">
+      <div className="flex items-center gap-3 mb-4">
+        <span className="w-10 h-10 bg-indigo-500 text-white rounded-xl flex items-center justify-center text-lg font-bold shadow-lg shadow-indigo-500/20">
+          <Paperclip className="w-5 h-5" />
+        </span>
+        <div>
+          <h3 className="text-lg font-bold text-indigo-700">Anexos e Documentos</h3>
+          <p className="text-xs text-indigo-600/70">Exames, laudos, imagens</p>
+        </div>
+      </div>
+      <MedicalAttachments attachments={attachments} onAdd={onAdd} onRemove={onRemove} />
     </div>
   );
 }
