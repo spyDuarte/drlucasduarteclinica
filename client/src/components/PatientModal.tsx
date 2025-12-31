@@ -30,12 +30,12 @@ export default function PatientModal({ patient, onClose, onSave, isLoading = fal
 
   return (
     <div
-      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+      className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[60] p-4"
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
     >
-      <div className="bg-white rounded-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-xl w-full max-w-3xl max-h-[85vh] sm:max-h-[90vh] overflow-y-auto animate-scale-in">
         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
           <h2 id="modal-title" className="text-xl font-semibold text-gray-900">
             {patient ? 'Editar Paciente' : 'Novo Paciente'}

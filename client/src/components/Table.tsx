@@ -10,9 +10,9 @@ interface TableProps {
 
 export function TableContainer({ children, className = '' }: TableProps) {
   return (
-    <div className={`overflow-x-auto -mx-4 md:mx-0 ${className}`}>
+    <div className={`overflow-x-auto ${className}`}>
       <div className="inline-block min-w-full align-middle">
-        <div className="overflow-hidden border border-gray-200 md:rounded-lg">
+        <div className="overflow-hidden border border-gray-200 rounded-lg">
           {children}
         </div>
       </div>

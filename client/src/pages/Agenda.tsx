@@ -129,7 +129,7 @@ export default function Agenda() {
           </h2>
         </div>
 
-        <div className="divide-y divide-gray-100 max-h-[60vh] overflow-y-auto">
+        <div className="divide-y divide-gray-100 max-h-[50vh] sm:max-h-[60vh] lg:max-h-[65vh] overflow-y-auto">
           {TIME_SLOTS.map(time => {
             const appointment = getAppointmentAtTime(time);
             const patient = appointment ? patients.find(p => p.id === appointment.patientId) : null;
@@ -322,8 +322,8 @@ function AppointmentModal({
   const selectedPatient = patients.find(p => p.id === formData.patientId);
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
+      <div className="bg-white rounded-xl w-full max-w-lg max-h-[85vh] sm:max-h-[90vh] overflow-y-auto animate-scale-in">
         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
           <h2 className="text-xl font-semibold text-gray-900">
             {appointment ? 'Editar Consulta' : 'Nova Consulta'}
@@ -370,7 +370,7 @@ function AppointmentModal({
           </div>
 
           {/* Date and Time */}
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Data *

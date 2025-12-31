@@ -121,33 +121,33 @@ export default function Header({ onMenuClick }: HeaderProps) {
       {/* Mobile menu button */}
       <button
         onClick={onMenuClick}
-        className="lg:hidden p-2.5 hover:bg-slate-100 rounded-xl transition-all duration-200 active:scale-95"
+        className="lg:hidden p-2.5 hover:bg-slate-100 rounded-xl transition-all duration-200 active:scale-95 flex-shrink-0"
         aria-label="Abrir menu"
       >
         <Menu className="w-6 h-6 text-slate-600" />
       </button>
 
       {/* Search */}
-      <div className="flex-1 max-w-xl hidden md:block" ref={searchRef}>
+      <div className="flex-1 max-w-xl mx-2 md:mx-0" ref={searchRef}>
         <div className="relative input-icon-wrapper group">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 transition-all duration-200 group-focus-within:text-primary-500 group-focus-within:scale-110 z-10" />
+          <Search className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-slate-400 transition-all duration-200 group-focus-within:text-primary-500 group-focus-within:scale-110 z-10" />
           <input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             onFocus={() => setIsSearchFocused(true)}
-            placeholder="Buscar pacientes..."
-            className="search-input w-full pl-12 pr-24 py-3 bg-slate-50/80 border border-slate-200/80 rounded-2xl focus:ring-4 focus:ring-primary-500/10 focus:border-primary-400 focus:bg-white outline-none transition-all duration-200 text-sm font-medium placeholder:text-slate-400"
+            placeholder="Buscar..."
+            className="search-input w-full pl-9 md:pl-12 pr-10 md:pr-24 py-2.5 md:py-3 bg-slate-50/80 border border-slate-200/80 rounded-xl md:rounded-2xl focus:ring-4 focus:ring-primary-500/10 focus:border-primary-400 focus:bg-white outline-none transition-all duration-200 text-sm font-medium placeholder:text-slate-400"
           />
           {searchTerm ? (
             <button
               onClick={() => setSearchTerm('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 hover:bg-slate-200 rounded-lg transition-colors"
+              className="absolute right-2 md:right-3 top-1/2 -translate-y-1/2 p-1.5 hover:bg-slate-200 rounded-lg transition-colors"
             >
               <X className="w-4 h-4 text-slate-400" />
             </button>
           ) : (
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-xs opacity-60 group-focus-within:opacity-100 transition-opacity">
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 hidden md:flex items-center gap-1.5 text-xs opacity-60 group-focus-within:opacity-100 transition-opacity">
               <kbd className="px-2 py-1 bg-slate-100 rounded-lg text-slate-500 font-medium flex items-center gap-0.5 border border-slate-200/50">
                 <Command className="w-3 h-3" />
                 <span>K</span>
@@ -157,21 +157,21 @@ export default function Header({ onMenuClick }: HeaderProps) {
 
           {/* Search Results Dropdown */}
           {isSearchFocused && searchTerm && (
-            <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden z-50 animate-fade-in">
+            <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden z-[70] animate-fade-in max-h-[60vh] overflow-y-auto">
               {searchResults.length > 0 ? (
                 <ul className="py-2">
                   {searchResults.map(patient => (
                     <li key={patient.id}>
                       <button
                         onClick={() => handlePatientSelect(patient.id)}
-                        className="w-full flex items-center gap-3 px-4 py-3 hover:bg-slate-50 transition-colors text-left"
+                        className="w-full flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2.5 md:py-3 hover:bg-slate-50 transition-colors text-left"
                       >
-                        <div className="w-10 h-10 bg-gradient-to-br from-primary-100 to-primary-50 rounded-xl flex items-center justify-center">
-                          <User className="w-5 h-5 text-primary-600" />
+                        <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-primary-100 to-primary-50 rounded-lg md:rounded-xl flex items-center justify-center flex-shrink-0">
+                          <User className="w-4 h-4 md:w-5 md:h-5 text-primary-600" />
                         </div>
-                        <div>
-                          <p className="font-semibold text-slate-900">{patient.nome}</p>
-                          <p className="text-sm text-slate-500">{patient.telefone}</p>
+                        <div className="min-w-0 flex-1">
+                          <p className="font-semibold text-slate-900 text-sm md:text-base truncate">{patient.nome}</p>
+                          <p className="text-xs md:text-sm text-slate-500 truncate">{patient.telefone}</p>
                         </div>
                       </button>
                     </li>
@@ -182,7 +182,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
                   <p className="text-sm">Nenhum paciente encontrado</p>
                 </div>
               )}
-              <div className="border-t border-slate-100 px-4 py-2 bg-slate-50">
+              <div className="border-t border-slate-100 px-3 md:px-4 py-2 bg-slate-50">
                 <Link
                   to="/pacientes"
                   onClick={() => setIsSearchFocused(false)}
@@ -197,7 +197,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
       </div>
 
       {/* Right side */}
-      <div className="flex items-center gap-2 md:gap-3">
+      <div className="flex items-center gap-1.5 md:gap-2 lg:gap-3 flex-shrink-0">
         {/* Date Badge - Hidden on mobile */}
         <div className="hidden xl:flex items-center gap-3 px-4 py-2 bg-gradient-to-r from-primary-50 to-primary-100/50 rounded-2xl border border-primary-100/60">
           <div className="w-8 h-8 bg-white rounded-xl flex items-center justify-center shadow-sm">
