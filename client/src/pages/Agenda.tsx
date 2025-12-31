@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useData } from '../contexts/DataContext';
 import { useToast } from '../components/Toast';
 import {
@@ -9,7 +10,8 @@ import {
   X,
   Phone,
   AlertCircle,
-  Calendar
+  Calendar,
+  FileText
 } from 'lucide-react';
 import {
   formatDate,
@@ -25,10 +27,16 @@ const TIME_SLOTS = generateTimeSlots('08:00', '18:00', 30);
 export default function Agenda() {
   const { patients, addAppointment, updateAppointment, deleteAppointment, getAppointmentsByDate } = useData();
   const { showToast } = useToast();
+  const navigate = useNavigate();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showModal, setShowModal] = useState(false);
   const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null);
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string | null>(null);
+
+  // Função para navegar para o prontuário do paciente
+  const handleOpenMedicalRecord = (patientId: string) => {
+    navigate(`/pacientes/${patientId}`);
+  };
 
   const dateStr = selectedDate.toISOString().split('T')[0];
   const dayAppointments = getAppointmentsByDate(dateStr);
@@ -175,6 +183,19 @@ export default function Agenda() {
 
                       {/* Status Actions */}
                       <div className="flex items-center gap-2 ml-10 sm:ml-0">
+                        {/* Botão de Prontuário - visível quando em atendimento */}
+                        {(appointment.status === 'em_atendimento' || appointment.status === 'aguardando') && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleOpenMedicalRecord(appointment.patientId);
+                            }}
+                            className="p-1.5 md:p-2 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 rounded-lg transition-colors"
+                            title="Abrir prontuário"
+                          >
+                            <FileText className="w-4 h-4" />
+                          </button>
+                        )}
                         <select
                           value={appointment.status}
                           onChange={e => handleStatusChange(appointment.id, e.target.value as AppointmentStatus)}
@@ -272,11 +293,26 @@ function AppointmentModal({
   onSave,
   onDelete
 }: AppointmentModalProps) {
+  const { checkAppointmentConflict } = useData();
+  const { showToast } = useToast();
+
+  // Calcula o horário de fim inicial
+  const calculateEndTime = (startTime: string): string => {
+    const [hours, minutes] = startTime.split(':').map(Number);
+    const endMinutes = hours * 60 + minutes + 30;
+    const endHours = Math.floor(endMinutes / 60);
+    const endMins = endMinutes % 60;
+    return `${endHours.toString().padStart(2, '0')}:${endMins.toString().padStart(2, '0')}`;
+  };
+
+  const initialStartTime = appointment?.horaInicio || selectedTime || '09:00';
+  const initialEndTime = appointment?.horaFim || calculateEndTime(initialStartTime);
+
   const [formData, setFormData] = useState<AppointmentFormData>({
     patientId: appointment?.patientId || '',
     data: appointment?.data || selectedDate,
-    horaInicio: appointment?.horaInicio || selectedTime || '09:00',
-    horaFim: appointment?.horaFim || '',
+    horaInicio: initialStartTime,
+    horaFim: initialEndTime,
     tipo: appointment?.tipo || 'primeira_consulta',
     status: appointment?.status || 'agendada',
     motivo: appointment?.motivo || '',
@@ -285,23 +321,78 @@ function AppointmentModal({
     observacoes: appointment?.observacoes || ''
   });
 
-  // Auto-calculate end time
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+
+  // Auto-calculate end time when start time changes
   useEffect(() => {
-    if (formData.horaInicio && !formData.horaFim) {
-      const [hours, minutes] = formData.horaInicio.split(':').map(Number);
-      const endMinutes = hours * 60 + minutes + 30;
-      const endHours = Math.floor(endMinutes / 60);
-      const endMins = endMinutes % 60;
-      setFormData(prev => ({
-        ...prev,
-        horaFim: `${endHours.toString().padStart(2, '0')}:${endMins.toString().padStart(2, '0')}`
-      }));
+    if (formData.horaInicio) {
+      const newEndTime = calculateEndTime(formData.horaInicio);
+      // Só atualiza se o horário de fim for menor ou igual ao início
+      if (formData.horaFim <= formData.horaInicio || !formData.horaFim) {
+        setFormData(prev => ({
+          ...prev,
+          horaFim: newEndTime
+        }));
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formData.horaInicio]);
 
+  // Validação de data passada
+  const isDateInPast = (dateStr: string): boolean => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const selectedDateObj = new Date(dateStr + 'T00:00:00');
+    return selectedDateObj < today;
+  };
+
+  // Validação do formulário
+  const validateForm = (): boolean => {
+    const errors: Record<string, string> = {};
+
+    if (!formData.patientId) {
+      errors.patientId = 'Selecione um paciente';
+    }
+
+    if (!formData.data) {
+      errors.data = 'Informe a data';
+    } else if (isDateInPast(formData.data) && !appointment) {
+      errors.data = 'Não é possível agendar para datas passadas';
+    }
+
+    if (!formData.horaInicio) {
+      errors.horaInicio = 'Informe o horário de início';
+    }
+
+    if (!formData.horaFim) {
+      errors.horaFim = 'Informe o horário de término';
+    } else if (formData.horaFim <= formData.horaInicio) {
+      errors.horaFim = 'O horário de término deve ser maior que o início';
+    }
+
+    // Verifica conflito de horário
+    const hasConflict = checkAppointmentConflict(
+      formData.data,
+      formData.horaInicio,
+      formData.horaFim,
+      appointment?.id // Exclui a própria consulta na edição
+    );
+
+    if (hasConflict) {
+      errors.horaInicio = 'Já existe uma consulta agendada neste horário';
+      showToast('Conflito de horário detectado', 'error');
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
 
     const data: Partial<Appointment> = {
       patientId: formData.patientId,
@@ -344,8 +435,11 @@ function AppointmentModal({
             </label>
             <select
               value={formData.patientId}
-              onChange={e => setFormData({ ...formData, patientId: e.target.value })}
-              className="input-field"
+              onChange={e => {
+                setFormData({ ...formData, patientId: e.target.value });
+                if (formErrors.patientId) setFormErrors(prev => ({ ...prev, patientId: '' }));
+              }}
+              className={`input-field ${formErrors.patientId ? 'border-red-500 focus:ring-red-500' : ''}`}
               required
             >
               <option value="">Selecione um paciente</option>
@@ -355,6 +449,9 @@ function AppointmentModal({
                 </option>
               ))}
             </select>
+            {formErrors.patientId && (
+              <p className="text-red-500 text-xs mt-1">{formErrors.patientId}</p>
+            )}
             {selectedPatient && (
               <div className="mt-2 p-2 bg-gray-50 rounded-lg flex items-center gap-2 text-sm text-gray-600">
                 <Phone className="w-4 h-4" />
@@ -378,10 +475,16 @@ function AppointmentModal({
               <input
                 type="date"
                 value={formData.data}
-                onChange={e => setFormData({ ...formData, data: e.target.value })}
-                className="input-field"
+                onChange={e => {
+                  setFormData({ ...formData, data: e.target.value });
+                  if (formErrors.data) setFormErrors(prev => ({ ...prev, data: '' }));
+                }}
+                className={`input-field ${formErrors.data ? 'border-red-500 focus:ring-red-500' : ''}`}
                 required
               />
+              {formErrors.data && (
+                <p className="text-red-500 text-xs mt-1">{formErrors.data}</p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -389,14 +492,20 @@ function AppointmentModal({
               </label>
               <select
                 value={formData.horaInicio}
-                onChange={e => setFormData({ ...formData, horaInicio: e.target.value, horaFim: '' })}
-                className="input-field"
+                onChange={e => {
+                  setFormData({ ...formData, horaInicio: e.target.value });
+                  if (formErrors.horaInicio) setFormErrors(prev => ({ ...prev, horaInicio: '' }));
+                }}
+                className={`input-field ${formErrors.horaInicio ? 'border-red-500 focus:ring-red-500' : ''}`}
                 required
               >
                 {TIME_SLOTS.map(time => (
                   <option key={time} value={time}>{time}</option>
                 ))}
               </select>
+              {formErrors.horaInicio && (
+                <p className="text-red-500 text-xs mt-1">{formErrors.horaInicio}</p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -404,14 +513,20 @@ function AppointmentModal({
               </label>
               <select
                 value={formData.horaFim}
-                onChange={e => setFormData({ ...formData, horaFim: e.target.value })}
-                className="input-field"
+                onChange={e => {
+                  setFormData({ ...formData, horaFim: e.target.value });
+                  if (formErrors.horaFim) setFormErrors(prev => ({ ...prev, horaFim: '' }));
+                }}
+                className={`input-field ${formErrors.horaFim ? 'border-red-500 focus:ring-red-500' : ''}`}
                 required
               >
                 {TIME_SLOTS.filter(t => t > formData.horaInicio).map(time => (
                   <option key={time} value={time}>{time}</option>
                 ))}
               </select>
+              {formErrors.horaFim && (
+                <p className="text-red-500 text-xs mt-1">{formErrors.horaFim}</p>
+              )}
             </div>
           </div>
 
