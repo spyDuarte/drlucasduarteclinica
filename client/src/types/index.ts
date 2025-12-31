@@ -37,6 +37,13 @@ export interface Patient {
   medicamentosEmUso?: string[];
   historicoFamiliar?: string;
   observacoes?: string;
+
+  // NOVAS FUNCIONALIDADES
+  // Lista de problemas ativos (problem list)
+  activeProblems?: ActiveProblem[];
+  // Alertas de segurança ativos
+  safetyAlerts?: SafetyAlert[];
+
   createdAt: string;
   updatedAt: string;
 }
@@ -186,6 +193,7 @@ export interface MedicalRecord {
     };
 
     examesComplementares?: string;
+    // DEPRECATED: Use resultadosExamesDetalhados para novos registros
     resultadosExames?: {
       nome: string;
       data: string;
@@ -193,6 +201,8 @@ export interface MedicalRecord {
       valorReferencia?: string;
       observacao?: string;
     }[];
+    // NOVO: Resultados com interpretação e referência a anexos
+    resultadosExamesDetalhados?: ExamResult[];
   };
 
   avaliacao: {
@@ -254,6 +264,17 @@ export interface MedicalRecord {
 
   assinaturaDigital?: string;
   dataHoraAssinatura?: string;
+
+  // NOVAS FUNCIONALIDADES
+  // Sistema de anexos
+  attachments?: MedicalRecordAttachment[];
+
+  // Sistema de auditoria
+  audit?: AuditLog;
+
+  // Alertas de segurança gerados neste atendimento
+  safetyAlertsGenerated?: string[]; // IDs dos alertas criados
+
   createdAt: string;
   updatedAt: string;
 }
@@ -269,6 +290,148 @@ export interface Prescription {
   viaAdministracao?: string;
   usoControlado?: boolean;
   observacoes?: string;
+}
+
+// Sistema de Anexos e Documentos Médicos
+export type AttachmentType =
+  | 'exame_laboratorial'
+  | 'exame_imagem'
+  | 'laudo'
+  | 'receita'
+  | 'atestado'
+  | 'termo_consentimento'
+  | 'relatorio_medico'
+  | 'outros';
+
+export interface MedicalRecordAttachment {
+  id: string;
+  medicalRecordId: string;
+  fileName: string;
+  fileType: string; // MIME type: image/jpeg, application/pdf, etc
+  fileSize: number; // em bytes
+  fileData: string; // Base64 encoded
+  attachmentType: AttachmentType;
+  description?: string;
+  uploadedAt: string;
+  uploadedBy?: string;
+}
+
+// Sistema de Auditoria
+export interface AuditLog {
+  createdBy?: string; // ID ou nome do usuário
+  createdAt: string;
+  lastEditedBy?: string;
+  lastEditedAt?: string;
+  accessHistory?: {
+    userId: string;
+    userName: string;
+    timestamp: string;
+    action: 'view' | 'edit' | 'print' | 'export';
+  }[];
+  versions?: {
+    version: number;
+    timestamp: string;
+    editedBy: string;
+    changes: string; // Descrição das mudanças
+    snapshot?: Partial<MedicalRecord>; // Snapshot dos dados antes da edição
+  }[];
+}
+
+// Sistema de Alertas de Segurança
+export type AlertSeverity = 'info' | 'warning' | 'critical';
+export type AlertType =
+  | 'alergia'
+  | 'medicacao'
+  | 'condicao_cronica'
+  | 'procedimento_risco'
+  | 'interacao_medicamentosa'
+  | 'valor_critico'
+  | 'outro';
+
+export interface SafetyAlert {
+  id: string;
+  patientId: string;
+  type: AlertType;
+  severity: AlertSeverity;
+  title: string;
+  description: string;
+  dateCreated: string;
+  dateResolved?: string;
+  isActive: boolean;
+  relatedMedication?: string;
+  relatedCondition?: string;
+  actionRequired?: string;
+}
+
+// Lista de Problemas Ativos (Problem List)
+export type ProblemStatus = 'ativo' | 'controlado' | 'resolvido' | 'inativo';
+export type ProblemSeverity = 'leve' | 'moderada' | 'grave' | 'critica';
+
+export interface ActiveProblem {
+  id: string;
+  patientId: string;
+  cid10: string;
+  description: string;
+  dateOnset: string; // Data de início
+  dateResolved?: string; // Data de resolução
+  status: ProblemStatus;
+  severity: ProblemSeverity;
+  isPrimary: boolean; // Se é o problema principal
+  notes?: string;
+  relatedMedicalRecords?: string[]; // IDs dos prontuários relacionados
+  currentTreatment?: string;
+  goals?: string[];
+}
+
+// Validações Clínicas de Valores Críticos
+export interface VitalSignValidation {
+  field: string;
+  displayName: string;
+  unit: string;
+  minNormal?: number;
+  maxNormal?: number;
+  minCritical?: number;
+  maxCritical?: number;
+  minValue?: number; // Valor absoluto mínimo permitido
+  maxValue?: number; // Valor absoluto máximo permitido
+}
+
+// Base de Dados de Medicamentos (simplificada)
+export interface MedicationInfo {
+  name: string;
+  concentrations: string[];
+  maxDailyDose?: string;
+  contraindications?: string[];
+  interactions?: string[]; // Nomes de outros medicamentos
+  sideEffects?: string[];
+  isControlled: boolean;
+  isPsychotropic: boolean;
+  category?: string;
+}
+
+// Templates de Orientações
+export type OrientationType = 'geral' | 'alimentar' | 'medicacao' | 'atividade_fisica' | 'retorno' | 'cuidados_especiais';
+
+export interface OrientationTemplate {
+  id: string;
+  type: OrientationType;
+  title: string;
+  content: string;
+  applicableConditions?: string[]; // CIDs relacionados
+  tags?: string[];
+}
+
+// Resultados de Exames Expandidos
+export interface ExamResult {
+  id: string;
+  name: string;
+  date: string;
+  result: string;
+  referenceValue?: string;
+  unit?: string;
+  interpretation?: 'normal' | 'alterado_leve' | 'alterado_moderado' | 'alterado_grave' | 'critico';
+  notes?: string;
+  attachmentId?: string; // Referência ao anexo do resultado
 }
 
 export interface Atestado {
