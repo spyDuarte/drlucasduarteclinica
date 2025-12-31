@@ -12,14 +12,14 @@ const getDemoUsers = (): (User & { password: string })[] => [
     email: import.meta.env.VITE_DEMO_DOCTOR_EMAIL || 'medico@clinica.com',
     role: 'medico',
     crm: import.meta.env.VITE_DEMO_DOCTOR_CRM || 'CRM/SP 123456',
-    password: import.meta.env.VITE_DEMO_DOCTOR_PASSWORD || 'medico123'
+    password: import.meta.env.VITE_DEMO_DOCTOR_PASSWORD || '123456'
   },
   {
     id: '2',
     nome: import.meta.env.VITE_DEMO_SECRETARY_NAME || 'Maria Silva',
     email: import.meta.env.VITE_DEMO_SECRETARY_EMAIL || 'secretaria@clinica.com',
     role: 'secretaria',
-    password: import.meta.env.VITE_DEMO_SECRETARY_PASSWORD || 'secretaria123'
+    password: import.meta.env.VITE_DEMO_SECRETARY_PASSWORD || '123456'
   }
 ];
 
