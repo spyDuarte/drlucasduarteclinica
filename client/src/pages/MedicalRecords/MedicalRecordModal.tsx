@@ -38,8 +38,8 @@ export function MedicalRecordModal({ patientId, record, onClose, onSave }: Medic
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] p-2 sm:p-4 animate-fade-in">
-      <div className="medical-modal w-full max-w-5xl max-h-[90vh] sm:max-h-[85vh] overflow-y-auto animate-scale-in">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] p-2 sm:p-4 animate-fade-in overflow-y-auto">
+      <div className="medical-modal w-full max-w-5xl my-4 animate-scale-in">
         {/* Header */}
         <div className="medical-modal-header sticky top-0 z-10">
           <div className="flex items-center justify-between relative z-10">
@@ -296,7 +296,7 @@ function SubjectiveSection({ formData, updateField, expandedSections, toggleSect
           isExpanded={expandedSections.habitosVida}
           onToggle={() => toggleSection('habitosVida')}
         >
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
             <InputField label="Tabagismo" value={formData.tabagismo} onChange={v => updateField('tabagismo', v)} placeholder="Nunca, ex-fumante, ativo..." />
             <InputField label="Etilismo" value={formData.etilismo} onChange={v => updateField('etilismo', v)} placeholder="Social, frequente, abstêmio..." />
             <InputField label="Atividade física" value={formData.atividadeFisica} onChange={v => updateField('atividadeFisica', v)} placeholder="Sedentário, moderado, intenso..." />
@@ -349,7 +349,7 @@ function ObjectiveSection({ formData, updateField, expandedSections, toggleSecti
       </div>
       <div className="space-y-4">
         {/* Estado Geral */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
           <SelectField
             label="Estado geral"
             value={formData.estadoGeral}
@@ -383,7 +383,7 @@ function ObjectiveSection({ formData, updateField, expandedSections, toggleSecti
         {/* Sinais Vitais */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Sinais Vitais</label>
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
             <InputField label="PA (mmHg)" value={formData.pressaoArterial} onChange={v => updateField('pressaoArterial', v)} placeholder="120/80" />
             <InputField label="PA deitado" value={formData.pressaoArterialDeitado} onChange={v => updateField('pressaoArterialDeitado', v)} placeholder="120/80" />
             <InputField label="PA em pé" value={formData.pressaoArterialEmPe} onChange={v => updateField('pressaoArterialEmPe', v)} placeholder="120/80" />
@@ -705,7 +705,7 @@ function PrescriptionSection({ prescricoes, newPrescription, setNewPrescription,
           ))}
         </div>
       )}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 mb-2">
         <input type="text" value={newPrescription.medicamento} onChange={e => setNewPrescription({ ...newPrescription, medicamento: e.target.value })} className="input-field text-sm" placeholder="Medicamento" />
         <input type="text" value={newPrescription.concentracao} onChange={e => setNewPrescription({ ...newPrescription, concentracao: e.target.value })} className="input-field text-sm" placeholder="Concentração" />
         <select value={newPrescription.formaFarmaceutica} onChange={e => setNewPrescription({ ...newPrescription, formaFarmaceutica: e.target.value })} className="input-field text-sm">
@@ -729,7 +729,7 @@ function PrescriptionSection({ prescricoes, newPrescription, setNewPrescription,
         </select>
         <input type="text" value={newPrescription.posologia} onChange={e => setNewPrescription({ ...newPrescription, posologia: e.target.value })} className="input-field text-sm" placeholder="Posologia" />
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
         <input type="text" value={newPrescription.quantidade} onChange={e => setNewPrescription({ ...newPrescription, quantidade: e.target.value })} className="input-field text-sm" placeholder="Quantidade" />
         <input type="text" value={newPrescription.duracao} onChange={e => setNewPrescription({ ...newPrescription, duracao: e.target.value })} className="input-field text-sm" placeholder="Duração" />
         <select value={newPrescription.viaAdministracao} onChange={e => setNewPrescription({ ...newPrescription, viaAdministracao: e.target.value })} className="input-field text-sm">
