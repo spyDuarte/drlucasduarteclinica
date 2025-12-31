@@ -14,7 +14,25 @@ import {
   Activity,
   Clipboard,
   Edit2,
-  Printer
+  Printer,
+  Heart,
+  Thermometer,
+  Wind,
+  Droplets,
+  Weight,
+  Ruler,
+  MapPin,
+  Stethoscope,
+  X,
+  ChevronDown,
+  ChevronUp,
+  FileCheck,
+  Syringe,
+  ClipboardList,
+  AlertCircle,
+  Shield,
+  Users,
+  CalendarCheck
 } from 'lucide-react';
 import { formatDate, calculateAge, formatCPF, formatPhone } from '../utils/helpers';
 import type { MedicalRecord } from '../types';
@@ -32,392 +50,611 @@ export default function MedicalRecords() {
 
   if (!patient) {
     return (
-      <div className="text-center py-12">
-        <FileText className="w-16 h-16 mx-auto text-gray-300 mb-4" />
+      <div className="empty-state max-w-md mx-auto mt-12">
+        <div className="w-20 h-20 mx-auto mb-4 bg-slate-100 rounded-2xl flex items-center justify-center">
+          <FileText className="w-10 h-10 text-slate-300" />
+        </div>
         <h2 className="text-xl font-semibold text-gray-900 mb-2">Paciente não encontrado</h2>
-        <Link to="/pacientes" className="text-sky-600 hover:text-sky-700">
-          Voltar para lista de pacientes
+        <p className="text-gray-500 mb-6">O prontuário solicitado não existe ou foi removido.</p>
+        <Link
+          to="/pacientes"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-primary-50 text-primary-600 rounded-lg font-medium hover:bg-primary-100 transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Voltar para pacientes
         </Link>
       </div>
     );
   }
 
+  // Helper para tipo de atendimento
+  const getAppointmentTypeLabel = (type: string) => {
+    const types: Record<string, { label: string; class: string }> = {
+      consulta: { label: 'Consulta', class: 'type-consulta' },
+      retorno: { label: 'Retorno', class: 'type-retorno' },
+      urgencia: { label: 'Urgência', class: 'type-urgencia' },
+      emergencia: { label: 'Emergência', class: 'type-emergencia' },
+      teleconsulta: { label: 'Teleconsulta', class: 'type-teleconsulta' },
+      procedimento: { label: 'Procedimento', class: 'type-procedimento' },
+      avaliacao_pre_operatoria: { label: 'Pré-operatório', class: 'type-pre-op' },
+      pos_operatorio: { label: 'Pós-operatório', class: 'type-pos-op' }
+    };
+    return types[type] || { label: type, class: 'type-consulta' };
+  };
+
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-4">
-        <button
-          onClick={() => navigate('/pacientes')}
-          className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-        <div className="flex-1">
-          <h1 className="text-2xl font-bold text-gray-900">Prontuário do Paciente</h1>
-          <p className="text-gray-600">{patient.nome}</p>
+    <div className="space-y-6 animate-fade-in">
+      {/* Header Premium */}
+      <div className="medical-record-header">
+        <div className="flex items-center gap-4 relative z-10">
+          <button
+            onClick={() => navigate('/pacientes')}
+            className="p-2.5 bg-white/10 hover:bg-white/20 rounded-xl transition-all duration-200 backdrop-blur-sm"
+          >
+            <ArrowLeft className="w-5 h-5 text-white" />
+          </button>
+          <div className="flex-1">
+            <div className="flex items-center gap-2 text-white/70 text-sm mb-1">
+              <Stethoscope className="w-4 h-4" />
+              <span>Prontuário Médico</span>
+            </div>
+            <h1 className="text-2xl font-bold text-white">{patient.nome}</h1>
+          </div>
+          <button
+            onClick={() => setShowNewRecord(true)}
+            className="flex items-center gap-2 px-5 py-2.5 bg-white text-primary-600 rounded-xl font-semibold hover:bg-white/90 transition-all duration-200 shadow-lg shadow-black/10"
+          >
+            <Plus className="w-5 h-5" />
+            Novo Atendimento
+          </button>
         </div>
-        <button
-          onClick={() => setShowNewRecord(true)}
-          className="btn-primary flex items-center gap-2"
-        >
-          <Plus className="w-5 h-5" />
-          Novo Atendimento
-        </button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Patient Info */}
-        <div className="lg:col-span-1 space-y-6">
-          {/* Basic Info Card */}
-          <div className="card">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-16 h-16 bg-sky-100 rounded-full flex items-center justify-center">
-                <User className="w-8 h-8 text-sky-600" />
+        {/* Patient Info - Sidebar */}
+        <div className="lg:col-span-1 space-y-4">
+          {/* Profile Card Premium */}
+          <div className="patient-profile-card p-5">
+            <div className="flex items-start gap-4 mb-5">
+              <div className="patient-avatar">
+                <User className="w-7 h-7 text-white" />
               </div>
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900">{patient.nome}</h2>
-                <p className="text-gray-500">{formatCPF(patient.cpf)}</p>
+              <div className="flex-1 min-w-0">
+                <h2 className="text-lg font-bold text-gray-900 truncate">{patient.nome}</h2>
+                <p className="text-sm text-slate-500 font-medium">{formatCPF(patient.cpf)}</p>
+                <div className="flex items-center gap-1.5 mt-1.5">
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-primary-50 text-primary-700 rounded-full text-xs font-semibold">
+                    <Calendar className="w-3 h-3" />
+                    {calculateAge(patient.dataNascimento)} anos
+                  </span>
+                </div>
               </div>
             </div>
 
-            <div className="space-y-3 text-sm">
-              <div className="flex items-center gap-2 text-gray-600">
-                <Calendar className="w-4 h-4" />
-                <span>
-                  {formatDate(patient.dataNascimento)} ({calculateAge(patient.dataNascimento)} anos)
-                </span>
+            <div className="space-y-3">
+              <div className="flex items-center gap-3 p-2.5 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
+                <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-sm">
+                  <Calendar className="w-4 h-4 text-slate-500" />
+                </div>
+                <div>
+                  <p className="text-xs text-slate-400 font-medium">Nascimento</p>
+                  <p className="text-sm text-slate-700 font-medium">{formatDate(patient.dataNascimento)}</p>
+                </div>
               </div>
-              <div className="flex items-center gap-2 text-gray-600">
-                <Phone className="w-4 h-4" />
-                <span>{formatPhone(patient.telefone)}</span>
+
+              <div className="flex items-center gap-3 p-2.5 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
+                <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-sm">
+                  <Phone className="w-4 h-4 text-slate-500" />
+                </div>
+                <div>
+                  <p className="text-xs text-slate-400 font-medium">Telefone</p>
+                  <p className="text-sm text-slate-700 font-medium">{formatPhone(patient.telefone)}</p>
+                </div>
               </div>
+
               {patient.email && (
-                <div className="flex items-center gap-2 text-gray-600">
-                  <Mail className="w-4 h-4" />
-                  <span>{patient.email}</span>
+                <div className="flex items-center gap-3 p-2.5 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
+                  <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-sm">
+                    <Mail className="w-4 h-4 text-slate-500" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs text-slate-400 font-medium">E-mail</p>
+                    <p className="text-sm text-slate-700 font-medium truncate">{patient.email}</p>
+                  </div>
                 </div>
               )}
             </div>
 
             {patient.convenio && (
-              <div className="mt-4 p-3 bg-green-50 rounded-lg">
-                <p className="text-sm font-medium text-green-800">
-                  Convênio: {patient.convenio.nome}
-                </p>
-                <p className="text-xs text-green-600">
+              <div className="mt-4 p-3 bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-100 rounded-xl">
+                <div className="flex items-center gap-2 mb-1">
+                  <Shield className="w-4 h-4 text-emerald-600" />
+                  <span className="text-sm font-semibold text-emerald-800">{patient.convenio.nome}</span>
+                </div>
+                <p className="text-xs text-emerald-600 ml-6">
                   Carteira: {patient.convenio.numero}
                 </p>
               </div>
             )}
           </div>
 
-          {/* Allergies */}
+          {/* Allergies - Alert Card */}
           {patient.alergias && patient.alergias.length > 0 && (
-            <div className="card bg-red-50 border-red-200">
-              <div className="flex items-center gap-2 text-red-700 mb-2">
-                <AlertTriangle className="w-5 h-5" />
-                <h3 className="font-semibold">Alergias</h3>
+            <div className="alert-card-danger p-4">
+              <div className="flex items-center gap-2 text-red-700 mb-3">
+                <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+                  <AlertTriangle className="w-4 h-4 text-red-600" />
+                </div>
+                <h3 className="font-semibold text-sm">Alergias</h3>
               </div>
-              <ul className="space-y-1">
+              <div className="flex flex-wrap gap-1.5">
                 {patient.alergias.map((alergia, idx) => (
-                  <li key={idx} className="text-sm text-red-600">• {alergia}</li>
+                  <span
+                    key={idx}
+                    className="inline-flex items-center px-2.5 py-1 bg-red-100 text-red-700 rounded-full text-xs font-medium"
+                  >
+                    {alergia}
+                  </span>
                 ))}
-              </ul>
+              </div>
             </div>
           )}
 
           {/* Current Medications */}
           {patient.medicamentosEmUso && patient.medicamentosEmUso.length > 0 && (
-            <div className="card">
-              <div className="flex items-center gap-2 text-gray-700 mb-2">
-                <Pill className="w-5 h-5" />
-                <h3 className="font-semibold">Medicamentos em uso</h3>
+            <div className="patient-profile-card p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 bg-violet-100 rounded-lg flex items-center justify-center">
+                  <Pill className="w-4 h-4 text-violet-600" />
+                </div>
+                <h3 className="font-semibold text-sm text-gray-800">Medicamentos em uso</h3>
               </div>
-              <ul className="space-y-1">
+              <div className="space-y-2">
                 {patient.medicamentosEmUso.map((med, idx) => (
-                  <li key={idx} className="text-sm text-gray-600">• {med}</li>
+                  <div key={idx} className="flex items-center gap-2 p-2 bg-slate-50 rounded-lg">
+                    <div className="w-1.5 h-1.5 bg-violet-400 rounded-full" />
+                    <span className="text-sm text-gray-700">{med}</span>
+                  </div>
                 ))}
-              </ul>
+              </div>
             </div>
           )}
 
           {/* Family History */}
           {patient.historicoFamiliar && (
-            <div className="card">
-              <div className="flex items-center gap-2 text-gray-700 mb-2">
-                <Activity className="w-5 h-5" />
-                <h3 className="font-semibold">Histórico familiar</h3>
+            <div className="patient-profile-card p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center">
+                  <Users className="w-4 h-4 text-amber-600" />
+                </div>
+                <h3 className="font-semibold text-sm text-gray-800">Histórico familiar</h3>
               </div>
-              <p className="text-sm text-gray-600">{patient.historicoFamiliar}</p>
+              <p className="text-sm text-gray-600 leading-relaxed">{patient.historicoFamiliar}</p>
             </div>
           )}
+
+          {/* Quick Stats */}
+          <div className="patient-profile-card p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                <ClipboardList className="w-4 h-4 text-blue-600" />
+              </div>
+              <h3 className="font-semibold text-sm text-gray-800">Resumo</h3>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="text-center p-3 bg-slate-50 rounded-xl">
+                <p className="text-2xl font-bold text-primary-600">{records.length}</p>
+                <p className="text-xs text-slate-500 font-medium">Atendimentos</p>
+              </div>
+              <div className="text-center p-3 bg-slate-50 rounded-xl">
+                <p className="text-2xl font-bold text-emerald-600">
+                  {records.length > 0 ? formatDate(records[0]?.data, 'dd/MM') : '-'}
+                </p>
+                <p className="text-xs text-slate-500 font-medium">Último</p>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Medical Records */}
-        <div className="lg:col-span-2 space-y-6">
-          <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-            <Clipboard className="w-5 h-5" />
-            Histórico de Atendimentos ({records.length})
-          </h2>
+        {/* Medical Records - Main Area */}
+        <div className="lg:col-span-2 space-y-5">
+          {/* Section Header */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-primary-100 rounded-xl flex items-center justify-center">
+                <Clipboard className="w-5 h-5 text-primary-600" />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-gray-900">Histórico de Atendimentos</h2>
+                <p className="text-sm text-slate-500">{records.length} registro{records.length !== 1 ? 's' : ''} encontrado{records.length !== 1 ? 's' : ''}</p>
+              </div>
+            </div>
+          </div>
 
           {records.length === 0 ? (
-            <div className="card text-center py-8">
-              <FileText className="w-12 h-12 mx-auto text-gray-300 mb-2" />
-              <p className="text-gray-500">Nenhum atendimento registrado</p>
+            <div className="empty-state">
+              <div className="w-16 h-16 mx-auto mb-4 bg-slate-100 rounded-2xl flex items-center justify-center">
+                <FileText className="w-8 h-8 text-slate-300" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Nenhum atendimento registrado</h3>
+              <p className="text-sm text-gray-500 mb-4">Clique em "Novo Atendimento" para criar o primeiro registro.</p>
+              <button
+                onClick={() => setShowNewRecord(true)}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+                Criar atendimento
+              </button>
             </div>
           ) : (
             <div className="space-y-4">
-              {records.sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()).map(record => (
-                <div key={record.id} className="card">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4 text-gray-400" />
-                        <span className="font-medium text-gray-900">
-                          {formatDate(record.data, "dd 'de' MMMM 'de' yyyy")}
-                        </span>
-                      </div>
-                      {record.tipoAtendimento && (
-                        <span className="px-2 py-0.5 bg-sky-100 text-sky-700 rounded text-xs font-medium">
-                          {record.tipoAtendimento === 'consulta' && 'Consulta'}
-                          {record.tipoAtendimento === 'retorno' && 'Retorno'}
-                          {record.tipoAtendimento === 'urgencia' && 'Urgência'}
-                          {record.tipoAtendimento === 'emergencia' && 'Emergência'}
-                          {record.tipoAtendimento === 'teleconsulta' && 'Teleconsulta'}
-                          {record.tipoAtendimento === 'procedimento' && 'Procedimento'}
-                          {record.tipoAtendimento === 'avaliacao_pre_operatoria' && 'Pré-operatório'}
-                          {record.tipoAtendimento === 'pos_operatorio' && 'Pós-operatório'}
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => setEditingRecord(record)}
-                        className="p-2 text-gray-500 hover:text-sky-600 hover:bg-sky-50 rounded-lg"
-                        title="Editar"
-                      >
-                        <Edit2 className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => window.print()}
-                        className="p-2 text-gray-500 hover:text-sky-600 hover:bg-sky-50 rounded-lg"
-                        title="Imprimir"
-                      >
-                        <Printer className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* SOAP Notes */}
-                  <div className="space-y-4">
-                    {/* Subjective */}
-                    <div>
-                      <h4 className="text-sm font-semibold text-sky-600 mb-1">S - Subjetivo</h4>
-                      <p className="text-sm text-gray-700">
-                        <strong>Queixa principal:</strong> {record.subjetivo.queixaPrincipal}
-                        {record.subjetivo.duracaoSintomas && (
-                          <span className="text-gray-500"> | Duração: {record.subjetivo.duracaoSintomas}</span>
-                        )}
-                      </p>
-                      <p className="text-sm text-gray-600 mt-1">
-                        {record.subjetivo.historicoDoencaAtual}
-                      </p>
-                      {(record.subjetivo.fatoresMelhora || record.subjetivo.fatoresPiora) && (
-                        <div className="mt-1 text-xs text-gray-500">
-                          {record.subjetivo.fatoresMelhora && <span>Melhora: {record.subjetivo.fatoresMelhora} | </span>}
-                          {record.subjetivo.fatoresPiora && <span>Piora: {record.subjetivo.fatoresPiora}</span>}
+              {records.sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()).map((record, index) => {
+                const typeInfo = getAppointmentTypeLabel(record.tipoAtendimento || 'consulta');
+                return (
+                  <div
+                    key={record.id}
+                    className="soap-card record-card-enter"
+                    style={{ animationDelay: `${index * 0.05}s` }}
+                  >
+                    {/* Card Header */}
+                    <div className="soap-header">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-primary-100 rounded-xl flex items-center justify-center">
+                          <CalendarCheck className="w-5 h-5 text-primary-600" />
                         </div>
-                      )}
-                      {record.subjetivo.sintomasAssociados && (
-                        <p className="text-xs text-gray-500 mt-1">
-                          <strong>Sintomas associados:</strong> {record.subjetivo.sintomasAssociados}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Objective */}
-                    <div>
-                      <h4 className="text-sm font-semibold text-green-600 mb-1">O - Objetivo</h4>
-                      {/* Estado Geral */}
-                      {(record.objetivo.estadoGeral || record.objetivo.nivelConsciencia) && (
-                        <div className="flex flex-wrap gap-2 mb-2">
-                          {record.objetivo.estadoGeral && (
-                            <span className="px-2 py-1 bg-green-50 text-green-700 rounded text-xs">
-                              EG: {record.objetivo.estadoGeral}
-                            </span>
-                          )}
-                          {record.objetivo.nivelConsciencia && (
-                            <span className="px-2 py-1 bg-green-50 text-green-700 rounded text-xs">
-                              {record.objetivo.nivelConsciencia.replace('_', ' ')}
-                            </span>
-                          )}
-                          {record.objetivo.escalaGlasgow && (
-                            <span className="px-2 py-1 bg-green-50 text-green-700 rounded text-xs">
-                              Glasgow: {record.objetivo.escalaGlasgow}
-                            </span>
-                          )}
-                        </div>
-                      )}
-                      {record.objetivo.sinaisVitais && (
-                        <div className="flex flex-wrap gap-2 mb-2">
-                          {record.objetivo.sinaisVitais.pressaoArterial && (
-                            <span className="px-2 py-1 bg-gray-100 rounded text-xs">
-                              PA: {record.objetivo.sinaisVitais.pressaoArterial} mmHg
-                            </span>
-                          )}
-                          {record.objetivo.sinaisVitais.frequenciaCardiaca && (
-                            <span className="px-2 py-1 bg-gray-100 rounded text-xs">
-                              FC: {record.objetivo.sinaisVitais.frequenciaCardiaca} bpm
-                            </span>
-                          )}
-                          {record.objetivo.sinaisVitais.frequenciaRespiratoria && (
-                            <span className="px-2 py-1 bg-gray-100 rounded text-xs">
-                              FR: {record.objetivo.sinaisVitais.frequenciaRespiratoria} irpm
-                            </span>
-                          )}
-                          {record.objetivo.sinaisVitais.temperatura && (
-                            <span className="px-2 py-1 bg-gray-100 rounded text-xs">
-                              Temp: {record.objetivo.sinaisVitais.temperatura}°C
-                            </span>
-                          )}
-                          {record.objetivo.sinaisVitais.saturacaoO2 && (
-                            <span className="px-2 py-1 bg-gray-100 rounded text-xs">
-                              SpO2: {record.objetivo.sinaisVitais.saturacaoO2}%
-                            </span>
-                          )}
-                          {record.objetivo.sinaisVitais.glicemiaCapilar && (
-                            <span className="px-2 py-1 bg-gray-100 rounded text-xs">
-                              Glicemia: {record.objetivo.sinaisVitais.glicemiaCapilar} mg/dL
-                            </span>
-                          )}
-                          {record.objetivo.sinaisVitais.peso && (
-                            <span className="px-2 py-1 bg-gray-100 rounded text-xs">
-                              Peso: {record.objetivo.sinaisVitais.peso} kg
-                            </span>
-                          )}
-                          {record.objetivo.sinaisVitais.imc && (
-                            <span className="px-2 py-1 bg-gray-100 rounded text-xs">
-                              IMC: {record.objetivo.sinaisVitais.imc}
-                            </span>
-                          )}
-                          {record.objetivo.sinaisVitais.escalaDor !== undefined && record.objetivo.sinaisVitais.escalaDor !== null && (
-                            <span className={`px-2 py-1 rounded text-xs ${record.objetivo.sinaisVitais.escalaDor >= 7 ? 'bg-red-100 text-red-700' : record.objetivo.sinaisVitais.escalaDor >= 4 ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100'}`}>
-                              Dor: {record.objetivo.sinaisVitais.escalaDor}/10
-                            </span>
-                          )}
-                        </div>
-                      )}
-                      <p className="text-sm text-gray-600">{record.objetivo.exameFisico}</p>
-                    </div>
-
-                    {/* Assessment */}
-                    <div>
-                      <h4 className="text-sm font-semibold text-orange-600 mb-1">A - Avaliação</h4>
-                      {record.avaliacao.diagnosticoPrincipal && (
-                        <p className="text-sm text-gray-700 mb-1">
-                          <strong>Diagnóstico principal:</strong> {record.avaliacao.diagnosticoPrincipal}
-                        </p>
-                      )}
-                      <div className="flex flex-wrap gap-2">
-                        {record.avaliacao.hipotesesDiagnosticas.map((diag, idx) => (
-                          <span key={idx} className="px-2 py-1 bg-orange-50 text-orange-700 rounded text-xs">
-                            {diag}
-                          </span>
-                        ))}
-                      </div>
-                      {record.avaliacao.cid10 && record.avaliacao.cid10.length > 0 && (
-                        <p className="text-xs text-gray-500 mt-1">
-                          <strong>CID-10:</strong> {record.avaliacao.cid10.join(', ')}
-                        </p>
-                      )}
-                      {record.avaliacao.gravidade && (
-                        <span className={`inline-block mt-1 px-2 py-0.5 rounded text-xs font-medium ${
-                          record.avaliacao.gravidade === 'leve' ? 'bg-green-100 text-green-700' :
-                          record.avaliacao.gravidade === 'moderada' ? 'bg-yellow-100 text-yellow-700' :
-                          record.avaliacao.gravidade === 'grave' ? 'bg-orange-100 text-orange-700' :
-                          'bg-red-100 text-red-700'
-                        }`}>
-                          Gravidade: {record.avaliacao.gravidade}
-                        </span>
-                      )}
-                      {record.avaliacao.prognostico && (
-                        <p className="text-xs text-gray-500 mt-1">
-                          <strong>Prognóstico:</strong> {record.avaliacao.prognostico}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Plan */}
-                    <div>
-                      <h4 className="text-sm font-semibold text-purple-600 mb-1">P - Plano</h4>
-                      <p className="text-sm text-gray-600">{record.plano.conduta}</p>
-
-                      {record.plano.prescricoes && record.plano.prescricoes.length > 0 && (
-                        <div className="mt-2">
-                          <p className="text-xs font-medium text-gray-500 mb-1">Prescrições:</p>
-                          <ul className="space-y-1">
-                            {record.plano.prescricoes.map((rx, idx) => (
-                              <li key={idx} className="text-xs text-gray-600 bg-gray-50 p-2 rounded">
-                                <strong>{rx.medicamento}</strong> {rx.concentracao} - {rx.formaFarmaceutica}
-                                <br />
-                                {rx.posologia} | Qtd: {rx.quantidade}
-                                {rx.viaAdministracao && <span className="text-gray-400"> | Via: {rx.viaAdministracao}</span>}
-                                {rx.usoControlado && <span className="text-red-500 ml-1">[Controlado]</span>}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-
-                      {record.plano.prescricoesNaoMedicamentosas && record.plano.prescricoesNaoMedicamentosas.length > 0 && (
-                        <p className="text-xs text-gray-500 mt-2">
-                          <strong>Medidas não medicamentosas:</strong> {record.plano.prescricoesNaoMedicamentosas.join(', ')}
-                        </p>
-                      )}
-
-                      {record.plano.solicitacaoExames && record.plano.solicitacaoExames.length > 0 && (
-                        <p className="text-xs text-gray-500 mt-2">
-                          <strong>Exames solicitados:</strong> {record.plano.solicitacaoExames.join(', ')}
-                        </p>
-                      )}
-
-                      {record.plano.encaminhamentos && record.plano.encaminhamentos.length > 0 && (
-                        <p className="text-xs text-gray-500 mt-2">
-                          <strong>Encaminhamentos:</strong> {record.plano.encaminhamentos.map(e => `${e.especialidade} (${e.motivo})`).join(', ')}
-                        </p>
-                      )}
-
-                      {record.plano.atestadoEmitido && (
-                        <p className="text-xs text-purple-600 mt-2">
-                          <strong>Atestado emitido:</strong> {record.plano.tipoAtestado?.replace('_', ' ')}
-                          {record.plano.diasAfastamento && ` - ${record.plano.diasAfastamento} dia(s)`}
-                        </p>
-                      )}
-
-                      {record.plano.orientacoes && (
-                        <p className="text-xs text-gray-500 mt-2">
-                          <strong>Orientações:</strong> {record.plano.orientacoes}
-                        </p>
-                      )}
-
-                      {record.plano.alertasCuidados && record.plano.alertasCuidados.length > 0 && (
-                        <div className="mt-2 p-2 bg-yellow-50 rounded">
-                          <p className="text-xs text-yellow-700">
-                            <strong>Alertas:</strong> {record.plano.alertasCuidados.join(', ')}
+                        <div>
+                          <p className="font-semibold text-gray-900">
+                            {formatDate(record.data, "dd 'de' MMMM 'de' yyyy")}
                           </p>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <span className={`appointment-type-badge ${typeInfo.class}`}>
+                              {typeInfo.label}
+                            </span>
+                            {record.localAtendimento && (
+                              <span className="text-xs text-slate-500 flex items-center gap-1">
+                                <MapPin className="w-3 h-3" />
+                                {record.localAtendimento}
+                              </span>
+                            )}
+                          </div>
                         </div>
-                      )}
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => setEditingRecord(record)}
+                          className="card-action-btn"
+                          title="Editar"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => window.print()}
+                          className="card-action-btn"
+                          title="Imprimir"
+                        >
+                          <Printer className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
 
-                      {(record.plano.retorno || record.plano.dataRetorno) && (
-                        <p className="text-xs text-gray-500 mt-2">
-                          <strong>Retorno:</strong> {record.plano.retorno}
-                          {record.plano.dataRetorno && ` (${formatDate(record.plano.dataRetorno)})`}
-                        </p>
-                      )}
+                    {/* SOAP Content */}
+                    <div className="soap-content space-y-5">
+                      {/* S - Subjetivo */}
+                      <div className="soap-section-s rounded-lg p-4">
+                        <div className="flex items-center gap-2 mb-3">
+                          <span className="w-7 h-7 bg-sky-500 text-white rounded-lg flex items-center justify-center text-xs font-bold">S</span>
+                          <h4 className="font-semibold text-sky-700">Subjetivo</h4>
+                        </div>
+                        <div className="space-y-2 pl-9">
+                          <div className="flex items-start gap-2">
+                            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide min-w-[100px]">Queixa:</span>
+                            <span className="text-sm text-gray-700 font-medium">{record.subjetivo.queixaPrincipal}</span>
+                            {record.subjetivo.duracaoSintomas && (
+                              <span className="text-xs px-2 py-0.5 bg-sky-100 text-sky-700 rounded-full ml-2">
+                                {record.subjetivo.duracaoSintomas}
+                              </span>
+                            )}
+                          </div>
+                          {record.subjetivo.historicoDoencaAtual && (
+                            <p className="text-sm text-gray-600 leading-relaxed">{record.subjetivo.historicoDoencaAtual}</p>
+                          )}
+                          {(record.subjetivo.fatoresMelhora || record.subjetivo.fatoresPiora) && (
+                            <div className="flex flex-wrap gap-3 text-xs">
+                              {record.subjetivo.fatoresMelhora && (
+                                <span className="flex items-center gap-1 text-emerald-600">
+                                  <ChevronUp className="w-3 h-3" /> Melhora: {record.subjetivo.fatoresMelhora}
+                                </span>
+                              )}
+                              {record.subjetivo.fatoresPiora && (
+                                <span className="flex items-center gap-1 text-red-600">
+                                  <ChevronDown className="w-3 h-3" /> Piora: {record.subjetivo.fatoresPiora}
+                                </span>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* O - Objetivo */}
+                      <div className="soap-section-o rounded-lg p-4">
+                        <div className="flex items-center gap-2 mb-3">
+                          <span className="w-7 h-7 bg-emerald-500 text-white rounded-lg flex items-center justify-center text-xs font-bold">O</span>
+                          <h4 className="font-semibold text-emerald-700">Objetivo</h4>
+                        </div>
+                        <div className="space-y-3 pl-9">
+                          {/* Estado Geral Badges */}
+                          {(record.objetivo.estadoGeral || record.objetivo.nivelConsciencia || record.objetivo.escalaGlasgow) && (
+                            <div className="flex flex-wrap gap-2">
+                              {record.objetivo.estadoGeral && (
+                                <span className="px-3 py-1.5 bg-emerald-100 text-emerald-700 rounded-lg text-xs font-medium">
+                                  EG: {record.objetivo.estadoGeral}
+                                </span>
+                              )}
+                              {record.objetivo.nivelConsciencia && (
+                                <span className="px-3 py-1.5 bg-emerald-100 text-emerald-700 rounded-lg text-xs font-medium">
+                                  {record.objetivo.nivelConsciencia.replace('_', ' ')}
+                                </span>
+                              )}
+                              {record.objetivo.escalaGlasgow && (
+                                <span className="px-3 py-1.5 bg-emerald-100 text-emerald-700 rounded-lg text-xs font-medium">
+                                  Glasgow: {record.objetivo.escalaGlasgow}
+                                </span>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Vitals Grid Premium */}
+                          {record.objetivo.sinaisVitais && (
+                            <div className="vitals-grid">
+                              {record.objetivo.sinaisVitais.pressaoArterial && (
+                                <div className="vital-sign-badge">
+                                  <Heart className="w-4 h-4 text-rose-500" />
+                                  <div>
+                                    <p className="text-[10px] text-slate-400 uppercase font-semibold">PA</p>
+                                    <p className="text-sm font-bold text-slate-700">{record.objetivo.sinaisVitais.pressaoArterial}</p>
+                                  </div>
+                                </div>
+                              )}
+                              {record.objetivo.sinaisVitais.frequenciaCardiaca && (
+                                <div className="vital-sign-badge">
+                                  <Activity className="w-4 h-4 text-red-500" />
+                                  <div>
+                                    <p className="text-[10px] text-slate-400 uppercase font-semibold">FC</p>
+                                    <p className="text-sm font-bold text-slate-700">{record.objetivo.sinaisVitais.frequenciaCardiaca} <span className="text-xs font-normal">bpm</span></p>
+                                  </div>
+                                </div>
+                              )}
+                              {record.objetivo.sinaisVitais.frequenciaRespiratoria && (
+                                <div className="vital-sign-badge">
+                                  <Wind className="w-4 h-4 text-blue-500" />
+                                  <div>
+                                    <p className="text-[10px] text-slate-400 uppercase font-semibold">FR</p>
+                                    <p className="text-sm font-bold text-slate-700">{record.objetivo.sinaisVitais.frequenciaRespiratoria} <span className="text-xs font-normal">irpm</span></p>
+                                  </div>
+                                </div>
+                              )}
+                              {record.objetivo.sinaisVitais.temperatura && (
+                                <div className="vital-sign-badge">
+                                  <Thermometer className="w-4 h-4 text-orange-500" />
+                                  <div>
+                                    <p className="text-[10px] text-slate-400 uppercase font-semibold">Temp</p>
+                                    <p className="text-sm font-bold text-slate-700">{record.objetivo.sinaisVitais.temperatura}°C</p>
+                                  </div>
+                                </div>
+                              )}
+                              {record.objetivo.sinaisVitais.saturacaoO2 && (
+                                <div className="vital-sign-badge">
+                                  <Droplets className="w-4 h-4 text-cyan-500" />
+                                  <div>
+                                    <p className="text-[10px] text-slate-400 uppercase font-semibold">SpO2</p>
+                                    <p className="text-sm font-bold text-slate-700">{record.objetivo.sinaisVitais.saturacaoO2}%</p>
+                                  </div>
+                                </div>
+                              )}
+                              {record.objetivo.sinaisVitais.peso && (
+                                <div className="vital-sign-badge">
+                                  <Weight className="w-4 h-4 text-violet-500" />
+                                  <div>
+                                    <p className="text-[10px] text-slate-400 uppercase font-semibold">Peso</p>
+                                    <p className="text-sm font-bold text-slate-700">{record.objetivo.sinaisVitais.peso} <span className="text-xs font-normal">kg</span></p>
+                                  </div>
+                                </div>
+                              )}
+                              {record.objetivo.sinaisVitais.imc && (
+                                <div className="vital-sign-badge">
+                                  <Ruler className="w-4 h-4 text-indigo-500" />
+                                  <div>
+                                    <p className="text-[10px] text-slate-400 uppercase font-semibold">IMC</p>
+                                    <p className="text-sm font-bold text-slate-700">{record.objetivo.sinaisVitais.imc}</p>
+                                  </div>
+                                </div>
+                              )}
+                              {record.objetivo.sinaisVitais.glicemiaCapilar && (
+                                <div className="vital-sign-badge">
+                                  <Droplets className="w-4 h-4 text-amber-500" />
+                                  <div>
+                                    <p className="text-[10px] text-slate-400 uppercase font-semibold">Glicemia</p>
+                                    <p className="text-sm font-bold text-slate-700">{record.objetivo.sinaisVitais.glicemiaCapilar} <span className="text-xs font-normal">mg/dL</span></p>
+                                  </div>
+                                </div>
+                              )}
+                              {record.objetivo.sinaisVitais.escalaDor !== undefined && record.objetivo.sinaisVitais.escalaDor !== null && (
+                                <div className={`vital-sign-badge ${
+                                  record.objetivo.sinaisVitais.escalaDor >= 7 ? 'vital-danger' :
+                                  record.objetivo.sinaisVitais.escalaDor >= 4 ? 'vital-warning' : 'vital-normal'
+                                }`}>
+                                  <AlertCircle className="w-4 h-4" />
+                                  <div>
+                                    <p className="text-[10px] uppercase font-semibold opacity-70">Dor</p>
+                                    <p className="text-sm font-bold">{record.objetivo.sinaisVitais.escalaDor}/10</p>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {record.objetivo.exameFisico && (
+                            <p className="text-sm text-gray-600 leading-relaxed">{record.objetivo.exameFisico}</p>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* A - Avaliação */}
+                      <div className="soap-section-a rounded-lg p-4">
+                        <div className="flex items-center gap-2 mb-3">
+                          <span className="w-7 h-7 bg-amber-500 text-white rounded-lg flex items-center justify-center text-xs font-bold">A</span>
+                          <h4 className="font-semibold text-amber-700">Avaliação</h4>
+                          {record.avaliacao.gravidade && (
+                            <span className={`severity-indicator severity-${record.avaliacao.gravidade}`}>
+                              {record.avaliacao.gravidade}
+                            </span>
+                          )}
+                        </div>
+                        <div className="space-y-3 pl-9">
+                          {record.avaliacao.diagnosticoPrincipal && (
+                            <div className="p-3 bg-amber-50 border border-amber-100 rounded-lg">
+                              <p className="text-xs font-semibold text-amber-600 uppercase tracking-wide mb-1">Diagnóstico Principal</p>
+                              <p className="text-sm font-medium text-gray-800">{record.avaliacao.diagnosticoPrincipal}</p>
+                            </div>
+                          )}
+                          {record.avaliacao.hipotesesDiagnosticas.length > 0 && (
+                            <div className="flex flex-wrap gap-2">
+                              {record.avaliacao.hipotesesDiagnosticas.map((diag, idx) => (
+                                <span key={idx} className="px-3 py-1.5 bg-amber-100 text-amber-800 rounded-lg text-xs font-medium">
+                                  {diag}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                          {record.avaliacao.cid10 && record.avaliacao.cid10.length > 0 && (
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-semibold text-slate-500">CID-10:</span>
+                              <div className="flex flex-wrap gap-1">
+                                {record.avaliacao.cid10.map((cid, idx) => (
+                                  <span key={idx} className="cid-chip">{cid}</span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          {record.avaliacao.prognostico && (
+                            <p className="text-xs text-slate-600">
+                              <span className="font-semibold">Prognóstico:</span> {record.avaliacao.prognostico}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* P - Plano */}
+                      <div className="soap-section-p rounded-lg p-4">
+                        <div className="flex items-center gap-2 mb-3">
+                          <span className="w-7 h-7 bg-violet-500 text-white rounded-lg flex items-center justify-center text-xs font-bold">P</span>
+                          <h4 className="font-semibold text-violet-700">Plano</h4>
+                        </div>
+                        <div className="space-y-3 pl-9">
+                          {record.plano.conduta && (
+                            <p className="text-sm text-gray-600 leading-relaxed">{record.plano.conduta}</p>
+                          )}
+
+                          {/* Prescrições */}
+                          {record.plano.prescricoes && record.plano.prescricoes.length > 0 && (
+                            <div>
+                              <div className="flex items-center gap-2 mb-2">
+                                <Syringe className="w-4 h-4 text-violet-500" />
+                                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Prescrições</span>
+                              </div>
+                              <div className="space-y-2">
+                                {record.plano.prescricoes.map((rx, idx) => (
+                                  <div key={idx} className="prescription-card">
+                                    <div className="flex items-start justify-between">
+                                      <div>
+                                        <p className="text-sm font-semibold text-gray-800">
+                                          {rx.medicamento} {rx.concentracao && <span className="text-slate-500">{rx.concentracao}</span>}
+                                        </p>
+                                        <p className="text-xs text-slate-600">{rx.formaFarmaceutica}</p>
+                                      </div>
+                                      {rx.usoControlado && (
+                                        <span className="px-2 py-0.5 bg-red-100 text-red-700 rounded text-[10px] font-semibold uppercase">
+                                          Controlado
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div className="mt-2 pt-2 border-t border-slate-100 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-600">
+                                      <span>{rx.posologia}</span>
+                                      <span>Qtd: {rx.quantidade}</span>
+                                      {rx.viaAdministracao && <span>Via: {rx.viaAdministracao}</span>}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Info grid */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            {record.plano.prescricoesNaoMedicamentosas && record.plano.prescricoesNaoMedicamentosas.length > 0 && (
+                              <div className="p-3 bg-slate-50 rounded-lg">
+                                <p className="text-xs font-semibold text-slate-500 mb-1">Medidas não medicamentosas</p>
+                                <p className="text-sm text-gray-700">{record.plano.prescricoesNaoMedicamentosas.join(', ')}</p>
+                              </div>
+                            )}
+                            {record.plano.solicitacaoExames && record.plano.solicitacaoExames.length > 0 && (
+                              <div className="p-3 bg-slate-50 rounded-lg">
+                                <p className="text-xs font-semibold text-slate-500 mb-1">Exames solicitados</p>
+                                <p className="text-sm text-gray-700">{record.plano.solicitacaoExames.join(', ')}</p>
+                              </div>
+                            )}
+                            {record.plano.encaminhamentos && record.plano.encaminhamentos.length > 0 && (
+                              <div className="p-3 bg-slate-50 rounded-lg">
+                                <p className="text-xs font-semibold text-slate-500 mb-1">Encaminhamentos</p>
+                                <p className="text-sm text-gray-700">{record.plano.encaminhamentos.map(e => `${e.especialidade} (${e.motivo})`).join(', ')}</p>
+                              </div>
+                            )}
+                            {record.plano.orientacoes && (
+                              <div className="p-3 bg-slate-50 rounded-lg">
+                                <p className="text-xs font-semibold text-slate-500 mb-1">Orientações</p>
+                                <p className="text-sm text-gray-700">{record.plano.orientacoes}</p>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Atestado */}
+                          {record.plano.atestadoEmitido && (
+                            <div className="flex items-center gap-2 p-3 bg-violet-50 border border-violet-100 rounded-lg">
+                              <FileCheck className="w-4 h-4 text-violet-600" />
+                              <span className="text-sm font-medium text-violet-700">
+                                Atestado emitido: {record.plano.tipoAtestado?.replace('_', ' ')}
+                                {record.plano.diasAfastamento && ` - ${record.plano.diasAfastamento} dia(s)`}
+                              </span>
+                            </div>
+                          )}
+
+                          {/* Alertas */}
+                          {record.plano.alertasCuidados && record.plano.alertasCuidados.length > 0 && (
+                            <div className="alert-card-warning p-3">
+                              <div className="flex items-center gap-2">
+                                <AlertTriangle className="w-4 h-4 text-amber-600" />
+                                <span className="text-xs font-semibold text-amber-700">Alertas:</span>
+                              </div>
+                              <p className="text-sm text-amber-800 mt-1">{record.plano.alertasCuidados.join(', ')}</p>
+                            </div>
+                          )}
+
+                          {/* Retorno */}
+                          {(record.plano.retorno || record.plano.dataRetorno) && (
+                            <div className="flex items-center gap-2 p-3 bg-blue-50 border border-blue-100 rounded-lg">
+                              <CalendarCheck className="w-4 h-4 text-blue-600" />
+                              <span className="text-sm font-medium text-blue-700">
+                                Retorno: {record.plano.retorno}
+                                {record.plano.dataRetorno && ` (${formatDate(record.plano.dataRetorno)})`}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
@@ -841,23 +1078,34 @@ function MedicalRecordModal({ patientId, record, onClose, onSave }: MedicalRecor
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl w-full max-w-5xl max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between z-10">
-          <h2 className="text-xl font-semibold text-gray-900">
-            {record ? 'Editar Atendimento' : 'Novo Atendimento'}
-          </h2>
-          <button
-            onClick={onClose}
-            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg"
-          >
-            ×
-          </button>
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
+      <div className="medical-modal w-full max-w-5xl max-h-[90vh] overflow-y-auto animate-scale-in">
+        {/* Header Premium */}
+        <div className="medical-modal-header sticky top-0 z-10">
+          <div className="flex items-center justify-between relative z-10">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+                <Stethoscope className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-white">
+                  {record ? 'Editar Atendimento' : 'Novo Atendimento'}
+                </h2>
+                <p className="text-sm text-white/70">Registro SOAP completo</p>
+              </div>
+            </div>
+            <button
+              onClick={onClose}
+              className="p-2.5 bg-white/10 hover:bg-white/20 rounded-xl transition-all text-white"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {/* Informações Gerais do Atendimento */}
-          <div className="bg-gray-50 rounded-lg p-4">
+          <div className="bg-gradient-to-r from-slate-50 to-slate-100 rounded-xl p-5 border border-slate-200">
             <h3 className="text-sm font-semibold text-gray-700 mb-3">Informações do Atendimento</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
@@ -900,8 +1148,14 @@ function MedicalRecordModal({ patientId, record, onClose, onSave }: MedicalRecor
           </div>
 
           {/* SOAP - Subjective */}
-          <div className="border-l-4 border-sky-500 pl-4">
-            <h3 className="text-lg font-semibold text-sky-600 mb-3">S - Subjetivo</h3>
+          <div className="soap-section-s rounded-xl p-5">
+            <div className="flex items-center gap-3 mb-4">
+              <span className="w-10 h-10 bg-sky-500 text-white rounded-xl flex items-center justify-center text-lg font-bold shadow-lg shadow-sky-500/20">S</span>
+              <div>
+                <h3 className="text-lg font-bold text-sky-700">Subjetivo</h3>
+                <p className="text-xs text-sky-600/70">Relato do paciente</p>
+              </div>
+            </div>
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -1006,14 +1260,17 @@ function MedicalRecordModal({ patientId, record, onClose, onSave }: MedicalRecor
               </div>
 
               {/* Seção colapsável: Hábitos de Vida */}
-              <div className="border rounded-lg">
+              <div className="collapsible-section">
                 <button
                   type="button"
                   onClick={() => toggleSection('habitosVida')}
-                  className="w-full px-4 py-2 text-left text-sm font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-t-lg flex items-center justify-between"
+                  className="collapsible-header"
                 >
-                  <span>Hábitos de Vida</span>
-                  <span>{expandedSections.habitosVida ? '−' : '+'}</span>
+                  <div className="flex items-center gap-2">
+                    <Activity className="w-4 h-4 text-sky-500" />
+                    <span className="text-sm font-semibold text-slate-700">Hábitos de Vida</span>
+                  </div>
+                  {expandedSections.habitosVida ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
                 </button>
                 {expandedSections.habitosVida && (
                   <div className="p-4 space-y-3">
@@ -1084,14 +1341,17 @@ function MedicalRecordModal({ patientId, record, onClose, onSave }: MedicalRecor
               </div>
 
               {/* Seção colapsável: Histórico Patológico */}
-              <div className="border rounded-lg">
+              <div className="collapsible-section">
                 <button
                   type="button"
                   onClick={() => toggleSection('historicoPregrasso')}
-                  className="w-full px-4 py-2 text-left text-sm font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-t-lg flex items-center justify-between"
+                  className="collapsible-header"
                 >
-                  <span>Histórico Patológico Pregresso</span>
-                  <span>{expandedSections.historicoPregrasso ? '−' : '+'}</span>
+                  <div className="flex items-center gap-2">
+                    <Clipboard className="w-4 h-4 text-sky-500" />
+                    <span className="text-sm font-semibold text-slate-700">Histórico Patológico Pregresso</span>
+                  </div>
+                  {expandedSections.historicoPregrasso ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
                 </button>
                 {expandedSections.historicoPregrasso && (
                   <div className="p-4 space-y-3">
@@ -1144,8 +1404,14 @@ function MedicalRecordModal({ patientId, record, onClose, onSave }: MedicalRecor
           </div>
 
           {/* SOAP - Objective */}
-          <div className="border-l-4 border-green-500 pl-4">
-            <h3 className="text-lg font-semibold text-green-600 mb-3">O - Objetivo</h3>
+          <div className="soap-section-o rounded-xl p-5">
+            <div className="flex items-center gap-3 mb-4">
+              <span className="w-10 h-10 bg-emerald-500 text-white rounded-xl flex items-center justify-center text-lg font-bold shadow-lg shadow-emerald-500/20">O</span>
+              <div>
+                <h3 className="text-lg font-bold text-emerald-700">Objetivo</h3>
+                <p className="text-xs text-emerald-600/70">Exame físico e sinais vitais</p>
+              </div>
+            </div>
             <div className="space-y-4">
               {/* Estado Geral */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -1338,14 +1604,17 @@ function MedicalRecordModal({ patientId, record, onClose, onSave }: MedicalRecor
               </div>
 
               {/* Seção colapsável: Exame Físico Detalhado */}
-              <div className="border rounded-lg">
+              <div className="collapsible-section">
                 <button
                   type="button"
                   onClick={() => toggleSection('exameFisicoDetalhado')}
-                  className="w-full px-4 py-2 text-left text-sm font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-t-lg flex items-center justify-between"
+                  className="collapsible-header"
                 >
-                  <span>Exame Físico Detalhado por Sistemas</span>
-                  <span>{expandedSections.exameFisicoDetalhado ? '−' : '+'}</span>
+                  <div className="flex items-center gap-2">
+                    <Stethoscope className="w-4 h-4 text-emerald-500" />
+                    <span className="text-sm font-semibold text-slate-700">Exame Físico Detalhado por Sistemas</span>
+                  </div>
+                  {expandedSections.exameFisicoDetalhado ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
                 </button>
                 {expandedSections.exameFisicoDetalhado && (
                   <div className="p-4 space-y-3">
@@ -1489,8 +1758,14 @@ function MedicalRecordModal({ patientId, record, onClose, onSave }: MedicalRecor
           </div>
 
           {/* SOAP - Assessment */}
-          <div className="border-l-4 border-orange-500 pl-4">
-            <h3 className="text-lg font-semibold text-orange-600 mb-3">A - Avaliação</h3>
+          <div className="soap-section-a rounded-xl p-5">
+            <div className="flex items-center gap-3 mb-4">
+              <span className="w-10 h-10 bg-amber-500 text-white rounded-xl flex items-center justify-center text-lg font-bold shadow-lg shadow-amber-500/20">A</span>
+              <div>
+                <h3 className="text-lg font-bold text-amber-700">Avaliação</h3>
+                <p className="text-xs text-amber-600/70">Diagnóstico e hipóteses</p>
+              </div>
+            </div>
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -1589,8 +1864,14 @@ function MedicalRecordModal({ patientId, record, onClose, onSave }: MedicalRecor
           </div>
 
           {/* SOAP - Plan */}
-          <div className="border-l-4 border-purple-500 pl-4">
-            <h3 className="text-lg font-semibold text-purple-600 mb-3">P - Plano</h3>
+          <div className="soap-section-p rounded-xl p-5">
+            <div className="flex items-center gap-3 mb-4">
+              <span className="w-10 h-10 bg-violet-500 text-white rounded-xl flex items-center justify-center text-lg font-bold shadow-lg shadow-violet-500/20">P</span>
+              <div>
+                <h3 className="text-lg font-bold text-violet-700">Plano</h3>
+                <p className="text-xs text-violet-600/70">Conduta e tratamento</p>
+              </div>
+            </div>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Conduta</label>
@@ -1880,14 +2161,17 @@ function MedicalRecordModal({ patientId, record, onClose, onSave }: MedicalRecor
               </div>
 
               {/* Seção colapsável: Plano Terapêutico */}
-              <div className="border rounded-lg">
+              <div className="collapsible-section">
                 <button
                   type="button"
                   onClick={() => toggleSection('planoTerapeutico')}
-                  className="w-full px-4 py-2 text-left text-sm font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-t-lg flex items-center justify-between"
+                  className="collapsible-header"
                 >
-                  <span>Plano Terapêutico Detalhado</span>
-                  <span>{expandedSections.planoTerapeutico ? '−' : '+'}</span>
+                  <div className="flex items-center gap-2">
+                    <ClipboardList className="w-4 h-4 text-violet-500" />
+                    <span className="text-sm font-semibold text-slate-700">Plano Terapêutico Detalhado</span>
+                  </div>
+                  {expandedSections.planoTerapeutico ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
                 </button>
                 {expandedSections.planoTerapeutico && (
                   <div className="p-4 space-y-3">
@@ -1953,11 +2237,19 @@ function MedicalRecordModal({ patientId, record, onClose, onSave }: MedicalRecor
           </div>
 
           {/* Actions */}
-          <div className="flex gap-3 justify-end pt-4 border-t border-gray-200">
-            <button type="button" onClick={onClose} className="btn-secondary">
+          <div className="flex gap-3 justify-end pt-6 border-t border-gray-100 mt-6">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-semibold transition-all"
+            >
               Cancelar
             </button>
-            <button type="submit" className="btn-primary">
+            <button
+              type="submit"
+              className="px-6 py-2.5 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white rounded-xl font-semibold shadow-lg shadow-primary-500/25 transition-all flex items-center gap-2"
+            >
+              <FileCheck className="w-4 h-4" />
               {record ? 'Salvar alterações' : 'Registrar atendimento'}
             </button>
           </div>
