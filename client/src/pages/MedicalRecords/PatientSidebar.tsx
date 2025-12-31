@@ -19,7 +19,7 @@ interface PatientSidebarProps {
 
 export function PatientSidebar({ patient, records }: PatientSidebarProps) {
   return (
-    <div className="lg:col-span-1 space-y-4">
+    <div className="space-y-4 lg:sticky lg:top-4 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto lg:pr-2">
       {/* Profile Card Premium */}
       <div className="patient-profile-card p-5">
         <div className="flex items-start gap-4 mb-5">
