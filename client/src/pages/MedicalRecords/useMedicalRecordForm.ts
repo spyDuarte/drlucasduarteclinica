@@ -22,6 +22,14 @@ const INITIAL_SECTIONS: ExpandedSections = {
   planoTerapeutico: false
 };
 
+export interface FormErrors {
+  queixaPrincipal?: string;
+  historicoDoencaAtual?: string;
+  exameFisico?: string;
+  cid10?: string;
+  conduta?: string;
+}
+
 export function useMedicalRecordForm(record: MedicalRecord | null) {
   const [formData, setFormData] = useState<MedicalRecordFormData>(() =>
     createInitialFormData(record)
@@ -29,13 +37,56 @@ export function useMedicalRecordForm(record: MedicalRecord | null) {
 
   const [newPrescription, setNewPrescription] = useState<PrescriptionData>(INITIAL_PRESCRIPTION);
   const [expandedSections, setExpandedSections] = useState<ExpandedSections>(INITIAL_SECTIONS);
+  const [formErrors, setFormErrors] = useState<FormErrors>({});
 
   const updateField = useCallback(<K extends keyof MedicalRecordFormData>(
     field: K,
     value: MedicalRecordFormData[K]
   ) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+    // Limpa o erro do campo quando o usuário editar
+    if (field in formErrors) {
+      setFormErrors(prev => ({ ...prev, [field]: undefined }));
+    }
+  }, [formErrors]);
+
+  const clearError = useCallback((field: keyof FormErrors) => {
+    setFormErrors(prev => ({ ...prev, [field]: undefined }));
   }, []);
+
+  const validateForm = useCallback((): boolean => {
+    const errors: FormErrors = {};
+
+    if (!formData.queixaPrincipal.trim()) {
+      errors.queixaPrincipal = 'Queixa principal é obrigatória';
+    }
+
+    if (!formData.historicoDoencaAtual.trim()) {
+      errors.historicoDoencaAtual = 'Histórico da doença atual é obrigatório';
+    }
+
+    if (!formData.exameFisico.trim()) {
+      errors.exameFisico = 'Exame físico é obrigatório';
+    }
+
+    if (!formData.cid10.trim()) {
+      errors.cid10 = 'CID-10 é obrigatório para o registro do atendimento';
+    } else {
+      // Validação básica do formato CID-10 (letra seguida de números)
+      const cids = formData.cid10.split(',').map(c => c.trim()).filter(Boolean);
+      const invalidCids = cids.filter(cid => !/^[A-Z]\d{2,3}(\.\d{1,2})?$/i.test(cid));
+      if (invalidCids.length > 0) {
+        errors.cid10 = `Formato de CID-10 inválido: ${invalidCids.join(', ')}. Use formato: A00, B12.3, etc.`;
+      }
+    }
+
+    if (!formData.conduta.trim()) {
+      errors.conduta = 'Conduta é obrigatória';
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  }, [formData]);
 
   const toggleSection = useCallback((section: keyof ExpandedSections) => {
     setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
@@ -190,6 +241,9 @@ export function useMedicalRecordForm(record: MedicalRecord | null) {
     removePrescription,
     expandedSections,
     toggleSection,
-    buildRecordData
+    buildRecordData,
+    formErrors,
+    validateForm,
+    clearError
   };
 }

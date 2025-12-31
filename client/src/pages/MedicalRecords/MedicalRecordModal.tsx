@@ -9,7 +9,7 @@ import {
   FileCheck
 } from 'lucide-react';
 import type { MedicalRecord } from '../../types';
-import { useMedicalRecordForm } from './useMedicalRecordForm';
+import { useMedicalRecordForm, type FormErrors } from './useMedicalRecordForm';
 import type { PrescriptionData } from './types';
 
 interface MedicalRecordModalProps {
@@ -29,11 +29,23 @@ export function MedicalRecordModal({ patientId, record, onClose, onSave }: Medic
     removePrescription,
     expandedSections,
     toggleSection,
-    buildRecordData
+    buildRecordData,
+    formErrors,
+    validateForm
   } = useMedicalRecordForm(record);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!validateForm()) {
+      // Rola para o primeiro erro
+      const firstErrorField = document.querySelector('.field-error');
+      if (firstErrorField) {
+        firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      return;
+    }
+
     onSave(buildRecordData(patientId));
   };
 
@@ -73,6 +85,7 @@ export function MedicalRecordModal({ patientId, record, onClose, onSave }: Medic
             updateField={updateField}
             expandedSections={expandedSections}
             toggleSection={toggleSection}
+            formErrors={formErrors}
           />
 
           <ObjectiveSection
@@ -80,9 +93,10 @@ export function MedicalRecordModal({ patientId, record, onClose, onSave }: Medic
             updateField={updateField}
             expandedSections={expandedSections}
             toggleSection={toggleSection}
+            formErrors={formErrors}
           />
 
-          <AssessmentSection formData={formData} updateField={updateField} />
+          <AssessmentSection formData={formData} updateField={updateField} formErrors={formErrors} />
 
           <PlanSection
             formData={formData}
@@ -93,6 +107,7 @@ export function MedicalRecordModal({ patientId, record, onClose, onSave }: Medic
             setNewPrescription={setNewPrescription}
             addPrescription={addPrescription}
             removePrescription={removePrescription}
+            formErrors={formErrors}
           />
 
           {/* Actions */}
@@ -122,6 +137,7 @@ export function MedicalRecordModal({ patientId, record, onClose, onSave }: Medic
 interface FormSectionProps {
   formData: ReturnType<typeof useMedicalRecordForm>['formData'];
   updateField: ReturnType<typeof useMedicalRecordForm>['updateField'];
+  formErrors?: FormErrors;
 }
 
 function GeneralInfoSection({ formData, updateField }: FormSectionProps) {
@@ -174,9 +190,10 @@ function GeneralInfoSection({ formData, updateField }: FormSectionProps) {
 interface ExpandableSectionProps extends FormSectionProps {
   expandedSections: ReturnType<typeof useMedicalRecordForm>['expandedSections'];
   toggleSection: ReturnType<typeof useMedicalRecordForm>['toggleSection'];
+  formErrors: FormErrors;
 }
 
-function SubjectiveSection({ formData, updateField, expandedSections, toggleSection }: ExpandableSectionProps) {
+function SubjectiveSection({ formData, updateField, expandedSections, toggleSection, formErrors }: ExpandableSectionProps) {
   return (
     <div className="soap-section-s rounded-xl p-5">
       <div className="flex items-center gap-3 mb-4">
@@ -188,15 +205,20 @@ function SubjectiveSection({ formData, updateField, expandedSections, toggleSect
       </div>
       <div className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Queixa principal</label>
+          <div className={formErrors.queixaPrincipal ? 'field-error' : ''}>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Queixa principal <span className="text-red-500">*</span>
+            </label>
             <input
               type="text"
               value={formData.queixaPrincipal}
               onChange={e => updateField('queixaPrincipal', e.target.value)}
-              className="input-field"
+              className={`input-field ${formErrors.queixaPrincipal ? 'border-red-500 focus:ring-red-500' : ''}`}
               placeholder="Motivo principal da consulta"
             />
+            {formErrors.queixaPrincipal && (
+              <p className="text-red-500 text-xs mt-1">{formErrors.queixaPrincipal}</p>
+            )}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Duração dos sintomas</label>
@@ -210,15 +232,20 @@ function SubjectiveSection({ formData, updateField, expandedSections, toggleSect
           </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">História da doença atual</label>
+        <div className={formErrors.historicoDoencaAtual ? 'field-error' : ''}>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            História da doença atual <span className="text-red-500">*</span>
+          </label>
           <textarea
             value={formData.historicoDoencaAtual}
             onChange={e => updateField('historicoDoencaAtual', e.target.value)}
-            className="input-field"
+            className={`input-field ${formErrors.historicoDoencaAtual ? 'border-red-500 focus:ring-red-500' : ''}`}
             rows={3}
             placeholder="Descreva a evolução dos sintomas..."
           />
+          {formErrors.historicoDoencaAtual && (
+            <p className="text-red-500 text-xs mt-1">{formErrors.historicoDoencaAtual}</p>
+          )}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -337,7 +364,7 @@ function SubjectiveSection({ formData, updateField, expandedSections, toggleSect
 }
 
 // Objective Section
-function ObjectiveSection({ formData, updateField, expandedSections, toggleSection }: ExpandableSectionProps) {
+function ObjectiveSection({ formData, updateField, expandedSections, toggleSection, formErrors }: ExpandableSectionProps) {
   return (
     <div className="soap-section-o rounded-xl p-5">
       <div className="flex items-center gap-3 mb-4">
@@ -399,15 +426,20 @@ function ObjectiveSection({ formData, updateField, expandedSections, toggleSecti
           </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Exame físico geral</label>
+        <div className={formErrors.exameFisico ? 'field-error' : ''}>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Exame físico geral <span className="text-red-500">*</span>
+          </label>
           <textarea
             value={formData.exameFisico}
             onChange={e => updateField('exameFisico', e.target.value)}
-            className="input-field"
+            className={`input-field ${formErrors.exameFisico ? 'border-red-500 focus:ring-red-500' : ''}`}
             rows={3}
             placeholder="Descreva os achados do exame físico..."
           />
+          {formErrors.exameFisico && (
+            <p className="text-red-500 text-xs mt-1">{formErrors.exameFisico}</p>
+          )}
         </div>
 
         {/* Exame Físico Detalhado */}
@@ -449,7 +481,7 @@ function ObjectiveSection({ formData, updateField, expandedSections, toggleSecti
 }
 
 // Assessment Section
-function AssessmentSection({ formData, updateField }: FormSectionProps) {
+function AssessmentSection({ formData, updateField, formErrors }: FormSectionProps) {
   return (
     <div className="soap-section-a rounded-xl p-5">
       <div className="flex items-center gap-3 mb-4">
@@ -462,7 +494,22 @@ function AssessmentSection({ formData, updateField }: FormSectionProps) {
       <div className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <InputField label="Diagnóstico principal" value={formData.diagnosticoPrincipal} onChange={v => updateField('diagnosticoPrincipal', v)} placeholder="Diagnóstico mais provável" isSmall={false} />
-          <InputField label="CID-10 *" value={formData.cid10} onChange={v => updateField('cid10', v)} placeholder="Ex: J11, R50.9 (separados por vírgula)" required isSmall={false} />
+          <div className={formErrors?.cid10 ? 'field-error' : ''}>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              CID-10 <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={formData.cid10}
+              onChange={e => updateField('cid10', e.target.value)}
+              className={`input-field ${formErrors?.cid10 ? 'border-red-500 focus:ring-red-500' : ''}`}
+              placeholder="Ex: J11, R50.9 (separados por vírgula)"
+              required
+            />
+            {formErrors?.cid10 && (
+              <p className="text-red-500 text-xs mt-1">{formErrors.cid10}</p>
+            )}
+          </div>
         </div>
 
         <InputField label="Hipóteses diagnósticas (separadas por vírgula)" value={formData.hipotesesDiagnosticas} onChange={v => updateField('hipotesesDiagnosticas', v)} placeholder="Lista de possíveis diagnósticos" isSmall={false} />
@@ -497,9 +544,10 @@ interface PlanSectionProps extends ExpandableSectionProps {
   setNewPrescription: (data: PrescriptionData) => void;
   addPrescription: () => void;
   removePrescription: (index: number) => void;
+  formErrors: FormErrors;
 }
 
-function PlanSection({ formData, updateField, expandedSections, toggleSection, newPrescription, setNewPrescription, addPrescription, removePrescription }: PlanSectionProps) {
+function PlanSection({ formData, updateField, expandedSections, toggleSection, newPrescription, setNewPrescription, addPrescription, removePrescription, formErrors }: PlanSectionProps) {
   return (
     <div className="soap-section-p rounded-xl p-5">
       <div className="flex items-center gap-3 mb-4">
@@ -510,15 +558,20 @@ function PlanSection({ formData, updateField, expandedSections, toggleSection, n
         </div>
       </div>
       <div className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Conduta</label>
+        <div className={formErrors.conduta ? 'field-error' : ''}>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Conduta <span className="text-red-500">*</span>
+          </label>
           <textarea
             value={formData.conduta}
             onChange={e => updateField('conduta', e.target.value)}
-            className="input-field"
+            className={`input-field ${formErrors.conduta ? 'border-red-500 focus:ring-red-500' : ''}`}
             rows={3}
             placeholder="Descreva o plano terapêutico..."
           />
+          {formErrors.conduta && (
+            <p className="text-red-500 text-xs mt-1">{formErrors.conduta}</p>
+          )}
         </div>
 
         {/* Prescriptions */}
