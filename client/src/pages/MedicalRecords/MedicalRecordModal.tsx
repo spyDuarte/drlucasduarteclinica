@@ -38,8 +38,8 @@ export function MedicalRecordModal({ patientId, record, onClose, onSave }: Medic
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
-      <div className="medical-modal w-full max-w-5xl max-h-[90vh] overflow-y-auto animate-scale-in">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] p-2 sm:p-4 animate-fade-in">
+      <div className="medical-modal w-full max-w-5xl max-h-[90vh] sm:max-h-[85vh] overflow-y-auto animate-scale-in">
         {/* Header */}
         <div className="medical-modal-header sticky top-0 z-10">
           <div className="flex items-center justify-between relative z-10">
