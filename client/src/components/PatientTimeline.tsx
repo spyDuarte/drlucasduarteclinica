@@ -47,7 +47,6 @@ export function PatientTimeline({ medicalRecords, patientName, showLimit }: Pati
               key={record.id}
               record={record}
               isFirst={index === 0}
-              isLast={index === displayedRecords.length - 1}
             />
           ))}
         </div>
@@ -64,7 +63,7 @@ export function PatientTimeline({ medicalRecords, patientName, showLimit }: Pati
   );
 }
 
-function TimelineItem({ record, isFirst, isLast }: { record: MedicalRecord; isFirst: boolean; isLast: boolean }) {
+function TimelineItem({ record, isFirst }: { record: MedicalRecord; isFirst: boolean }) {
   const recordDate = new Date(record.data);
   const now = new Date();
   const daysAgo = Math.floor((now.getTime() - recordDate.getTime()) / (1000 * 60 * 60 * 24));

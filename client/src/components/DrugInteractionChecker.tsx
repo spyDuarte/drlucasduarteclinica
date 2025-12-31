@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useMemo, useEffect } from 'react';
 import { AlertTriangle, Shield, Info, Pill } from 'lucide-react';
-import { checkDrugInteractions, checkAgainstPatientMedications, isControlledMedication } from '../utils/medicationDatabase';
+import { checkAgainstPatientMedications, isControlledMedication } from '../utils/medicationDatabase';
 import type { Prescription } from '../types';
 
 interface DrugInteractionCheckerProps {
@@ -14,24 +14,16 @@ export function DrugInteractionChecker({
   patientMedications = [],
   onInteractionFound
 }: DrugInteractionCheckerProps) {
-  const [interactions, setInteractions] = useState<Array<{
-    medication1: string;
-    medication2: string;
-    severity: 'mild' | 'moderate' | 'severe';
-    description: string;
-    recommendation: string;
-  }>>([]);
+  const interactions = useMemo(() => {
+    const prescribedMeds = prescriptions.map(p => p.medicamento);
+    return checkAgainstPatientMedications(prescribedMeds, patientMedications);
+  }, [prescriptions, patientMedications]);
 
   useEffect(() => {
-    const prescribedMeds = prescriptions.map(p => p.medicamento);
-    const allInteractions = checkAgainstPatientMedications(prescribedMeds, patientMedications);
-
-    setInteractions(allInteractions);
-
     if (onInteractionFound) {
-      onInteractionFound(allInteractions.length > 0);
+      onInteractionFound(interactions.length > 0);
     }
-  }, [prescriptions, patientMedications, onInteractionFound]);
+  }, [interactions, onInteractionFound]);
 
   // Conta medicamentos controlados
   const controlledCount = prescriptions.filter(p =>
