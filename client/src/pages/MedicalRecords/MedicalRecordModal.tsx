@@ -50,8 +50,8 @@ export function MedicalRecordModal({ patientId, record, onClose, onSave }: Medic
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] p-2 sm:p-4 animate-fade-in overflow-y-auto">
-      <div className="medical-modal w-full max-w-5xl my-4 animate-scale-in">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] p-2 sm:p-4 animate-fade-in overflow-y-auto overscroll-contain">
+      <div className="medical-modal w-full max-w-5xl my-4 sm:my-8 animate-scale-in max-h-[95vh] flex flex-col">
         {/* Header */}
         <div className="medical-modal-header sticky top-0 z-10">
           <div className="flex items-center justify-between relative z-10">
@@ -75,7 +75,7 @@ export function MedicalRecordModal({ patientId, record, onClose, onSave }: Medic
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto overscroll-contain p-6 space-y-6 scroll-smooth">
           {/* Informações Gerais */}
           <GeneralInfoSection formData={formData} updateField={updateField} />
 

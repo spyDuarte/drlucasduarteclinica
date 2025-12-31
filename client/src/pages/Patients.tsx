@@ -121,7 +121,8 @@ export default function Patients() {
       </div>
 
       {/* Patients List */}
-      <div className="card p-0 overflow-hidden shadow-lg">
+      <div className="card p-0 overflow-hidden shadow-lg flex flex-col max-h-[calc(100vh-280px)]">
+        <div className="overflow-x-auto overflow-y-auto flex-1 scroll-smooth">
         <table className="w-full">
           <thead className="bg-gradient-to-r from-gray-50 to-gray-50/50 border-b border-gray-200">
             <tr>
@@ -258,6 +259,7 @@ export default function Patients() {
             onItemsPerPageChange={pagination.setItemsPerPage}
           />
         )}
+        </div>
       </div>
 
       {/* Patient Modal */}
