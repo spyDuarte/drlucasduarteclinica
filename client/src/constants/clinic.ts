@@ -12,6 +12,7 @@ export const STORAGE_KEYS = {
   APPOINTMENTS: 'clinica_appointments',
   RECORDS: 'clinica_records',
   PAYMENTS: 'clinica_payments',
+  DOCUMENTS: 'clinica_documents',
 } as const;
 
 export const BRAZILIAN_STATES = [
@@ -52,4 +53,30 @@ export const PAYMENT_STATUS = {
   pago: 'Pago',
   cancelado: 'Cancelado',
   reembolsado: 'Reembolsado',
+} as const;
+
+// Informações da Clínica para documentos
+export const CLINIC_INFO = {
+  nome: 'Clínica Dr. Lucas Duarte',
+  endereco: 'Av. Principal, 1000 - Centro',
+  cidade: 'São Paulo - SP',
+  cep: '01310-100',
+  telefone: '(11) 3000-0000',
+  email: 'contato@drlucasduarte.com.br',
+  cnpj: '00.000.000/0001-00',
+} as const;
+
+export const DOCUMENT_TYPES = {
+  atestado_medico: 'Atestado Médico',
+  declaracao_comparecimento: 'Declaração de Comparecimento',
+  laudo_medico: 'Laudo Médico',
+  receita: 'Receita Médica',
+  solicitacao_exames: 'Solicitação de Exames',
+  encaminhamento: 'Encaminhamento',
+} as const;
+
+export const DOCUMENT_STATUS = {
+  rascunho: 'Rascunho',
+  emitido: 'Emitido',
+  cancelado: 'Cancelado',
 } as const;

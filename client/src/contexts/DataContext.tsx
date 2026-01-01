@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback, useMemo, type ReactNode } from 'react';
-import type { Patient, Appointment, MedicalRecord, Payment, DashboardStats } from '../types';
+import type { Patient, Appointment, MedicalRecord, Payment, DashboardStats, MedicalDocument, DocumentType } from '../types';
 import { generateId, doTimesOverlap, normalizeForSearch, sortBy } from '../utils/helpers';
 import { STORAGE_KEYS } from '../constants/clinic';
 import {
@@ -49,8 +49,19 @@ interface DataContextType {
   // Dashboard
   getDashboardStats: () => DashboardStats;
 
+  // Documentos Médicos
+  documents: MedicalDocument[];
+  addDocument: (document: Omit<MedicalDocument, 'id' | 'createdAt' | 'updatedAt'>) => MedicalDocument;
+  updateDocument: (id: string, document: Partial<MedicalDocument>) => void;
+  deleteDocument: (id: string) => void;
+  getDocument: (id: string) => MedicalDocument | undefined;
+  getDocumentsByPatient: (patientId: string) => MedicalDocument[];
+  getDocumentsByType: (type: DocumentType) => MedicalDocument[];
+  emitDocument: (id: string) => void;
+  cancelDocument: (id: string) => void;
+
   // Utilitários
-  exportData: () => { patients: Patient[]; appointments: Appointment[]; medicalRecords: MedicalRecord[]; payments: Payment[] };
+  exportData: () => { patients: Patient[]; appointments: Appointment[]; medicalRecords: MedicalRecord[]; payments: Payment[]; documents: MedicalDocument[] };
   clearAllData: () => void;
 }
 
@@ -105,6 +116,18 @@ export function DataProvider({ children }: { children: ReactNode }) {
     return generateDemoPayments();
   });
 
+  const [documents, setDocuments] = useState<MedicalDocument[]>(() => {
+    const savedDocuments = localStorage.getItem(STORAGE_KEYS.DOCUMENTS);
+    if (savedDocuments) {
+      try {
+        return JSON.parse(savedDocuments);
+      } catch {
+        return [];
+      }
+    }
+    return [];
+  });
+
   // Função auxiliar para salvar dados no localStorage com tratamento de erros
   const safeSetItem = (key: string, data: unknown) => {
     try {
@@ -134,10 +157,12 @@ export function DataProvider({ children }: { children: ReactNode }) {
       if (payments.length > 0) {
         safeSetItem(STORAGE_KEYS.PAYMENTS, payments);
       }
+      // Salva documentos mesmo se vazio para limpar storage quando necessário
+      safeSetItem(STORAGE_KEYS.DOCUMENTS, documents);
     }, 300); // Debounce de 300ms
 
     return () => clearTimeout(timeoutId);
-  }, [patients, appointments, medicalRecords, payments]);
+  }, [patients, appointments, medicalRecords, payments, documents]);
 
   // Funções de Pacientes
   const addPatient = useCallback((patientData: Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>) => {
@@ -377,6 +402,65 @@ export function DataProvider({ children }: { children: ReactNode }) {
     ));
   }, []);
 
+  // Funções de Documentos Médicos
+  const addDocument = useCallback((documentData: Omit<MedicalDocument, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const now = new Date().toISOString();
+    const newDocument: MedicalDocument = {
+      ...documentData,
+      id: generateId(),
+      createdAt: now,
+      updatedAt: now
+    };
+    setDocuments(prev => [...prev, newDocument]);
+    return newDocument;
+  }, []);
+
+  const updateDocument = useCallback((id: string, documentData: Partial<MedicalDocument>) => {
+    setDocuments(prev => prev.map(d =>
+      d.id === id
+        ? { ...d, ...documentData, updatedAt: new Date().toISOString() }
+        : d
+    ));
+  }, []);
+
+  const deleteDocument = useCallback((id: string) => {
+    setDocuments(prev => prev.filter(d => d.id !== id));
+  }, []);
+
+  const getDocument = useCallback((id: string) => documents.find(d => d.id === id), [documents]);
+
+  const getDocumentsByPatient = useCallback((patientId: string) =>
+    documents
+      .filter(d => d.patientId === patientId)
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
+    [documents]
+  );
+
+  const getDocumentsByType = useCallback((type: DocumentType) =>
+    documents
+      .filter(d => d.type === type)
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
+    [documents]
+  );
+
+  const emitDocument = useCallback((id: string) => {
+    const now = new Date().toISOString();
+    setDocuments(prev => prev.map(d =>
+      d.id === id
+        ? { ...d, status: 'emitido' as const, emitidoAt: now, updatedAt: now }
+        : d
+    ));
+  }, []);
+
+  const cancelDocument = useCallback((id: string) => {
+    const now = new Date().toISOString();
+    setDocuments(prev => prev.map(d =>
+      d.id === id
+        ? { ...d, status: 'cancelado' as const, updatedAt: now }
+        : d
+    ));
+  }, []);
+
   // Dashboard Stats - memoizado para evitar recálculos desnecessários
   const getDashboardStats = useCallback((): DashboardStats => {
     const now = new Date();
@@ -437,9 +521,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
       patients,
       appointments,
       medicalRecords,
-      payments
+      payments,
+      documents
     };
-  }, [patients, appointments, medicalRecords, payments]);
+  }, [patients, appointments, medicalRecords, payments, documents]);
 
   // Limpa todos os dados (volta ao estado inicial)
   const clearAllData = useCallback(() => {
@@ -448,12 +533,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setAppointments(generateDemoAppointments());
       setMedicalRecords(DEMO_MEDICAL_RECORDS);
       setPayments(generateDemoPayments());
+      setDocuments([]);
 
       // Limpa localStorage
       localStorage.removeItem(STORAGE_KEYS.PATIENTS);
       localStorage.removeItem(STORAGE_KEYS.APPOINTMENTS);
       localStorage.removeItem(STORAGE_KEYS.RECORDS);
       localStorage.removeItem(STORAGE_KEYS.PAYMENTS);
+      localStorage.removeItem(STORAGE_KEYS.DOCUMENTS);
     }
   }, []);
 
@@ -487,6 +574,15 @@ export function DataProvider({ children }: { children: ReactNode }) {
     getPaymentsByPatient,
     getPendingPayments,
     markPaymentAsPaid,
+    documents,
+    addDocument,
+    updateDocument,
+    deleteDocument,
+    getDocument,
+    getDocumentsByPatient,
+    getDocumentsByType,
+    emitDocument,
+    cancelDocument,
     getDashboardStats,
     exportData,
     clearAllData
@@ -496,6 +592,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     getAppointmentsByDate, getAppointmentsByPatient, checkAppointmentConflict, getUpcomingAppointments, getTodayAppointments,
     medicalRecords, addMedicalRecord, updateMedicalRecord, getMedicalRecordsByPatient, getLastMedicalRecord,
     payments, addPayment, updatePayment, getPaymentsByPatient, getPendingPayments, markPaymentAsPaid,
+    documents, addDocument, updateDocument, deleteDocument, getDocument, getDocumentsByPatient, getDocumentsByType, emitDocument, cancelDocument,
     getDashboardStats, exportData, clearAllData
   ]);
 

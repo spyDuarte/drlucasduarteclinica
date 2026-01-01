@@ -11,7 +11,8 @@ import {
   Stethoscope,
   Activity,
   X,
-  Sparkles
+  Sparkles,
+  FileSignature
 } from 'lucide-react';
 import { BrandIcon, NavIcon } from './Icon';
 
@@ -25,6 +26,7 @@ const menuItems: Array<{
   { path: '/pacientes', label: 'Pacientes', icon: Users, roles: ['medico', 'secretaria'] },
   { path: '/agenda', label: 'Agenda', icon: Calendar, roles: ['medico', 'secretaria'] },
   { path: '/prontuarios', label: 'Prontuários', icon: FileText, roles: ['medico'] },
+  { path: '/documentos', label: 'Documentos', icon: FileSignature, roles: ['medico'] },
   { path: '/financeiro', label: 'Financeiro', icon: DollarSign, roles: ['medico', 'secretaria'] },
   { path: '/relatorios', label: 'Relatórios', icon: BarChart3, roles: ['medico'] },
 ];

@@ -13,6 +13,7 @@ const Agenda = lazy(() => import('./pages/Agenda'));
 const MedicalRecords = lazy(() => import('./pages/MedicalRecords'));
 const Financial = lazy(() => import('./pages/Financial'));
 const Reports = lazy(() => import('./pages/Reports'));
+const Documents = lazy(() => import('./pages/Documents'));
 
 // Componente de loading para Suspense
 function PageLoader() {
@@ -94,6 +95,14 @@ function AppRoutes() {
             }
           />
           <Route path="financeiro" element={<Financial />} />
+          <Route
+            path="documentos"
+            element={
+              <ProtectedRoute allowedRoles={['medico']}>
+                <Documents />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="relatorios"
             element={
