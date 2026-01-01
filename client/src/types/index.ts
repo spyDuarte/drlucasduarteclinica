@@ -446,6 +446,67 @@ export interface Atestado {
   createdAt: string;
 }
 
+// Sistema de Documentos Médicos (Laudos, Declarações, Atestados)
+export type DocumentType =
+  | 'atestado_medico'
+  | 'declaracao_comparecimento'
+  | 'laudo_medico'
+  | 'receita'
+  | 'solicitacao_exames'
+  | 'encaminhamento';
+
+export type DocumentStatus = 'rascunho' | 'emitido' | 'cancelado';
+
+export interface MedicalDocument {
+  id: string;
+  patientId: string;
+  medicalRecordId?: string;
+  type: DocumentType;
+  status: DocumentStatus;
+
+  // Informações do documento
+  title: string;
+  content: string;
+
+  // Dados específicos por tipo
+  // Atestado
+  diasAfastamento?: number;
+  dataInicio?: string;
+  dataFim?: string;
+  cid10?: string[];
+  exibirCid?: boolean;
+
+  // Laudo
+  finalidade?: string;
+  conclusao?: string;
+
+  // Declaração de comparecimento
+  horaChegada?: string;
+  horaSaida?: string;
+
+  // Solicitação de exames
+  examesSolicitados?: string[];
+  indicacaoClinica?: string;
+
+  // Encaminhamento
+  especialidade?: string;
+  motivoEncaminhamento?: string;
+  urgencia?: 'eletivo' | 'urgente' | 'emergencia';
+
+  // Prescrição
+  prescricoes?: Prescription[];
+
+  // Metadados
+  medicoNome?: string;
+  medicoCRM?: string;
+  medicoEspecialidade?: string;
+
+  createdAt: string;
+  updatedAt: string;
+  emitidoAt?: string;
+  emitidoPor?: string;
+}
+
 // Módulo Financeiro
 export type PaymentStatus = 'pendente' | 'pago' | 'cancelado' | 'reembolsado';
 export type PaymentMethod = 'dinheiro' | 'cartao_credito' | 'cartao_debito' | 'pix' | 'convenio' | 'transferencia';
