@@ -73,10 +73,64 @@ export const DOCUMENT_TYPES = {
   receita: 'Receita Médica',
   solicitacao_exames: 'Solicitação de Exames',
   encaminhamento: 'Encaminhamento',
+  termo_consentimento: 'Termo de Consentimento',
+  relatorio_medico: 'Relatório Médico',
+  declaracao_acompanhante: 'Declaração para Acompanhante',
+  orientacoes_medicas: 'Orientações Médicas',
+  atestado_aptidao: 'Atestado de Aptidão',
+  guia_internacao: 'Guia de Internação',
 } as const;
 
 export const DOCUMENT_STATUS = {
   rascunho: 'Rascunho',
   emitido: 'Emitido',
   cancelado: 'Cancelado',
+} as const;
+
+// Tipos de aptidão
+export const TIPOS_APTIDAO = {
+  esporte_recreativo: 'Esporte Recreativo',
+  esporte_competitivo: 'Esporte Competitivo',
+  atividade_fisica: 'Atividade Física',
+  trabalho: 'Trabalho',
+  viagem: 'Viagem',
+  mergulho: 'Mergulho',
+  paraquedismo: 'Paraquedismo',
+  outro: 'Outro',
+} as const;
+
+// Tipos de procedimento
+export const TIPOS_PROCEDIMENTO = {
+  cirurgico: 'Cirúrgico',
+  diagnostico: 'Diagnóstico',
+  terapeutico: 'Terapêutico',
+  estetico: 'Estético',
+  anestesico: 'Anestésico',
+  outro: 'Outro',
+} as const;
+
+// Pareceres de aptidão
+export const PARECERES_APTIDAO = {
+  apto: 'Apto',
+  apto_com_restricoes: 'Apto com Restrições',
+  inapto_temporario: 'Inapto Temporariamente',
+  inapto: 'Inapto',
+} as const;
+
+// Tipos de orientação médica
+export const TIPOS_ORIENTACAO = {
+  pre_operatorio: 'Pré-Operatório',
+  pos_operatorio: 'Pós-Operatório',
+  tratamento: 'Tratamento',
+  dieta: 'Dieta',
+  medicacao: 'Medicação',
+  geral: 'Geral',
+} as const;
+
+// Tipos de leito
+export const TIPOS_LEITO = {
+  enfermaria: 'Enfermaria',
+  apartamento: 'Apartamento',
+  uti: 'UTI',
+  semi_intensiva: 'Semi-Intensiva',
 } as const;
