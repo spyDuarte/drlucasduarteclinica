@@ -17,12 +17,18 @@ import {
   Stethoscope,
   ArrowRightCircle,
   Clock,
-  AlertCircle
+  AlertCircle,
+  ScrollText,
+  FileBarChart,
+  Users,
+  BookOpen,
+  Activity,
+  Building2
 } from 'lucide-react';
 import { useData } from '../contexts/DataContext';
 import { useAuth } from '../contexts/AuthContext';
-import type { MedicalDocument, DocumentType, Patient, Prescription } from '../types';
-import { DOCUMENT_TYPES, DOCUMENT_STATUS } from '../constants/clinic';
+import type { MedicalDocument, DocumentType, Patient, Prescription, TipoAptidao, TipoProcedimento } from '../types';
+import { DOCUMENT_TYPES, DOCUMENT_STATUS, TIPOS_APTIDAO, TIPOS_PROCEDIMENTO, PARECERES_APTIDAO, TIPOS_ORIENTACAO, TIPOS_LEITO } from '../constants/clinic';
 import { formatDate } from '../utils/helpers';
 import { DocumentPreview } from '../components/DocumentPreview';
 import ConfirmDialog from '../components/ConfirmDialog';
@@ -35,6 +41,12 @@ const documentIcons: Record<DocumentType, typeof FileText> = {
   receita: Pill,
   solicitacao_exames: Stethoscope,
   encaminhamento: ArrowRightCircle,
+  termo_consentimento: ScrollText,
+  relatorio_medico: FileBarChart,
+  declaracao_acompanhante: Users,
+  orientacoes_medicas: BookOpen,
+  atestado_aptidao: Activity,
+  guia_internacao: Building2,
 };
 
 // Cores por status
@@ -394,21 +406,79 @@ function DocumentModal({ document, patients, user, onClose, onSave }: DocumentMo
     type: document?.type || 'atestado_medico' as DocumentType,
     title: document?.title || '',
     content: document?.content || '',
+    // Atestado médico
     diasAfastamento: document?.diasAfastamento || 1,
     dataInicio: document?.dataInicio || new Date().toISOString().split('T')[0],
     dataFim: document?.dataFim || '',
     cid10: document?.cid10?.join(', ') || '',
     exibirCid: document?.exibirCid ?? false,
+    // Laudo médico
     finalidade: document?.finalidade || '',
     conclusao: document?.conclusao || '',
+    historiaClinica: document?.historiaClinica || '',
+    exameFisico: document?.exameFisico || '',
+    examesComplementares: document?.examesComplementares || '',
+    // Declaração comparecimento
     horaChegada: document?.horaChegada || '',
     horaSaida: document?.horaSaida || '',
+    // Declaração acompanhante
+    nomeAcompanhante: document?.nomeAcompanhante || '',
+    cpfAcompanhante: document?.cpfAcompanhante || '',
+    grauParentesco: document?.grauParentesco || '',
+    horaChegadaAcompanhante: document?.horaChegadaAcompanhante || '',
+    horaSaidaAcompanhante: document?.horaSaidaAcompanhante || '',
+    // Solicitação exames
     examesSolicitados: document?.examesSolicitados?.join('\n') || '',
     indicacaoClinica: document?.indicacaoClinica || '',
+    hipoteseDiagnostica: document?.hipoteseDiagnostica || '',
+    prioridadeExame: document?.prioridadeExame || 'rotina' as 'rotina' | 'urgente' | 'emergencia',
+    // Encaminhamento
     especialidade: document?.especialidade || '',
     motivoEncaminhamento: document?.motivoEncaminhamento || '',
     urgencia: document?.urgencia || 'eletivo' as 'eletivo' | 'urgente' | 'emergencia',
+    resumoClinico: document?.resumoClinico || '',
+    examesRealizados: document?.examesRealizados || '',
+    tratamentosAnteriores: document?.tratamentosAnteriores || '',
+    // Prescrição
     prescricoes: document?.prescricoes || [] as Prescription[],
+    // Termo de consentimento
+    tipoProcedimento: document?.tipoProcedimento || 'cirurgico' as TipoProcedimento,
+    nomeProcedimento: document?.nomeProcedimento || '',
+    descricaoProcedimento: document?.descricaoProcedimento || '',
+    riscosProcedimento: document?.riscosProcedimento?.join('\n') || '',
+    beneficiosProcedimento: document?.beneficiosProcedimento?.join('\n') || '',
+    alternativasTratamento: document?.alternativasTratamento || '',
+    cuidadosPosProcedimento: document?.cuidadosPosProcedimento || '',
+    responsavelAssinatura: document?.responsavelAssinatura || '',
+    testemunha: document?.testemunha || '',
+    // Relatório médico
+    destinatario: document?.destinatario || '',
+    periodoAcompanhamento: document?.periodoAcompanhamento || '',
+    evolucaoClinica: document?.evolucaoClinica || '',
+    tratamentoAtual: document?.tratamentoAtual || '',
+    prognostico: document?.prognostico || '',
+    recomendacoes: document?.recomendacoes || '',
+    // Orientações médicas
+    tipoOrientacao: document?.tipoOrientacao || 'geral' as 'pre_operatorio' | 'pos_operatorio' | 'tratamento' | 'dieta' | 'medicacao' | 'geral',
+    orientacoesEspecificas: document?.orientacoesEspecificas?.join('\n') || '',
+    restricoes: document?.restricoes?.join('\n') || '',
+    sinaisAlerta: document?.sinaisAlerta?.join('\n') || '',
+    contatoEmergencia: document?.contatoEmergencia || '',
+    // Atestado aptidão
+    tipoAptidao: document?.tipoAptidao || 'atividade_fisica' as TipoAptidao,
+    modalidadeEsportiva: document?.modalidadeEsportiva || '',
+    restricoesAtividade: document?.restricoesAtividade?.join('\n') || '',
+    validadeAtestado: document?.validadeAtestado || '',
+    examesRealizadosAptidao: document?.examesRealizadosAptidao?.join('\n') || '',
+    parecer: document?.parecer || 'apto' as 'apto' | 'apto_com_restricoes' | 'inapto_temporario' | 'inapto',
+    // Guia internação
+    hospitalDestino: document?.hospitalDestino || '',
+    tipoInternacao: document?.tipoInternacao || 'eletiva' as 'eletiva' | 'urgencia' | 'emergencia',
+    leitoSolicitado: document?.leitoSolicitado || 'enfermaria' as 'enfermaria' | 'apartamento' | 'uti' | 'semi_intensiva',
+    previsaoPermanencia: document?.previsaoPermanencia || '',
+    procedimentoProposto: document?.procedimentoProposto || '',
+    justificativaInternacao: document?.justificativaInternacao || '',
+    cuidadosEspeciais: document?.cuidadosEspeciais?.join('\n') || '',
   });
 
   const [newPrescription, setNewPrescription] = useState({
@@ -480,9 +550,20 @@ function DocumentModal({ document, patients, user, onClose, onSave }: DocumentMo
         data.horaSaida = formData.horaSaida;
         break;
 
+      case 'declaracao_acompanhante':
+        data.nomeAcompanhante = formData.nomeAcompanhante;
+        data.cpfAcompanhante = formData.cpfAcompanhante;
+        data.grauParentesco = formData.grauParentesco;
+        data.horaChegadaAcompanhante = formData.horaChegadaAcompanhante;
+        data.horaSaidaAcompanhante = formData.horaSaidaAcompanhante;
+        break;
+
       case 'laudo_medico':
         data.finalidade = formData.finalidade;
         data.conclusao = formData.conclusao;
+        data.historiaClinica = formData.historiaClinica;
+        data.exameFisico = formData.exameFisico;
+        data.examesComplementares = formData.examesComplementares;
         data.cid10 = formData.cid10.split(',').map(c => c.trim()).filter(Boolean);
         break;
 
@@ -493,12 +574,67 @@ function DocumentModal({ document, patients, user, onClose, onSave }: DocumentMo
       case 'solicitacao_exames':
         data.examesSolicitados = formData.examesSolicitados.split('\n').map(e => e.trim()).filter(Boolean);
         data.indicacaoClinica = formData.indicacaoClinica;
+        data.hipoteseDiagnostica = formData.hipoteseDiagnostica;
+        data.prioridadeExame = formData.prioridadeExame;
         break;
 
       case 'encaminhamento':
         data.especialidade = formData.especialidade;
         data.motivoEncaminhamento = formData.motivoEncaminhamento;
         data.urgencia = formData.urgencia;
+        data.resumoClinico = formData.resumoClinico;
+        data.examesRealizados = formData.examesRealizados;
+        data.tratamentosAnteriores = formData.tratamentosAnteriores;
+        data.cid10 = formData.cid10.split(',').map(c => c.trim()).filter(Boolean);
+        break;
+
+      case 'termo_consentimento':
+        data.tipoProcedimento = formData.tipoProcedimento;
+        data.nomeProcedimento = formData.nomeProcedimento;
+        data.descricaoProcedimento = formData.descricaoProcedimento;
+        data.riscosProcedimento = formData.riscosProcedimento.split('\n').map(r => r.trim()).filter(Boolean);
+        data.beneficiosProcedimento = formData.beneficiosProcedimento.split('\n').map(b => b.trim()).filter(Boolean);
+        data.alternativasTratamento = formData.alternativasTratamento;
+        data.cuidadosPosProcedimento = formData.cuidadosPosProcedimento;
+        data.responsavelAssinatura = formData.responsavelAssinatura;
+        data.testemunha = formData.testemunha;
+        break;
+
+      case 'relatorio_medico':
+        data.destinatario = formData.destinatario;
+        data.periodoAcompanhamento = formData.periodoAcompanhamento;
+        data.evolucaoClinica = formData.evolucaoClinica;
+        data.tratamentoAtual = formData.tratamentoAtual;
+        data.prognostico = formData.prognostico;
+        data.recomendacoes = formData.recomendacoes;
+        data.cid10 = formData.cid10.split(',').map(c => c.trim()).filter(Boolean);
+        break;
+
+      case 'orientacoes_medicas':
+        data.tipoOrientacao = formData.tipoOrientacao;
+        data.orientacoesEspecificas = formData.orientacoesEspecificas.split('\n').map(o => o.trim()).filter(Boolean);
+        data.restricoes = formData.restricoes.split('\n').map(r => r.trim()).filter(Boolean);
+        data.sinaisAlerta = formData.sinaisAlerta.split('\n').map(s => s.trim()).filter(Boolean);
+        data.contatoEmergencia = formData.contatoEmergencia;
+        break;
+
+      case 'atestado_aptidao':
+        data.tipoAptidao = formData.tipoAptidao;
+        data.modalidadeEsportiva = formData.modalidadeEsportiva;
+        data.restricoesAtividade = formData.restricoesAtividade.split('\n').map(r => r.trim()).filter(Boolean);
+        data.validadeAtestado = formData.validadeAtestado;
+        data.examesRealizadosAptidao = formData.examesRealizadosAptidao.split('\n').map(e => e.trim()).filter(Boolean);
+        data.parecer = formData.parecer;
+        break;
+
+      case 'guia_internacao':
+        data.hospitalDestino = formData.hospitalDestino;
+        data.tipoInternacao = formData.tipoInternacao;
+        data.leitoSolicitado = formData.leitoSolicitado;
+        data.previsaoPermanencia = formData.previsaoPermanencia;
+        data.procedimentoProposto = formData.procedimentoProposto;
+        data.justificativaInternacao = formData.justificativaInternacao;
+        data.cuidadosEspeciais = formData.cuidadosEspeciais.split('\n').map(c => c.trim()).filter(Boolean);
         data.cid10 = formData.cid10.split(',').map(c => c.trim()).filter(Boolean);
         break;
     }
@@ -852,6 +988,36 @@ function DocumentModal({ document, patients, user, onClose, onSave }: DocumentMo
                 />
               </div>
               <div>
+                <label className="block text-sm text-gray-700 mb-1">Resumo clínico</label>
+                <textarea
+                  value={formData.resumoClinico}
+                  onChange={(e) => updateField('resumoClinico', e.target.value)}
+                  className="input-field"
+                  rows={2}
+                  placeholder="Breve resumo do quadro clínico..."
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-700 mb-1">Exames já realizados</label>
+                <textarea
+                  value={formData.examesRealizados}
+                  onChange={(e) => updateField('examesRealizados', e.target.value)}
+                  className="input-field"
+                  rows={2}
+                  placeholder="Exames e resultados relevantes..."
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-700 mb-1">Tratamentos anteriores</label>
+                <textarea
+                  value={formData.tratamentosAnteriores}
+                  onChange={(e) => updateField('tratamentosAnteriores', e.target.value)}
+                  className="input-field"
+                  rows={2}
+                  placeholder="Tratamentos já tentados..."
+                />
+              </div>
+              <div>
                 <label className="block text-sm text-gray-700 mb-1">Motivo do encaminhamento</label>
                 <textarea
                   value={formData.motivoEncaminhamento}
@@ -859,6 +1025,470 @@ function DocumentModal({ document, patients, user, onClose, onSave }: DocumentMo
                   className="input-field"
                   rows={3}
                   placeholder="Descreva o motivo do encaminhamento..."
+                />
+              </div>
+            </div>
+          )}
+
+          {formData.type === 'declaracao_acompanhante' && (
+            <div className="space-y-4 p-4 bg-cyan-50 rounded-xl">
+              <h3 className="font-medium text-cyan-800">Declaração para Acompanhante</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm text-gray-700 mb-1">Nome do acompanhante</label>
+                  <input
+                    type="text"
+                    value={formData.nomeAcompanhante}
+                    onChange={(e) => updateField('nomeAcompanhante', e.target.value)}
+                    className="input-field"
+                    placeholder="Nome completo do acompanhante"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-700 mb-1">CPF do acompanhante</label>
+                  <input
+                    type="text"
+                    value={formData.cpfAcompanhante}
+                    onChange={(e) => updateField('cpfAcompanhante', e.target.value)}
+                    className="input-field"
+                    placeholder="000.000.000-00"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm text-gray-700 mb-1">Grau de parentesco/relação</label>
+                <input
+                  type="text"
+                  value={formData.grauParentesco}
+                  onChange={(e) => updateField('grauParentesco', e.target.value)}
+                  className="input-field"
+                  placeholder="Ex: Mãe, Pai, Cônjuge, Responsável legal"
+                />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm text-gray-700 mb-1">Hora de chegada</label>
+                  <input
+                    type="time"
+                    value={formData.horaChegadaAcompanhante}
+                    onChange={(e) => updateField('horaChegadaAcompanhante', e.target.value)}
+                    className="input-field"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-700 mb-1">Hora de saída</label>
+                  <input
+                    type="time"
+                    value={formData.horaSaidaAcompanhante}
+                    onChange={(e) => updateField('horaSaidaAcompanhante', e.target.value)}
+                    className="input-field"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {formData.type === 'termo_consentimento' && (
+            <div className="space-y-4 p-4 bg-rose-50 rounded-xl">
+              <h3 className="font-medium text-rose-800">Termo de Consentimento Livre e Esclarecido</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm text-gray-700 mb-1">Tipo de procedimento</label>
+                  <select
+                    value={formData.tipoProcedimento}
+                    onChange={(e) => updateField('tipoProcedimento', e.target.value as TipoProcedimento)}
+                    className="input-field"
+                  >
+                    {Object.entries(TIPOS_PROCEDIMENTO).map(([key, label]) => (
+                      <option key={key} value={key}>{label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-700 mb-1">Nome do procedimento</label>
+                  <input
+                    type="text"
+                    value={formData.nomeProcedimento}
+                    onChange={(e) => updateField('nomeProcedimento', e.target.value)}
+                    className="input-field"
+                    placeholder="Ex: Biópsia de pele, Endoscopia"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm text-gray-700 mb-1">Descrição do procedimento</label>
+                <textarea
+                  value={formData.descricaoProcedimento}
+                  onChange={(e) => updateField('descricaoProcedimento', e.target.value)}
+                  className="input-field"
+                  rows={3}
+                  placeholder="Descreva detalhadamente o procedimento a ser realizado..."
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-700 mb-1">Riscos do procedimento (um por linha)</label>
+                <textarea
+                  value={formData.riscosProcedimento}
+                  onChange={(e) => updateField('riscosProcedimento', e.target.value)}
+                  className="input-field"
+                  rows={3}
+                  placeholder="Sangramento&#10;Infecção&#10;Reação alérgica"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-700 mb-1">Benefícios esperados (um por linha)</label>
+                <textarea
+                  value={formData.beneficiosProcedimento}
+                  onChange={(e) => updateField('beneficiosProcedimento', e.target.value)}
+                  className="input-field"
+                  rows={3}
+                  placeholder="Diagnóstico preciso&#10;Tratamento definitivo"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-700 mb-1">Alternativas de tratamento</label>
+                <textarea
+                  value={formData.alternativasTratamento}
+                  onChange={(e) => updateField('alternativasTratamento', e.target.value)}
+                  className="input-field"
+                  rows={2}
+                  placeholder="Outras opções de tratamento disponíveis..."
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-700 mb-1">Cuidados pós-procedimento</label>
+                <textarea
+                  value={formData.cuidadosPosProcedimento}
+                  onChange={(e) => updateField('cuidadosPosProcedimento', e.target.value)}
+                  className="input-field"
+                  rows={2}
+                  placeholder="Orientações para após o procedimento..."
+                />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm text-gray-700 mb-1">Responsável pela assinatura (se menor/incapaz)</label>
+                  <input
+                    type="text"
+                    value={formData.responsavelAssinatura}
+                    onChange={(e) => updateField('responsavelAssinatura', e.target.value)}
+                    className="input-field"
+                    placeholder="Nome do responsável legal"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-700 mb-1">Testemunha</label>
+                  <input
+                    type="text"
+                    value={formData.testemunha}
+                    onChange={(e) => updateField('testemunha', e.target.value)}
+                    className="input-field"
+                    placeholder="Nome da testemunha"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {formData.type === 'relatorio_medico' && (
+            <div className="space-y-4 p-4 bg-amber-50 rounded-xl">
+              <h3 className="font-medium text-amber-800">Relatório Médico Detalhado</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm text-gray-700 mb-1">Destinatário</label>
+                  <input
+                    type="text"
+                    value={formData.destinatario}
+                    onChange={(e) => updateField('destinatario', e.target.value)}
+                    className="input-field"
+                    placeholder="Ex: INSS, Seguradora XYZ, Perícia Médica"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-700 mb-1">Período de acompanhamento</label>
+                  <input
+                    type="text"
+                    value={formData.periodoAcompanhamento}
+                    onChange={(e) => updateField('periodoAcompanhamento', e.target.value)}
+                    className="input-field"
+                    placeholder="Ex: Janeiro/2024 a Dezembro/2024"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm text-gray-700 mb-1">CID-10 (separados por vírgula)</label>
+                <input
+                  type="text"
+                  value={formData.cid10}
+                  onChange={(e) => updateField('cid10', e.target.value)}
+                  className="input-field"
+                  placeholder="M54.5, G43.9"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-700 mb-1">Evolução clínica</label>
+                <textarea
+                  value={formData.evolucaoClinica}
+                  onChange={(e) => updateField('evolucaoClinica', e.target.value)}
+                  className="input-field"
+                  rows={4}
+                  placeholder="Descreva a evolução do quadro clínico do paciente..."
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-700 mb-1">Tratamento atual</label>
+                <textarea
+                  value={formData.tratamentoAtual}
+                  onChange={(e) => updateField('tratamentoAtual', e.target.value)}
+                  className="input-field"
+                  rows={3}
+                  placeholder="Medicações e terapias em uso..."
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-700 mb-1">Prognóstico</label>
+                <textarea
+                  value={formData.prognostico}
+                  onChange={(e) => updateField('prognostico', e.target.value)}
+                  className="input-field"
+                  rows={2}
+                  placeholder="Expectativa de evolução do quadro..."
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-700 mb-1">Recomendações</label>
+                <textarea
+                  value={formData.recomendacoes}
+                  onChange={(e) => updateField('recomendacoes', e.target.value)}
+                  className="input-field"
+                  rows={3}
+                  placeholder="Recomendações médicas para o paciente..."
+                />
+              </div>
+            </div>
+          )}
+
+          {formData.type === 'orientacoes_medicas' && (
+            <div className="space-y-4 p-4 bg-lime-50 rounded-xl">
+              <h3 className="font-medium text-lime-800">Orientações Médicas</h3>
+              <div>
+                <label className="block text-sm text-gray-700 mb-1">Tipo de orientação</label>
+                <select
+                  value={formData.tipoOrientacao}
+                  onChange={(e) => updateField('tipoOrientacao', e.target.value as typeof formData.tipoOrientacao)}
+                  className="input-field"
+                >
+                  {Object.entries(TIPOS_ORIENTACAO).map(([key, label]) => (
+                    <option key={key} value={key}>{label}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm text-gray-700 mb-1">Orientações específicas (uma por linha)</label>
+                <textarea
+                  value={formData.orientacoesEspecificas}
+                  onChange={(e) => updateField('orientacoesEspecificas', e.target.value)}
+                  className="input-field"
+                  rows={5}
+                  placeholder="Manter repouso relativo por 48 horas&#10;Aplicar gelo local por 20 minutos, 3x ao dia&#10;Elevar o membro afetado"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-700 mb-1">Restrições (uma por linha)</label>
+                <textarea
+                  value={formData.restricoes}
+                  onChange={(e) => updateField('restricoes', e.target.value)}
+                  className="input-field"
+                  rows={3}
+                  placeholder="Evitar esforços físicos&#10;Não dirigir enquanto em uso da medicação&#10;Evitar exposição solar"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-700 mb-1">Sinais de alerta - Procurar emergência se (um por linha)</label>
+                <textarea
+                  value={formData.sinaisAlerta}
+                  onChange={(e) => updateField('sinaisAlerta', e.target.value)}
+                  className="input-field"
+                  rows={3}
+                  placeholder="Febre acima de 38.5°C&#10;Dor intensa que não melhora com a medicação&#10;Sangramento persistente"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-700 mb-1">Contato de emergência</label>
+                <input
+                  type="text"
+                  value={formData.contatoEmergencia}
+                  onChange={(e) => updateField('contatoEmergencia', e.target.value)}
+                  className="input-field"
+                  placeholder="Telefone ou local para emergências"
+                />
+              </div>
+            </div>
+          )}
+
+          {formData.type === 'atestado_aptidao' && (
+            <div className="space-y-4 p-4 bg-emerald-50 rounded-xl">
+              <h3 className="font-medium text-emerald-800">Atestado de Aptidão</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm text-gray-700 mb-1">Tipo de aptidão</label>
+                  <select
+                    value={formData.tipoAptidao}
+                    onChange={(e) => updateField('tipoAptidao', e.target.value as TipoAptidao)}
+                    className="input-field"
+                  >
+                    {Object.entries(TIPOS_APTIDAO).map(([key, label]) => (
+                      <option key={key} value={key}>{label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-700 mb-1">Parecer</label>
+                  <select
+                    value={formData.parecer}
+                    onChange={(e) => updateField('parecer', e.target.value as typeof formData.parecer)}
+                    className="input-field"
+                  >
+                    {Object.entries(PARECERES_APTIDAO).map(([key, label]) => (
+                      <option key={key} value={key}>{label}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm text-gray-700 mb-1">Modalidade esportiva/Atividade</label>
+                  <input
+                    type="text"
+                    value={formData.modalidadeEsportiva}
+                    onChange={(e) => updateField('modalidadeEsportiva', e.target.value)}
+                    className="input-field"
+                    placeholder="Ex: Natação, Corrida, Trabalho em altura"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-700 mb-1">Validade do atestado</label>
+                  <input
+                    type="text"
+                    value={formData.validadeAtestado}
+                    onChange={(e) => updateField('validadeAtestado', e.target.value)}
+                    className="input-field"
+                    placeholder="Ex: 12 meses, 6 meses"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm text-gray-700 mb-1">Exames realizados (um por linha)</label>
+                <textarea
+                  value={formData.examesRealizadosAptidao}
+                  onChange={(e) => updateField('examesRealizadosAptidao', e.target.value)}
+                  className="input-field"
+                  rows={3}
+                  placeholder="Eletrocardiograma - Normal&#10;Teste ergométrico - Adequado&#10;Exame clínico - Sem alterações"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-700 mb-1">Restrições de atividade (uma por linha)</label>
+                <textarea
+                  value={formData.restricoesAtividade}
+                  onChange={(e) => updateField('restricoesAtividade', e.target.value)}
+                  className="input-field"
+                  rows={2}
+                  placeholder="Evitar atividades de impacto&#10;Manter frequência cardíaca abaixo de 150bpm"
+                />
+              </div>
+            </div>
+          )}
+
+          {formData.type === 'guia_internacao' && (
+            <div className="space-y-4 p-4 bg-sky-50 rounded-xl">
+              <h3 className="font-medium text-sky-800">Guia de Internação Hospitalar</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm text-gray-700 mb-1">Hospital de destino</label>
+                  <input
+                    type="text"
+                    value={formData.hospitalDestino}
+                    onChange={(e) => updateField('hospitalDestino', e.target.value)}
+                    className="input-field"
+                    placeholder="Nome do hospital"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-700 mb-1">Tipo de internação</label>
+                  <select
+                    value={formData.tipoInternacao}
+                    onChange={(e) => updateField('tipoInternacao', e.target.value as typeof formData.tipoInternacao)}
+                    className="input-field"
+                  >
+                    <option value="eletiva">Eletiva</option>
+                    <option value="urgencia">Urgência</option>
+                    <option value="emergencia">Emergência</option>
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm text-gray-700 mb-1">Leito solicitado</label>
+                  <select
+                    value={formData.leitoSolicitado}
+                    onChange={(e) => updateField('leitoSolicitado', e.target.value as typeof formData.leitoSolicitado)}
+                    className="input-field"
+                  >
+                    {Object.entries(TIPOS_LEITO).map(([key, label]) => (
+                      <option key={key} value={key}>{label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-700 mb-1">Previsão de permanência</label>
+                  <input
+                    type="text"
+                    value={formData.previsaoPermanencia}
+                    onChange={(e) => updateField('previsaoPermanencia', e.target.value)}
+                    className="input-field"
+                    placeholder="Ex: 3-5 dias, 1 semana"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm text-gray-700 mb-1">CID-10 (separados por vírgula)</label>
+                <input
+                  type="text"
+                  value={formData.cid10}
+                  onChange={(e) => updateField('cid10', e.target.value)}
+                  className="input-field"
+                  placeholder="K80.1, K81.0"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-700 mb-1">Procedimento proposto</label>
+                <input
+                  type="text"
+                  value={formData.procedimentoProposto}
+                  onChange={(e) => updateField('procedimentoProposto', e.target.value)}
+                  className="input-field"
+                  placeholder="Ex: Colecistectomia videolaparoscópica"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-700 mb-1">Justificativa da internação</label>
+                <textarea
+                  value={formData.justificativaInternacao}
+                  onChange={(e) => updateField('justificativaInternacao', e.target.value)}
+                  className="input-field"
+                  rows={3}
+                  placeholder="Descreva a necessidade clínica da internação..."
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-700 mb-1">Cuidados especiais necessários (um por linha)</label>
+                <textarea
+                  value={formData.cuidadosEspeciais}
+                  onChange={(e) => updateField('cuidadosEspeciais', e.target.value)}
+                  className="input-field"
+                  rows={3}
+                  placeholder="Jejum pré-operatório de 8 horas&#10;Reserva de sangue tipo A+&#10;Avaliação cardiológica pré-operatória"
                 />
               </div>
             </div>

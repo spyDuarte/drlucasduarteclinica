@@ -453,9 +453,35 @@ export type DocumentType =
   | 'laudo_medico'
   | 'receita'
   | 'solicitacao_exames'
-  | 'encaminhamento';
+  | 'encaminhamento'
+  | 'termo_consentimento'
+  | 'relatorio_medico'
+  | 'declaracao_acompanhante'
+  | 'orientacoes_medicas'
+  | 'atestado_aptidao'
+  | 'guia_internacao';
 
 export type DocumentStatus = 'rascunho' | 'emitido' | 'cancelado';
+
+// Tipos de aptidão para atestados
+export type TipoAptidao =
+  | 'esporte_recreativo'
+  | 'esporte_competitivo'
+  | 'atividade_fisica'
+  | 'trabalho'
+  | 'viagem'
+  | 'mergulho'
+  | 'paraquedismo'
+  | 'outro';
+
+// Tipos de procedimento para termo de consentimento
+export type TipoProcedimento =
+  | 'cirurgico'
+  | 'diagnostico'
+  | 'terapeutico'
+  | 'estetico'
+  | 'anestesico'
+  | 'outro';
 
 export interface MedicalDocument {
   id: string;
@@ -469,32 +495,90 @@ export interface MedicalDocument {
   content: string;
 
   // Dados específicos por tipo
-  // Atestado
+  // Atestado Médico
   diasAfastamento?: number;
   dataInicio?: string;
   dataFim?: string;
   cid10?: string[];
   exibirCid?: boolean;
 
-  // Laudo
+  // Laudo Médico
   finalidade?: string;
   conclusao?: string;
+  historiaClinica?: string;
+  exameFisico?: string;
+  examesComplementares?: string;
 
   // Declaração de comparecimento
   horaChegada?: string;
   horaSaida?: string;
 
+  // Declaração para acompanhante
+  nomeAcompanhante?: string;
+  cpfAcompanhante?: string;
+  grauParentesco?: string;
+  horaChegadaAcompanhante?: string;
+  horaSaidaAcompanhante?: string;
+
   // Solicitação de exames
   examesSolicitados?: string[];
   indicacaoClinica?: string;
+  hipoteseDiagnostica?: string;
+  prioridadeExame?: 'rotina' | 'urgente' | 'emergencia';
 
   // Encaminhamento
   especialidade?: string;
   motivoEncaminhamento?: string;
   urgencia?: 'eletivo' | 'urgente' | 'emergencia';
+  resumoClinico?: string;
+  examesRealizados?: string;
+  tratamentosAnteriores?: string;
 
   // Prescrição
   prescricoes?: Prescription[];
+
+  // Termo de Consentimento
+  tipoProcedimento?: TipoProcedimento;
+  nomeProcedimento?: string;
+  descricaoProcedimento?: string;
+  riscosProcedimento?: string[];
+  beneficiosProcedimento?: string[];
+  alternativasTratamento?: string;
+  cuidadosPosProcedimento?: string;
+  responsavelAssinatura?: string;
+  testemunha?: string;
+
+  // Relatório Médico Detalhado
+  destinatario?: string;
+  periodoAcompanhamento?: string;
+  evolucaoClinica?: string;
+  tratamentoAtual?: string;
+  prognostico?: string;
+  recomendacoes?: string;
+
+  // Orientações Médicas
+  tipoOrientacao?: 'pre_operatorio' | 'pos_operatorio' | 'tratamento' | 'dieta' | 'medicacao' | 'geral';
+  orientacoesEspecificas?: string[];
+  restricoes?: string[];
+  sinaisAlerta?: string[];
+  contatoEmergencia?: string;
+
+  // Atestado de Aptidão
+  tipoAptidao?: TipoAptidao;
+  modalidadeEsportiva?: string;
+  restricoesAtividade?: string[];
+  validadeAtestado?: string;
+  examesRealizadosAptidao?: string[];
+  parecer?: 'apto' | 'apto_com_restricoes' | 'inapto_temporario' | 'inapto';
+
+  // Guia de Internação
+  hospitalDestino?: string;
+  tipoInternacao?: 'eletiva' | 'urgencia' | 'emergencia';
+  leitoSolicitado?: 'enfermaria' | 'apartamento' | 'uti' | 'semi_intensiva';
+  previsaoPermanencia?: string;
+  procedimentoProposto?: string;
+  justificativaInternacao?: string;
+  cuidadosEspeciais?: string[];
 
   // Metadados
   medicoNome?: string;

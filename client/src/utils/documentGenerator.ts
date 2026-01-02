@@ -447,6 +447,448 @@ function generateEncaminhamento({ document, patient }: DocumentData): string {
   `;
 }
 
+// Gera declaração para acompanhante
+function generateDeclaracaoAcompanhante({ document, patient }: DocumentData): string {
+  return `
+    <div class="document-title">
+      <h2>DECLARAÇÃO PARA ACOMPANHANTE</h2>
+    </div>
+    ${generatePatientInfo(patient, false)}
+    <div class="document-body">
+      <div class="declaracao-content">
+        <p class="declaration-text">
+          Declaramos para os devidos fins que o(a) Sr(a). <strong>${document.nomeAcompanhante || 'Nome não informado'}</strong>,
+          ${document.cpfAcompanhante ? `portador(a) do CPF nº <strong>${document.cpfAcompanhante}</strong>,` : ''}
+          ${document.grauParentesco ? `${document.grauParentesco.toLowerCase()} do(a) paciente acima identificado(a),` : ''}
+          esteve presente nesta unidade de saúde acompanhando o(a) paciente durante atendimento médico
+          ${document.horaChegadaAcompanhante && document.horaSaidaAcompanhante
+            ? `no período das <strong>${document.horaChegadaAcompanhante}</strong> às <strong>${document.horaSaidaAcompanhante}</strong>`
+            : 'nesta data'}.
+        </p>
+      </div>
+      <div class="legal-notice">
+        <p><strong>AVISO LEGAL:</strong> Esta declaração é emitida para fins de comprovação de acompanhamento a paciente em atendimento médico, podendo ser utilizada para justificar ausência laboral conforme legislação trabalhista vigente.</p>
+      </div>
+    </div>
+  `;
+}
+
+// Gera termo de consentimento livre e esclarecido
+function generateTermoConsentimento({ document, patient }: DocumentData): string {
+  const tipoProcedimentoLabels: Record<string, string> = {
+    cirurgico: 'Procedimento Cirúrgico',
+    diagnostico: 'Procedimento Diagnóstico',
+    terapeutico: 'Procedimento Terapêutico',
+    estetico: 'Procedimento Estético',
+    anestesico: 'Procedimento Anestésico',
+    outro: 'Procedimento Médico'
+  };
+
+  const tipoProcedimento = document.tipoProcedimento
+    ? tipoProcedimentoLabels[document.tipoProcedimento]
+    : 'Procedimento Médico';
+
+  return `
+    <div class="document-title termo-title">
+      <h2>TERMO DE CONSENTIMENTO LIVRE E ESCLARECIDO</h2>
+      <p class="subtitle">${tipoProcedimento}</p>
+    </div>
+    ${generatePatientInfo(patient, true)}
+    <div class="document-body termo-body">
+      <div class="procedimento-section">
+        <h3>PROCEDIMENTO PROPOSTO</h3>
+        <p class="procedimento-nome"><strong>${document.nomeProcedimento || 'Procedimento não especificado'}</strong></p>
+        ${document.descricaoProcedimento ? `
+          <div class="procedimento-descricao">
+            <p>${document.descricaoProcedimento}</p>
+          </div>
+        ` : ''}
+      </div>
+
+      ${document.riscosProcedimento && document.riscosProcedimento.length > 0 ? `
+        <div class="riscos-section">
+          <h3>RISCOS DO PROCEDIMENTO</h3>
+          <ul class="riscos-list">
+            ${document.riscosProcedimento.map(risco => `<li>${risco}</li>`).join('')}
+          </ul>
+        </div>
+      ` : ''}
+
+      ${document.beneficiosProcedimento && document.beneficiosProcedimento.length > 0 ? `
+        <div class="beneficios-section">
+          <h3>BENEFÍCIOS ESPERADOS</h3>
+          <ul class="beneficios-list">
+            ${document.beneficiosProcedimento.map(beneficio => `<li>${beneficio}</li>`).join('')}
+          </ul>
+        </div>
+      ` : ''}
+
+      ${document.alternativasTratamento ? `
+        <div class="alternativas-section">
+          <h3>ALTERNATIVAS DE TRATAMENTO</h3>
+          <p>${document.alternativasTratamento}</p>
+        </div>
+      ` : ''}
+
+      ${document.cuidadosPosProcedimento ? `
+        <div class="cuidados-section">
+          <h3>CUIDADOS PÓS-PROCEDIMENTO</h3>
+          <p>${document.cuidadosPosProcedimento}</p>
+        </div>
+      ` : ''}
+
+      <div class="declaracao-consentimento">
+        <p>
+          Declaro que li e compreendi as informações acima prestadas, bem como tive oportunidade de
+          fazer perguntas e esclarecer minhas dúvidas. Autorizo, de livre e espontânea vontade,
+          a realização do procedimento descrito acima, ciente dos riscos e benefícios envolvidos.
+        </p>
+      </div>
+
+      <div class="assinaturas-section">
+        <div class="assinatura-linha">
+          <div class="assinatura-box">
+            <div class="assinatura-line"></div>
+            <p>Paciente ou Responsável Legal</p>
+            ${document.responsavelAssinatura ? `<p class="nome-assinatura">${document.responsavelAssinatura}</p>` : ''}
+          </div>
+          <div class="assinatura-box">
+            <div class="assinatura-line"></div>
+            <p>Testemunha</p>
+            ${document.testemunha ? `<p class="nome-assinatura">${document.testemunha}</p>` : ''}
+          </div>
+        </div>
+      </div>
+
+      <div class="legal-notice">
+        <p><strong>NOTA:</strong> Este termo está em conformidade com a Resolução CFM nº 2.217/2018 (Código de Ética Médica) e demais normativas vigentes sobre consentimento informado.</p>
+      </div>
+    </div>
+  `;
+}
+
+// Gera relatório médico detalhado
+function generateRelatorioMedico({ document, patient }: DocumentData): string {
+  return `
+    <div class="document-title relatorio-title">
+      <h2>RELATÓRIO MÉDICO</h2>
+      ${document.destinatario ? `<p class="destinatario">Para: ${document.destinatario}</p>` : ''}
+    </div>
+    ${generatePatientInfo(patient, true)}
+    <div class="document-body relatorio-body">
+      ${document.periodoAcompanhamento ? `
+        <div class="periodo-section">
+          <h3>PERÍODO DE ACOMPANHAMENTO</h3>
+          <p>${document.periodoAcompanhamento}</p>
+        </div>
+      ` : ''}
+
+      ${document.cid10 && document.cid10.length > 0 ? `
+        <div class="diagnostico-section">
+          <h3>DIAGNÓSTICO (CID-10)</h3>
+          <div class="cid-list">
+            ${document.cid10.map(cid => `<span class="cid-tag">${cid}</span>`).join('')}
+          </div>
+        </div>
+      ` : ''}
+
+      ${document.evolucaoClinica ? `
+        <div class="evolucao-section">
+          <h3>EVOLUÇÃO CLÍNICA</h3>
+          <div class="evolucao-content">
+            <p>${document.evolucaoClinica}</p>
+          </div>
+        </div>
+      ` : ''}
+
+      ${document.tratamentoAtual ? `
+        <div class="tratamento-section">
+          <h3>TRATAMENTO ATUAL</h3>
+          <div class="tratamento-content">
+            <p>${document.tratamentoAtual}</p>
+          </div>
+        </div>
+      ` : ''}
+
+      ${document.prognostico ? `
+        <div class="prognostico-section">
+          <h3>PROGNÓSTICO</h3>
+          <div class="prognostico-content">
+            <p>${document.prognostico}</p>
+          </div>
+        </div>
+      ` : ''}
+
+      ${document.recomendacoes ? `
+        <div class="recomendacoes-section">
+          <h3>RECOMENDAÇÕES</h3>
+          <div class="recomendacoes-content">
+            <p>${document.recomendacoes}</p>
+          </div>
+        </div>
+      ` : ''}
+
+      ${document.content ? `
+        <div class="observacoes-section">
+          <h3>OBSERVAÇÕES ADICIONAIS</h3>
+          <p>${document.content}</p>
+        </div>
+      ` : ''}
+
+      <div class="legal-notice">
+        <p><strong>AVISO:</strong> Este relatório contém informações médicas confidenciais e foi elaborado exclusivamente para a finalidade indicada, não devendo ser utilizado para outros fins sem autorização expressa do paciente.</p>
+      </div>
+    </div>
+  `;
+}
+
+// Gera orientações médicas
+function generateOrientacoesMedicas({ document, patient }: DocumentData): string {
+  const tipoOrientacaoLabels: Record<string, string> = {
+    pre_operatorio: 'Orientações Pré-Operatórias',
+    pos_operatorio: 'Orientações Pós-Operatórias',
+    tratamento: 'Orientações de Tratamento',
+    dieta: 'Orientações Alimentares',
+    medicacao: 'Orientações sobre Medicação',
+    geral: 'Orientações Gerais'
+  };
+
+  const tipoOrientacao = document.tipoOrientacao
+    ? tipoOrientacaoLabels[document.tipoOrientacao]
+    : 'Orientações Gerais';
+
+  return `
+    <div class="document-title orientacoes-title">
+      <h2>${tipoOrientacao.toUpperCase()}</h2>
+    </div>
+    ${generatePatientInfo(patient, false)}
+    <div class="document-body orientacoes-body">
+      ${document.orientacoesEspecificas && document.orientacoesEspecificas.length > 0 ? `
+        <div class="orientacoes-section">
+          <h3>ORIENTAÇÕES</h3>
+          <ol class="orientacoes-list">
+            ${document.orientacoesEspecificas.map(orientacao => `<li>${orientacao}</li>`).join('')}
+          </ol>
+        </div>
+      ` : ''}
+
+      ${document.restricoes && document.restricoes.length > 0 ? `
+        <div class="restricoes-section">
+          <h3>RESTRIÇÕES</h3>
+          <ul class="restricoes-list">
+            ${document.restricoes.map(restricao => `<li class="restricao-item">${restricao}</li>`).join('')}
+          </ul>
+        </div>
+      ` : ''}
+
+      ${document.sinaisAlerta && document.sinaisAlerta.length > 0 ? `
+        <div class="alerta-section">
+          <h3>SINAIS DE ALERTA - PROCURE ATENDIMENTO DE URGÊNCIA SE:</h3>
+          <ul class="alerta-list">
+            ${document.sinaisAlerta.map(sinal => `<li class="alerta-item">${sinal}</li>`).join('')}
+          </ul>
+        </div>
+      ` : ''}
+
+      ${document.contatoEmergencia ? `
+        <div class="contato-section">
+          <h3>CONTATO PARA EMERGÊNCIAS</h3>
+          <p class="contato-info">${document.contatoEmergencia}</p>
+        </div>
+      ` : ''}
+
+      ${document.content ? `
+        <div class="observacoes-section">
+          <h3>OBSERVAÇÕES ADICIONAIS</h3>
+          <p>${document.content}</p>
+        </div>
+      ` : ''}
+
+      <div class="legal-notice orientacoes-notice">
+        <p><strong>IMPORTANTE:</strong> Siga rigorosamente as orientações acima. Em caso de dúvidas, entre em contato com a clínica antes de tomar qualquer decisão.</p>
+      </div>
+    </div>
+  `;
+}
+
+// Gera atestado de aptidão
+function generateAtestadoAptidao({ document, patient }: DocumentData): string {
+  const tipoAptidaoLabels: Record<string, string> = {
+    esporte_recreativo: 'Prática de Esporte Recreativo',
+    esporte_competitivo: 'Prática de Esporte Competitivo',
+    atividade_fisica: 'Prática de Atividade Física',
+    trabalho: 'Atividade Laboral',
+    viagem: 'Viagem',
+    mergulho: 'Prática de Mergulho',
+    paraquedismo: 'Prática de Paraquedismo',
+    outro: 'Atividade Específica'
+  };
+
+  const parecerLabels: Record<string, { label: string; class: string }> = {
+    apto: { label: 'APTO', class: 'apto' },
+    apto_com_restricoes: { label: 'APTO COM RESTRIÇÕES', class: 'apto-restricoes' },
+    inapto_temporario: { label: 'INAPTO TEMPORARIAMENTE', class: 'inapto-temp' },
+    inapto: { label: 'INAPTO', class: 'inapto' }
+  };
+
+  const tipoAptidao = document.tipoAptidao
+    ? tipoAptidaoLabels[document.tipoAptidao]
+    : 'Atividade Específica';
+
+  const parecer = document.parecer
+    ? parecerLabels[document.parecer]
+    : parecerLabels.apto;
+
+  return `
+    <div class="document-title aptidao-title">
+      <h2>ATESTADO DE APTIDÃO</h2>
+      <p class="subtitle">${tipoAptidao}</p>
+    </div>
+    ${generatePatientInfo(patient, true)}
+    <div class="document-body aptidao-body">
+      <div class="parecer-section ${parecer.class}">
+        <h3>PARECER MÉDICO</h3>
+        <div class="parecer-box">
+          <span class="parecer-label">${parecer.label}</span>
+        </div>
+      </div>
+
+      ${document.modalidadeEsportiva ? `
+        <div class="modalidade-section">
+          <h3>MODALIDADE / ATIVIDADE</h3>
+          <p>${document.modalidadeEsportiva}</p>
+        </div>
+      ` : ''}
+
+      ${document.examesRealizadosAptidao && document.examesRealizadosAptidao.length > 0 ? `
+        <div class="exames-section">
+          <h3>EXAMES REALIZADOS</h3>
+          <ul class="exames-list">
+            ${document.examesRealizadosAptidao.map(exame => `<li>${exame}</li>`).join('')}
+          </ul>
+        </div>
+      ` : ''}
+
+      ${document.restricoesAtividade && document.restricoesAtividade.length > 0 ? `
+        <div class="restricoes-aptidao-section">
+          <h3>RESTRIÇÕES</h3>
+          <ul class="restricoes-list">
+            ${document.restricoesAtividade.map(restricao => `<li>${restricao}</li>`).join('')}
+          </ul>
+        </div>
+      ` : ''}
+
+      ${document.validadeAtestado ? `
+        <div class="validade-section">
+          <h3>VALIDADE DO ATESTADO</h3>
+          <p class="validade-info">${document.validadeAtestado}</p>
+        </div>
+      ` : ''}
+
+      ${document.content ? `
+        <div class="observacoes-section">
+          <h3>OBSERVAÇÕES</h3>
+          <p>${document.content}</p>
+        </div>
+      ` : ''}
+
+      <div class="legal-notice">
+        <p><strong>NOTA:</strong> Este atestado foi emitido com base em avaliação clínica realizada nesta data. Alterações no estado de saúde do(a) paciente podem invalidar este documento.</p>
+      </div>
+    </div>
+  `;
+}
+
+// Gera guia de internação hospitalar
+function generateGuiaInternacao({ document, patient }: DocumentData): string {
+  const tipoInternacaoLabels: Record<string, { label: string; class: string }> = {
+    eletiva: { label: 'Eletiva', class: 'eletiva' },
+    urgencia: { label: 'Urgência', class: 'urgencia' },
+    emergencia: { label: 'Emergência', class: 'emergencia' }
+  };
+
+  const leitoLabels: Record<string, string> = {
+    enfermaria: 'Enfermaria',
+    apartamento: 'Apartamento',
+    uti: 'UTI',
+    semi_intensiva: 'Semi-Intensiva'
+  };
+
+  const tipoInternacao = document.tipoInternacao
+    ? tipoInternacaoLabels[document.tipoInternacao]
+    : tipoInternacaoLabels.eletiva;
+
+  const leito = document.leitoSolicitado
+    ? leitoLabels[document.leitoSolicitado]
+    : 'Enfermaria';
+
+  return `
+    <div class="document-title internacao-title">
+      <h2>GUIA DE INTERNAÇÃO HOSPITALAR</h2>
+      <div class="internacao-tipo ${tipoInternacao.class}">
+        <span>CARÁTER: ${tipoInternacao.label.toUpperCase()}</span>
+      </div>
+    </div>
+    ${generatePatientInfo(patient, true)}
+    <div class="document-body internacao-body">
+      <div class="internacao-dados">
+        <div class="dado-row">
+          <div class="dado-item">
+            <span class="dado-label">Hospital de Destino:</span>
+            <span class="dado-value">${document.hospitalDestino || 'A definir'}</span>
+          </div>
+          <div class="dado-item">
+            <span class="dado-label">Leito Solicitado:</span>
+            <span class="dado-value">${leito}</span>
+          </div>
+        </div>
+        <div class="dado-row">
+          <div class="dado-item">
+            <span class="dado-label">Previsão de Permanência:</span>
+            <span class="dado-value">${document.previsaoPermanencia || 'A definir'}</span>
+          </div>
+        </div>
+      </div>
+
+      ${document.cid10 && document.cid10.length > 0 ? `
+        <div class="diagnostico-section">
+          <h3>DIAGNÓSTICO (CID-10)</h3>
+          <div class="cid-list">
+            ${document.cid10.map(cid => `<span class="cid-tag">${cid}</span>`).join('')}
+          </div>
+        </div>
+      ` : ''}
+
+      ${document.procedimentoProposto ? `
+        <div class="procedimento-section">
+          <h3>PROCEDIMENTO PROPOSTO</h3>
+          <p>${document.procedimentoProposto}</p>
+        </div>
+      ` : ''}
+
+      <div class="justificativa-section">
+        <h3>JUSTIFICATIVA DA INTERNAÇÃO</h3>
+        <div class="justificativa-content">
+          <p>${document.justificativaInternacao || document.content || 'Justificativa não informada.'}</p>
+        </div>
+      </div>
+
+      ${document.cuidadosEspeciais && document.cuidadosEspeciais.length > 0 ? `
+        <div class="cuidados-section">
+          <h3>CUIDADOS ESPECIAIS NECESSÁRIOS</h3>
+          <ul class="cuidados-list">
+            ${document.cuidadosEspeciais.map(cuidado => `<li>${cuidado}</li>`).join('')}
+          </ul>
+        </div>
+      ` : ''}
+
+      <div class="legal-notice">
+        <p><strong>NOTA:</strong> Esta guia de internação está sujeita à disponibilidade de leitos e aprovação do hospital/convênio. A internação deverá ser autorizada conforme procedimentos administrativos vigentes.</p>
+      </div>
+    </div>
+  `;
+}
+
 // Estilos CSS profissionais para impressão
 function getDocumentStyles(isEmitted: boolean): string {
   return `
@@ -1175,6 +1617,312 @@ function getDocumentStyles(isEmitted: boolean): string {
         margin: 3px 0;
       }
 
+      /* Estilos para Termo de Consentimento */
+      .termo-title .subtitle {
+        font-size: 11pt;
+        color: #4a5568;
+        margin-top: 5px;
+      }
+
+      .termo-body .procedimento-section,
+      .termo-body .riscos-section,
+      .termo-body .beneficios-section,
+      .termo-body .alternativas-section,
+      .termo-body .cuidados-section {
+        margin-bottom: 20px;
+      }
+
+      .termo-body .riscos-list li,
+      .termo-body .beneficios-list li {
+        margin-bottom: 5px;
+        padding-left: 5px;
+      }
+
+      .termo-body .declaracao-consentimento {
+        background: #f7fafc;
+        border: 2px solid #1a365d;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 25px 0;
+      }
+
+      .termo-body .declaracao-consentimento p {
+        font-size: 11pt;
+        line-height: 1.8;
+        text-align: justify;
+      }
+
+      .assinaturas-section {
+        margin-top: 40px;
+      }
+
+      .assinatura-linha {
+        display: flex;
+        justify-content: space-between;
+        gap: 40px;
+      }
+
+      .assinatura-box {
+        flex: 1;
+        text-align: center;
+      }
+
+      .assinatura-box .assinatura-line {
+        border-top: 1px solid #2d3748;
+        margin-bottom: 10px;
+      }
+
+      .assinatura-box p {
+        font-size: 10pt;
+        color: #4a5568;
+      }
+
+      .assinatura-box .nome-assinatura {
+        font-weight: 600;
+        color: #1a202c;
+      }
+
+      /* Estilos para Relatório Médico */
+      .relatorio-title .destinatario {
+        font-size: 11pt;
+        color: #4a5568;
+        margin-top: 5px;
+      }
+
+      .relatorio-body .periodo-section,
+      .relatorio-body .evolucao-section,
+      .relatorio-body .tratamento-section,
+      .relatorio-body .prognostico-section,
+      .relatorio-body .recomendacoes-section {
+        margin-bottom: 20px;
+      }
+
+      .relatorio-body .evolucao-content,
+      .relatorio-body .tratamento-content,
+      .relatorio-body .prognostico-content,
+      .relatorio-body .recomendacoes-content {
+        background: #f7fafc;
+        border-left: 3px solid #1a365d;
+        padding: 12px 15px;
+        border-radius: 0 6px 6px 0;
+      }
+
+      /* Estilos para Orientações Médicas */
+      .orientacoes-body .orientacoes-list {
+        counter-reset: item;
+        list-style: none;
+        padding-left: 0;
+      }
+
+      .orientacoes-body .orientacoes-list li {
+        counter-increment: item;
+        margin-bottom: 12px;
+        padding: 12px 15px 12px 45px;
+        background: #f0fff4;
+        border-radius: 6px;
+        position: relative;
+      }
+
+      .orientacoes-body .orientacoes-list li::before {
+        content: counter(item);
+        position: absolute;
+        left: 12px;
+        top: 12px;
+        width: 24px;
+        height: 24px;
+        background: #276749;
+        color: white;
+        border-radius: 50%;
+        text-align: center;
+        line-height: 24px;
+        font-size: 11pt;
+        font-weight: 600;
+      }
+
+      .orientacoes-body .restricoes-section {
+        margin-top: 20px;
+      }
+
+      .orientacoes-body .restricoes-list li {
+        margin-bottom: 8px;
+        padding: 10px 15px;
+        background: #fffaf0;
+        border-left: 3px solid #dd6b20;
+        border-radius: 0 6px 6px 0;
+      }
+
+      .orientacoes-body .alerta-section {
+        margin-top: 20px;
+        background: #fff5f5;
+        border: 2px solid #c53030;
+        border-radius: 8px;
+        padding: 15px;
+      }
+
+      .orientacoes-body .alerta-section h3 {
+        color: #c53030;
+        margin-bottom: 10px;
+      }
+
+      .orientacoes-body .alerta-list li {
+        margin-bottom: 8px;
+        padding-left: 20px;
+        position: relative;
+      }
+
+      .orientacoes-body .alerta-list li::before {
+        content: '⚠';
+        position: absolute;
+        left: 0;
+      }
+
+      .orientacoes-body .contato-section {
+        margin-top: 20px;
+        background: #ebf8ff;
+        padding: 15px;
+        border-radius: 8px;
+      }
+
+      .orientacoes-body .contato-info {
+        font-size: 14pt;
+        font-weight: 600;
+        color: #2b6cb0;
+      }
+
+      /* Estilos para Atestado de Aptidão */
+      .aptidao-title .subtitle {
+        font-size: 11pt;
+        color: #4a5568;
+        margin-top: 5px;
+      }
+
+      .aptidao-body .parecer-section {
+        text-align: center;
+        margin: 25px 0;
+      }
+
+      .aptidao-body .parecer-box {
+        display: inline-block;
+        padding: 15px 40px;
+        border-radius: 8px;
+        font-size: 18pt;
+        font-weight: 700;
+      }
+
+      .aptidao-body .parecer-section.apto .parecer-box {
+        background: #c6f6d5;
+        color: #276749;
+        border: 2px solid #276749;
+      }
+
+      .aptidao-body .parecer-section.apto-restricoes .parecer-box {
+        background: #fefcbf;
+        color: #744210;
+        border: 2px solid #d69e2e;
+      }
+
+      .aptidao-body .parecer-section.inapto-temp .parecer-box {
+        background: #fed7d7;
+        color: #9b2c2c;
+        border: 2px solid #e53e3e;
+      }
+
+      .aptidao-body .parecer-section.inapto .parecer-box {
+        background: #c53030;
+        color: white;
+        border: 2px solid #9b2c2c;
+      }
+
+      .aptidao-body .validade-section {
+        background: #ebf8ff;
+        padding: 12px 15px;
+        border-radius: 8px;
+        margin-top: 15px;
+      }
+
+      .aptidao-body .validade-info {
+        font-weight: 600;
+        color: #2b6cb0;
+      }
+
+      /* Estilos para Guia de Internação */
+      .internacao-title .internacao-tipo {
+        display: inline-block;
+        padding: 8px 20px;
+        border-radius: 6px;
+        font-weight: 700;
+        margin-top: 10px;
+      }
+
+      .internacao-title .internacao-tipo.eletiva {
+        background: #c6f6d5;
+        color: #276749;
+      }
+
+      .internacao-title .internacao-tipo.urgencia {
+        background: #fefcbf;
+        color: #744210;
+      }
+
+      .internacao-title .internacao-tipo.emergencia {
+        background: #fed7d7;
+        color: #9b2c2c;
+      }
+
+      .internacao-body .internacao-dados {
+        background: #f7fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 20px;
+      }
+
+      .internacao-body .dado-row {
+        display: flex;
+        gap: 30px;
+        margin-bottom: 10px;
+      }
+
+      .internacao-body .dado-row:last-child {
+        margin-bottom: 0;
+      }
+
+      .internacao-body .dado-item {
+        flex: 1;
+      }
+
+      .internacao-body .dado-label {
+        font-weight: 600;
+        color: #4a5568;
+        margin-right: 8px;
+      }
+
+      .internacao-body .dado-value {
+        color: #1a202c;
+      }
+
+      .internacao-body .justificativa-section {
+        margin-top: 20px;
+      }
+
+      .internacao-body .justificativa-content {
+        background: #f7fafc;
+        border-left: 3px solid #1a365d;
+        padding: 12px 15px;
+        border-radius: 0 6px 6px 0;
+      }
+
+      .internacao-body .cuidados-section {
+        margin-top: 20px;
+      }
+
+      .internacao-body .cuidados-list li {
+        margin-bottom: 8px;
+        padding: 8px 12px;
+        background: #fff5f5;
+        border-radius: 6px;
+      }
+
       /* Print Styles */
       @media print {
         body {
@@ -1217,6 +1965,9 @@ export function generateDocumentHTML(document: MedicalDocument, patient: Patient
     case 'declaracao_comparecimento':
       documentContent = generateDeclaracaoComparecimento(documentData);
       break;
+    case 'declaracao_acompanhante':
+      documentContent = generateDeclaracaoAcompanhante(documentData);
+      break;
     case 'laudo_medico':
       documentContent = generateLaudoMedico(documentData);
       break;
@@ -1228,6 +1979,21 @@ export function generateDocumentHTML(document: MedicalDocument, patient: Patient
       break;
     case 'encaminhamento':
       documentContent = generateEncaminhamento(documentData);
+      break;
+    case 'termo_consentimento':
+      documentContent = generateTermoConsentimento(documentData);
+      break;
+    case 'relatorio_medico':
+      documentContent = generateRelatorioMedico(documentData);
+      break;
+    case 'orientacoes_medicas':
+      documentContent = generateOrientacoesMedicas(documentData);
+      break;
+    case 'atestado_aptidao':
+      documentContent = generateAtestadoAptidao(documentData);
+      break;
+    case 'guia_internacao':
+      documentContent = generateGuiaInternacao(documentData);
       break;
     default:
       documentContent = `<div class="document-body"><p class="content-text">${document.content}</p></div>`;
