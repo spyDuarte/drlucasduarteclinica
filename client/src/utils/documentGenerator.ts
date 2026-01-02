@@ -319,7 +319,7 @@ function generateReceita({ document, patient }: DocumentData): string {
         <div class="prescricoes-section">
           <h3>PRESCRIÇÕES</h3>
           <div class="prescricoes-list">
-            ${comuns.map((rx: Prescription, idx: number) => renderPrescription(rx, idx + 1)).join('')}
+            ${comuns.map((rx: Prescription, idx: number) => renderPrescription(rx, idx)).join('')}
           </div>
         </div>
       ` : ''}
@@ -329,7 +329,7 @@ function generateReceita({ document, patient }: DocumentData): string {
           <h3>MEDICAMENTOS CONTROLADOS</h3>
           <p class="controlled-notice">Dispensação sujeita a retenção de receita conforme legislação vigente (Portaria SVS/MS 344/98)</p>
           <div class="prescricoes-list">
-            ${controladas.map((rx: Prescription, idx: number) => renderPrescription(rx, idx + 1, true)).join('')}
+            ${controladas.map((rx: Prescription, idx: number) => renderPrescription(rx, idx + comuns.length, true)).join('')}
           </div>
         </div>
       ` : ''}
