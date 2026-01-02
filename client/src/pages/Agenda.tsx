@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useData } from '../contexts/DataContext';
 import { useToast } from '../components/Toast';
@@ -11,14 +11,31 @@ import {
   Phone,
   AlertCircle,
   Calendar,
-  FileText
+  FileText,
+  Clock,
+  Search,
+  Stethoscope,
+  RefreshCw,
+  AlertTriangle,
+  Activity,
+  Scissors,
+  CreditCard,
+  Heart,
+  Mail,
+  CalendarDays,
+  UserCheck,
+  Bell,
+  MapPin,
+  Pill,
+  ClipboardList
 } from 'lucide-react';
 import {
   formatDate,
   formatRelativeDate,
   translateAppointmentType,
   getStatusColor,
-  generateTimeSlots
+  generateTimeSlots,
+  calculateAge
 } from '../utils/helpers';
 import type { Appointment, AppointmentStatus, AppointmentType, Patient } from '../types';
 
@@ -260,6 +277,36 @@ export default function Agenda() {
   );
 }
 
+// Tipos de consulta com ícones e cores
+const APPOINTMENT_TYPE_CONFIG: Record<AppointmentType, { icon: typeof Stethoscope; color: string; bgColor: string; label: string }> = {
+  primeira_consulta: { icon: UserCheck, color: 'text-blue-600', bgColor: 'bg-blue-100', label: 'Primeira Consulta' },
+  retorno: { icon: RefreshCw, color: 'text-green-600', bgColor: 'bg-green-100', label: 'Retorno' },
+  urgencia: { icon: AlertTriangle, color: 'text-red-600', bgColor: 'bg-red-100', label: 'Urgência' },
+  exame: { icon: Activity, color: 'text-purple-600', bgColor: 'bg-purple-100', label: 'Exame' },
+  procedimento: { icon: Scissors, color: 'text-orange-600', bgColor: 'bg-orange-100', label: 'Procedimento' },
+};
+
+// Status com cores
+const STATUS_CONFIG: Record<AppointmentStatus, { color: string; bgColor: string; label: string }> = {
+  agendada: { color: 'text-blue-700', bgColor: 'bg-blue-100', label: 'Agendada' },
+  confirmada: { color: 'text-green-700', bgColor: 'bg-green-100', label: 'Confirmada' },
+  aguardando: { color: 'text-yellow-700', bgColor: 'bg-yellow-100', label: 'Aguardando' },
+  em_atendimento: { color: 'text-purple-700', bgColor: 'bg-purple-100', label: 'Em Atendimento' },
+  finalizada: { color: 'text-gray-700', bgColor: 'bg-gray-100', label: 'Finalizada' },
+  cancelada: { color: 'text-red-700', bgColor: 'bg-red-100', label: 'Cancelada' },
+  faltou: { color: 'text-orange-700', bgColor: 'bg-orange-100', label: 'Não Compareceu' },
+};
+
+// Durações disponíveis
+const DURATION_OPTIONS = [
+  { value: 15, label: '15 min' },
+  { value: 30, label: '30 min' },
+  { value: 45, label: '45 min' },
+  { value: 60, label: '1 hora' },
+  { value: 90, label: '1h 30min' },
+  { value: 120, label: '2 horas' },
+];
+
 // Appointment Modal Component
 interface AppointmentModalProps {
   appointment: Appointment | null;
@@ -275,13 +322,14 @@ interface AppointmentFormData {
   patientId: string;
   data: string;
   horaInicio: string;
-  horaFim: string;
-  tipo: string;
-  status: string;
+  duracao: number;
+  tipo: AppointmentType;
+  status: AppointmentStatus;
   motivo: string;
   valor: string;
   convenio: boolean;
   observacoes: string;
+  enviarLembrete: boolean;
 }
 
 function AppointmentModal({
@@ -293,50 +341,68 @@ function AppointmentModal({
   onSave,
   onDelete
 }: AppointmentModalProps) {
-  const { checkAppointmentConflict } = useData();
+  const { checkAppointmentConflict, getAppointmentsByPatient } = useData();
   const { showToast } = useToast();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showPatientSearch, setShowPatientSearch] = useState(false);
 
-  // Calcula o horário de fim inicial
-  const calculateEndTime = (startTime: string): string => {
+  // Calcula duração inicial baseado nos horários
+  const calculateDuration = (start: string, end: string): number => {
+    const [startH, startM] = start.split(':').map(Number);
+    const [endH, endM] = end.split(':').map(Number);
+    return (endH * 60 + endM) - (startH * 60 + startM);
+  };
+
+  // Calcula o horário de fim baseado no início e duração
+  const calculateEndTime = (startTime: string, durationMinutes: number): string => {
     const [hours, minutes] = startTime.split(':').map(Number);
-    const endMinutes = hours * 60 + minutes + 30;
+    const endMinutes = hours * 60 + minutes + durationMinutes;
     const endHours = Math.floor(endMinutes / 60);
     const endMins = endMinutes % 60;
     return `${endHours.toString().padStart(2, '0')}:${endMins.toString().padStart(2, '0')}`;
   };
 
   const initialStartTime = appointment?.horaInicio || selectedTime || '09:00';
-  const initialEndTime = appointment?.horaFim || calculateEndTime(initialStartTime);
+  const initialDuration = appointment ? calculateDuration(appointment.horaInicio, appointment.horaFim) : 30;
 
   const [formData, setFormData] = useState<AppointmentFormData>({
     patientId: appointment?.patientId || '',
     data: appointment?.data || selectedDate,
     horaInicio: initialStartTime,
-    horaFim: initialEndTime,
+    duracao: initialDuration,
     tipo: appointment?.tipo || 'primeira_consulta',
     status: appointment?.status || 'agendada',
     motivo: appointment?.motivo || '',
     valor: appointment?.valor?.toString() || '',
     convenio: appointment?.convenio || false,
-    observacoes: appointment?.observacoes || ''
+    observacoes: appointment?.observacoes || '',
+    enviarLembrete: true,
   });
 
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
-  // Auto-calculate end time when start time changes
-  useEffect(() => {
-    if (formData.horaInicio) {
-      const newEndTime = calculateEndTime(formData.horaInicio);
-      // Só atualiza se o horário de fim for menor ou igual ao início
-      if (formData.horaFim <= formData.horaInicio || !formData.horaFim) {
-        setFormData(prev => ({
-          ...prev,
-          horaFim: newEndTime
-        }));
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formData.horaInicio]);
+  // Pacientes filtrados pela busca
+  const filteredPatients = useMemo(() => {
+    if (!searchQuery) return patients;
+    const query = searchQuery.toLowerCase();
+    return patients.filter(p =>
+      p.nome.toLowerCase().includes(query) ||
+      p.cpf.includes(query) ||
+      p.telefone.includes(query)
+    );
+  }, [patients, searchQuery]);
+
+  // Paciente selecionado
+  const selectedPatient = patients.find(p => p.id === formData.patientId);
+
+  // Histórico de consultas do paciente
+  const patientAppointments = useMemo(() => {
+    if (!formData.patientId) return [];
+    return getAppointmentsByPatient(formData.patientId)
+      .filter(a => a.status === 'finalizada')
+      .sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime())
+      .slice(0, 3);
+  }, [formData.patientId, getAppointmentsByPatient]);
 
   // Validação de data passada
   const isDateInPast = (dateStr: string): boolean => {
@@ -364,22 +430,18 @@ function AppointmentModal({
       errors.horaInicio = 'Informe o horário de início';
     }
 
-    if (!formData.horaFim) {
-      errors.horaFim = 'Informe o horário de término';
-    } else if (formData.horaFim <= formData.horaInicio) {
-      errors.horaFim = 'O horário de término deve ser maior que o início';
-    }
+    const horaFim = calculateEndTime(formData.horaInicio, formData.duracao);
 
     // Verifica conflito de horário
     const hasConflict = checkAppointmentConflict(
       formData.data,
       formData.horaInicio,
-      formData.horaFim,
-      appointment?.id // Exclui a própria consulta na edição
+      horaFim,
+      appointment?.id
     );
 
     if (hasConflict) {
-      errors.horaInicio = 'Já existe uma consulta agendada neste horário';
+      errors.horaInicio = 'Já existe uma consulta neste horário';
       showToast('Conflito de horário detectado', 'error');
     }
 
@@ -394,13 +456,15 @@ function AppointmentModal({
       return;
     }
 
+    const horaFim = calculateEndTime(formData.horaInicio, formData.duracao);
+
     const data: Partial<Appointment> = {
       patientId: formData.patientId,
       data: formData.data,
       horaInicio: formData.horaInicio,
-      horaFim: formData.horaFim,
-      tipo: formData.tipo as AppointmentType,
-      status: formData.status as AppointmentStatus,
+      horaFim: horaFim,
+      tipo: formData.tipo,
+      status: formData.status,
       motivo: formData.motivo || undefined,
       valor: formData.valor ? parseFloat(formData.valor) : undefined,
       convenio: formData.convenio,
@@ -410,242 +474,425 @@ function AppointmentModal({
     onSave(data);
   };
 
-  const selectedPatient = patients.find(p => p.id === formData.patientId);
+  const handleSelectPatient = (patientId: string) => {
+    setFormData({ ...formData, patientId });
+    setShowPatientSearch(false);
+    setSearchQuery('');
+    if (formErrors.patientId) setFormErrors(prev => ({ ...prev, patientId: '' }));
+  };
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[60] p-4 overflow-y-auto">
-      <div className="bg-white rounded-xl w-full max-w-lg max-h-[90vh] my-4 flex flex-col animate-scale-in">
-        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-gray-900">
-            {appointment ? 'Editar Consulta' : 'Nova Consulta'}
-          </h2>
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] p-2 sm:p-4 animate-fade-in overflow-y-auto">
+      <div className="bg-white rounded-2xl w-full max-w-2xl my-4 sm:my-8 max-h-[95vh] flex flex-col shadow-2xl animate-scale-in">
+        {/* Header Profissional */}
+        <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-primary-600 to-primary-700 rounded-t-2xl">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+              <CalendarDays className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-white">
+                {appointment ? 'Editar Agendamento' : 'Novo Agendamento'}
+              </h2>
+              <p className="text-sm text-white/70">
+                {formatDate(new Date(formData.data), "EEEE, dd 'de' MMMM")}
+              </p>
+            </div>
+          </div>
           <button
             onClick={onClose}
-            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg"
+            className="p-2 bg-white/10 hover:bg-white/20 rounded-xl transition-all text-white"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto overscroll-contain scroll-smooth p-6 space-y-4">
-          {/* Patient Selection */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Paciente *
-            </label>
-            <select
-              value={formData.patientId}
-              onChange={e => {
-                setFormData({ ...formData, patientId: e.target.value });
-                if (formErrors.patientId) setFormErrors(prev => ({ ...prev, patientId: '' }));
-              }}
-              className={`input-field ${formErrors.patientId ? 'border-red-500 focus:ring-red-500' : ''}`}
-              required
-            >
-              <option value="">Selecione um paciente</option>
-              {patients.map(patient => (
-                <option key={patient.id} value={patient.id}>
-                  {patient.nome}
-                </option>
-              ))}
-            </select>
-            {formErrors.patientId && (
-              <p className="text-red-500 text-xs mt-1">{formErrors.patientId}</p>
-            )}
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-6">
+          {/* Seção: Paciente */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+              <User className="w-4 h-4 text-primary-600" />
+              PACIENTE
+            </div>
+
+            {/* Busca de Paciente */}
+            <div className="relative">
+              <div
+                className={`input-field flex items-center gap-2 cursor-pointer ${
+                  formErrors.patientId ? 'border-red-500' : ''
+                }`}
+                onClick={() => setShowPatientSearch(true)}
+              >
+                <Search className="w-4 h-4 text-gray-400" />
+                {selectedPatient ? (
+                  <span className="text-gray-900">{selectedPatient.nome}</span>
+                ) : (
+                  <span className="text-gray-400">Buscar paciente por nome, CPF ou telefone...</span>
+                )}
+              </div>
+
+              {showPatientSearch && (
+                <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-64 overflow-hidden">
+                  <div className="p-2 border-b border-gray-100">
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Digite para buscar..."
+                      className="w-full px-3 py-2 bg-gray-50 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      autoFocus
+                    />
+                  </div>
+                  <div className="max-h-48 overflow-y-auto">
+                    {filteredPatients.length === 0 ? (
+                      <div className="p-4 text-center text-gray-500 text-sm">
+                        Nenhum paciente encontrado
+                      </div>
+                    ) : (
+                      filteredPatients.map(patient => (
+                        <div
+                          key={patient.id}
+                          onClick={() => handleSelectPatient(patient.id)}
+                          className={`p-3 hover:bg-gray-50 cursor-pointer flex items-center gap-3 ${
+                            formData.patientId === patient.id ? 'bg-primary-50' : ''
+                          }`}
+                        >
+                          <div className="w-10 h-10 bg-gradient-to-br from-primary-100 to-primary-200 rounded-full flex items-center justify-center">
+                            <User className="w-5 h-5 text-primary-600" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-gray-900 truncate">{patient.nome}</p>
+                            <p className="text-xs text-gray-500">{patient.telefone}</p>
+                          </div>
+                          {patient.alergias && patient.alergias.length > 0 && (
+                            <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0" />
+                          )}
+                        </div>
+                      ))
+                    )}
+                  </div>
+                  <div className="p-2 border-t border-gray-100">
+                    <button
+                      type="button"
+                      onClick={() => setShowPatientSearch(false)}
+                      className="w-full px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg"
+                    >
+                      Fechar
+                    </button>
+                  </div>
+                </div>
+              )}
+              {formErrors.patientId && (
+                <p className="text-red-500 text-xs mt-1">{formErrors.patientId}</p>
+              )}
+            </div>
+
+            {/* Card do Paciente Selecionado */}
             {selectedPatient && (
-              <div className="mt-2 p-2 bg-gray-50 rounded-lg flex items-center gap-2 text-sm text-gray-600">
-                <Phone className="w-4 h-4" />
-                {selectedPatient.telefone}
+              <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-4 space-y-3">
+                <div className="flex items-start gap-4">
+                  <div className="w-14 h-14 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/20">
+                    <User className="w-7 h-7 text-white" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-gray-900">{selectedPatient.nome}</h3>
+                    <p className="text-sm text-gray-500">
+                      {calculateAge(selectedPatient.dataNascimento)} anos • {selectedPatient.sexo === 'M' ? 'Masculino' : selectedPatient.sexo === 'F' ? 'Feminino' : 'Outro'}
+                    </p>
+                    <div className="flex flex-wrap gap-3 mt-2 text-xs text-gray-600">
+                      <span className="flex items-center gap-1">
+                        <Phone className="w-3 h-3" />
+                        {selectedPatient.telefone}
+                      </span>
+                      {selectedPatient.email && (
+                        <span className="flex items-center gap-1">
+                          <Mail className="w-3 h-3" />
+                          {selectedPatient.email}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Alertas */}
                 {selectedPatient.alergias && selectedPatient.alergias.length > 0 && (
-                  <span className="ml-auto flex items-center gap-1 text-red-600">
-                    <AlertCircle className="w-4 h-4" />
-                    Alergias: {selectedPatient.alergias.join(', ')}
-                  </span>
+                  <div className="flex items-start gap-2 p-2 bg-red-50 border border-red-200 rounded-lg">
+                    <AlertCircle className="w-4 h-4 text-red-600 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-xs font-medium text-red-800">Alergias:</p>
+                      <p className="text-xs text-red-700">{selectedPatient.alergias.join(', ')}</p>
+                    </div>
+                  </div>
+                )}
+
+                {selectedPatient.medicamentosEmUso && selectedPatient.medicamentosEmUso.length > 0 && (
+                  <div className="flex items-start gap-2 p-2 bg-amber-50 border border-amber-200 rounded-lg">
+                    <Pill className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-xs font-medium text-amber-800">Medicamentos em uso:</p>
+                      <p className="text-xs text-amber-700">{selectedPatient.medicamentosEmUso.join(', ')}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Últimas consultas */}
+                {patientAppointments.length > 0 && (
+                  <div className="pt-2 border-t border-gray-200">
+                    <p className="text-xs font-medium text-gray-500 mb-2">Últimas consultas:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {patientAppointments.map(apt => (
+                        <span key={apt.id} className="px-2 py-1 bg-white rounded-md text-xs text-gray-600 border border-gray-200">
+                          {formatDate(new Date(apt.data), 'dd/MM/yyyy')} - {translateAppointmentType(apt.tipo)}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
                 )}
               </div>
             )}
           </div>
 
-          {/* Date and Time */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Data *
-              </label>
-              <input
-                type="date"
-                value={formData.data}
-                onChange={e => {
-                  setFormData({ ...formData, data: e.target.value });
-                  if (formErrors.data) setFormErrors(prev => ({ ...prev, data: '' }));
-                }}
-                className={`input-field ${formErrors.data ? 'border-red-500 focus:ring-red-500' : ''}`}
-                required
-              />
-              {formErrors.data && (
-                <p className="text-red-500 text-xs mt-1">{formErrors.data}</p>
-              )}
+          {/* Seção: Data e Horário */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+              <Clock className="w-4 h-4 text-primary-600" />
+              DATA E HORÁRIO
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Início *
-              </label>
-              <select
-                value={formData.horaInicio}
-                onChange={e => {
-                  setFormData({ ...formData, horaInicio: e.target.value });
-                  if (formErrors.horaInicio) setFormErrors(prev => ({ ...prev, horaInicio: '' }));
-                }}
-                className={`input-field ${formErrors.horaInicio ? 'border-red-500 focus:ring-red-500' : ''}`}
-                required
-              >
-                {TIME_SLOTS.map(time => (
-                  <option key={time} value={time}>{time}</option>
-                ))}
-              </select>
-              {formErrors.horaInicio && (
-                <p className="text-red-500 text-xs mt-1">{formErrors.horaInicio}</p>
-              )}
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">
+                  Data
+                </label>
+                <input
+                  type="date"
+                  value={formData.data}
+                  onChange={e => {
+                    setFormData({ ...formData, data: e.target.value });
+                    if (formErrors.data) setFormErrors(prev => ({ ...prev, data: '' }));
+                  }}
+                  className={`input-field ${formErrors.data ? 'border-red-500' : ''}`}
+                  required
+                />
+                {formErrors.data && (
+                  <p className="text-red-500 text-xs mt-1">{formErrors.data}</p>
+                )}
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">
+                  Horário
+                </label>
+                <select
+                  value={formData.horaInicio}
+                  onChange={e => {
+                    setFormData({ ...formData, horaInicio: e.target.value });
+                    if (formErrors.horaInicio) setFormErrors(prev => ({ ...prev, horaInicio: '' }));
+                  }}
+                  className={`input-field ${formErrors.horaInicio ? 'border-red-500' : ''}`}
+                  required
+                >
+                  {TIME_SLOTS.map(time => (
+                    <option key={time} value={time}>{time}</option>
+                  ))}
+                </select>
+                {formErrors.horaInicio && (
+                  <p className="text-red-500 text-xs mt-1">{formErrors.horaInicio}</p>
+                )}
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">
+                  Duração
+                </label>
+                <select
+                  value={formData.duracao}
+                  onChange={e => setFormData({ ...formData, duracao: parseInt(e.target.value) })}
+                  className="input-field"
+                >
+                  {DURATION_OPTIONS.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+              </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Fim *
-              </label>
-              <select
-                value={formData.horaFim}
-                onChange={e => {
-                  setFormData({ ...formData, horaFim: e.target.value });
-                  if (formErrors.horaFim) setFormErrors(prev => ({ ...prev, horaFim: '' }));
-                }}
-                className={`input-field ${formErrors.horaFim ? 'border-red-500 focus:ring-red-500' : ''}`}
-                required
-              >
-                {TIME_SLOTS.filter(t => t > formData.horaInicio).map(time => (
-                  <option key={time} value={time}>{time}</option>
-                ))}
-              </select>
-              {formErrors.horaFim && (
-                <p className="text-red-500 text-xs mt-1">{formErrors.horaFim}</p>
-              )}
+
+            {/* Preview do horário */}
+            <div className="flex items-center gap-2 p-3 bg-primary-50 rounded-lg">
+              <CalendarDays className="w-4 h-4 text-primary-600" />
+              <span className="text-sm text-primary-700">
+                <strong>{formatDate(new Date(formData.data), "EEEE, dd/MM")}</strong>
+                {' '}das <strong>{formData.horaInicio}</strong> às{' '}
+                <strong>{calculateEndTime(formData.horaInicio, formData.duracao)}</strong>
+                {' '}({formData.duracao} min)
+              </span>
             </div>
           </div>
 
-          {/* Type and Status */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Tipo de consulta *
-              </label>
-              <select
-                value={formData.tipo}
-                onChange={e => setFormData({ ...formData, tipo: e.target.value as AppointmentType })}
-                className="input-field"
-              >
-                <option value="primeira_consulta">Primeira consulta</option>
-                <option value="retorno">Retorno</option>
-                <option value="urgencia">Urgência</option>
-                <option value="exame">Exame</option>
-                <option value="procedimento">Procedimento</option>
-              </select>
+          {/* Seção: Tipo de Consulta */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+              <Stethoscope className="w-4 h-4 text-primary-600" />
+              TIPO DE ATENDIMENTO
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Status
-              </label>
-              <select
-                value={formData.status}
-                onChange={e => setFormData({ ...formData, status: e.target.value as AppointmentStatus })}
-                className="input-field"
-              >
-                <option value="agendada">Agendada</option>
-                <option value="confirmada">Confirmada</option>
-                <option value="aguardando">Aguardando</option>
-                <option value="em_atendimento">Em atendimento</option>
-                <option value="finalizada">Finalizada</option>
-                <option value="cancelada">Cancelada</option>
-                <option value="faltou">Não compareceu</option>
-              </select>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {(Object.keys(APPOINTMENT_TYPE_CONFIG) as AppointmentType[]).map(type => {
+                const config = APPOINTMENT_TYPE_CONFIG[type];
+                const Icon = config.icon;
+                const isSelected = formData.tipo === type;
+
+                return (
+                  <button
+                    key={type}
+                    type="button"
+                    onClick={() => setFormData({ ...formData, tipo: type })}
+                    className={`p-3 rounded-xl border-2 transition-all flex flex-col items-center gap-2 ${
+                      isSelected
+                        ? `border-primary-500 ${config.bgColor} shadow-md`
+                        : 'border-gray-200 hover:border-gray-300 bg-white'
+                    }`}
+                  >
+                    <div className={`w-8 h-8 rounded-lg ${config.bgColor} flex items-center justify-center`}>
+                      <Icon className={`w-4 h-4 ${config.color}`} />
+                    </div>
+                    <span className={`text-xs font-medium ${isSelected ? config.color : 'text-gray-600'}`}>
+                      {config.label}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
-          {/* Reason */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Motivo da consulta
-            </label>
+          {/* Seção: Motivo */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+              <ClipboardList className="w-4 h-4 text-primary-600" />
+              MOTIVO DA CONSULTA
+            </div>
             <input
               type="text"
               value={formData.motivo}
               onChange={e => setFormData({ ...formData, motivo: e.target.value })}
               className="input-field"
-              placeholder="Ex: Check-up, Dor de cabeça..."
+              placeholder="Descreva o motivo ou queixa principal..."
             />
           </div>
 
-          {/* Payment */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Valor (R$)
-              </label>
-              <input
-                type="number"
-                value={formData.valor}
-                onChange={e => setFormData({ ...formData, valor: e.target.value })}
+          {/* Seção: Status e Pagamento */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            {/* Status */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+                <Activity className="w-4 h-4 text-primary-600" />
+                STATUS
+              </div>
+              <select
+                value={formData.status}
+                onChange={e => setFormData({ ...formData, status: e.target.value as AppointmentStatus })}
                 className="input-field"
-                placeholder="0,00"
-                step="0.01"
-              />
+              >
+                {(Object.keys(STATUS_CONFIG) as AppointmentStatus[]).map(status => (
+                  <option key={status} value={status}>{STATUS_CONFIG[status].label}</option>
+                ))}
+              </select>
             </div>
-            <div className="flex items-end">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={formData.convenio}
-                  onChange={e => setFormData({ ...formData, convenio: e.target.checked })}
-                  className="w-5 h-5 rounded border-gray-300 text-sky-600 focus:ring-sky-500"
-                />
-                <span className="text-sm text-gray-700">Consulta por convênio</span>
-              </label>
+
+            {/* Pagamento */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+                <CreditCard className="w-4 h-4 text-primary-600" />
+                PAGAMENTO
+              </div>
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">R$</span>
+                  <input
+                    type="number"
+                    value={formData.valor}
+                    onChange={e => setFormData({ ...formData, valor: e.target.value })}
+                    className="input-field pl-10"
+                    placeholder="0,00"
+                    step="0.01"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, convenio: !formData.convenio })}
+                  className={`px-4 py-2 rounded-xl border-2 transition-all flex items-center gap-2 ${
+                    formData.convenio
+                      ? 'border-primary-500 bg-primary-50 text-primary-700'
+                      : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                  }`}
+                >
+                  <Heart className={`w-4 h-4 ${formData.convenio ? 'fill-primary-500' : ''}`} />
+                  <span className="text-sm font-medium">Convênio</span>
+                </button>
+              </div>
             </div>
           </div>
 
-          {/* Notes */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Observações
-            </label>
+          {/* Observações */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+              <FileText className="w-4 h-4 text-primary-600" />
+              OBSERVAÇÕES
+            </div>
             <textarea
               value={formData.observacoes}
               onChange={e => setFormData({ ...formData, observacoes: e.target.value })}
               className="input-field"
               rows={2}
+              placeholder="Anotações adicionais sobre o agendamento..."
             />
           </div>
 
-          {/* Actions */}
-          <div className="flex gap-3 justify-between pt-4 border-t border-gray-200">
-            <div>
-              {onDelete && (
-                <button
-                  type="button"
-                  onClick={onDelete}
-                  className="btn-danger"
-                >
-                  Excluir
-                </button>
-              )}
-            </div>
-            <div className="flex gap-3">
-              <button type="button" onClick={onClose} className="btn-secondary">
-                Cancelar
-              </button>
-              <button type="submit" className="btn-primary">
-                {appointment ? 'Salvar' : 'Agendar'}
-              </button>
-            </div>
+          {/* Lembrete */}
+          <div className="flex items-center gap-3 p-3 bg-amber-50 rounded-xl border border-amber-200">
+            <Bell className="w-5 h-5 text-amber-600" />
+            <label className="flex items-center gap-2 cursor-pointer flex-1">
+              <input
+                type="checkbox"
+                checked={formData.enviarLembrete}
+                onChange={e => setFormData({ ...formData, enviarLembrete: e.target.checked })}
+                className="w-4 h-4 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
+              />
+              <span className="text-sm text-amber-800">Enviar lembrete ao paciente antes da consulta</span>
+            </label>
           </div>
         </form>
+
+        {/* Footer Actions */}
+        <div className="flex items-center justify-between gap-3 p-4 border-t border-gray-200 bg-gray-50 rounded-b-2xl">
+          <div>
+            {onDelete && (
+              <button
+                type="button"
+                onClick={onDelete}
+                className="px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-xl font-medium transition-all flex items-center gap-2"
+              >
+                <X className="w-4 h-4" />
+                Excluir
+              </button>
+            )}
+          </div>
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-medium transition-all"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              onClick={handleSubmit}
+              className="px-6 py-2 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white rounded-xl font-medium shadow-lg shadow-primary-500/25 transition-all flex items-center gap-2"
+            >
+              <CalendarDays className="w-4 h-4" />
+              {appointment ? 'Salvar Alterações' : 'Agendar Consulta'}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
