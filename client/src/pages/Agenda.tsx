@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useData } from '../contexts/DataContext';
 import { useToast } from '../components/Toast';
@@ -25,7 +25,6 @@ import {
   CalendarDays,
   UserCheck,
   Bell,
-  MapPin,
   Pill,
   ClipboardList
 } from 'lucide-react';
@@ -734,7 +733,7 @@ function AppointmentModal({
               TIPO DE ATENDIMENTO
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            <div className="flex flex-wrap gap-2">
               {(Object.keys(APPOINTMENT_TYPE_CONFIG) as AppointmentType[]).map(type => {
                 const config = APPOINTMENT_TYPE_CONFIG[type];
                 const Icon = config.icon;
@@ -745,16 +744,16 @@ function AppointmentModal({
                     key={type}
                     type="button"
                     onClick={() => setFormData({ ...formData, tipo: type })}
-                    className={`p-3 rounded-xl border-2 transition-all flex flex-col items-center gap-2 ${
+                    className={`flex-1 min-w-[calc(50%-0.25rem)] sm:min-w-0 sm:flex-initial px-4 py-3 rounded-xl border-2 transition-all flex items-center gap-3 ${
                       isSelected
-                        ? `border-primary-500 ${config.bgColor} shadow-md`
-                        : 'border-gray-200 hover:border-gray-300 bg-white'
+                        ? `border-primary-500 ${config.bgColor} shadow-md ring-2 ring-primary-500/20`
+                        : 'border-gray-200 hover:border-gray-300 hover:shadow-sm bg-white'
                     }`}
                   >
-                    <div className={`w-8 h-8 rounded-lg ${config.bgColor} flex items-center justify-center`}>
-                      <Icon className={`w-4 h-4 ${config.color}`} />
+                    <div className={`w-9 h-9 rounded-lg ${config.bgColor} flex items-center justify-center flex-shrink-0`}>
+                      <Icon className={`w-5 h-5 ${config.color}`} />
                     </div>
-                    <span className={`text-xs font-medium ${isSelected ? config.color : 'text-gray-600'}`}>
+                    <span className={`text-sm font-medium whitespace-nowrap ${isSelected ? config.color : 'text-gray-700'}`}>
                       {config.label}
                     </span>
                   </button>
