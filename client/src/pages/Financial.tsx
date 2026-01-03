@@ -452,7 +452,7 @@ function PaymentModal({ payment, patients, onClose, onSave }: PaymentModalProps)
   ];
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4 overflow-y-auto">
       <div className="bg-white rounded-2xl w-full max-w-lg my-4 max-h-[90vh] flex flex-col shadow-2xl animate-in fade-in zoom-in-95 duration-200">
         {/* Header */}
         <div className="relative border-b border-slate-100 px-6 py-5">
