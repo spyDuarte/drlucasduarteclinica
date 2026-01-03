@@ -21,7 +21,7 @@ import {
   X,
   FileCheck
 } from 'lucide-react';
-import type { MedicalRecord, MedicalDocument } from '../../types';
+import type { MedicalRecord, MedicalDocument, Patient } from '../../types';
 
 import { PatientSidebar } from './PatientSidebar';
 import { MedicalRecordCard } from './MedicalRecordCard';
@@ -69,6 +69,29 @@ export default function MedicalRecords() {
     return recordWithVitals?.objetivo?.sinaisVitais;
   }, [records]);
 
+  // Registros ordenados por data
+  const sortedRecords = useMemo(() => {
+    return [...records].sort((a, b) =>
+      new Date(b.data).getTime() - new Date(a.data).getTime()
+    );
+  }, [records]);
+
+  // Filtrar registros
+  const filteredRecords = useMemo(() => {
+    return sortedRecords.filter(record => {
+      const searchLower = searchTerm.toLowerCase();
+      const matchesSearch = searchTerm === '' ||
+        record.subjetivo?.queixaPrincipal?.toLowerCase().includes(searchLower) ||
+        record.avaliacao?.diagnosticoPrincipal?.toLowerCase().includes(searchLower) ||
+        record.avaliacao?.hipotesesDiagnosticas?.some(h => h.toLowerCase().includes(searchLower)) ||
+        record.avaliacao?.cid10?.some(c => c.toLowerCase().includes(searchLower));
+
+      const matchesType = filterType === 'todos' || record.tipoAtendimento === filterType;
+
+      return matchesSearch && matchesType;
+    });
+  }, [sortedRecords, searchTerm, filterType]);
+
   if (!patient) {
     return (
       <div className="empty-state max-w-md mx-auto mt-12">
@@ -87,26 +110,6 @@ export default function MedicalRecords() {
       </div>
     );
   }
-
-  const sortedRecords = [...records].sort((a, b) =>
-    new Date(b.data).getTime() - new Date(a.data).getTime()
-  );
-
-  // Filtrar registros
-  const filteredRecords = useMemo(() => {
-    return sortedRecords.filter(record => {
-      const searchLower = searchTerm.toLowerCase();
-      const matchesSearch = searchTerm === '' ||
-        record.subjetivo?.queixaPrincipal?.toLowerCase().includes(searchLower) ||
-        record.avaliacao?.diagnosticoPrincipal?.toLowerCase().includes(searchLower) ||
-        record.avaliacao?.hipotesesDiagnosticas?.some(h => h.toLowerCase().includes(searchLower)) ||
-        record.avaliacao?.cid10?.some(c => c.toLowerCase().includes(searchLower));
-
-      const matchesType = filterType === 'todos' || record.tipoAtendimento === filterType;
-
-      return matchesSearch && matchesType;
-    });
-  }, [sortedRecords, searchTerm, filterType]);
 
   const handleSaveRecord = (data: Partial<MedicalRecord>) => {
     if (editingRecord) {
@@ -592,9 +595,9 @@ function ClinicalSummaryTab({
   records,
   lastVitals
 }: {
-  patient: any;
+  patient: Patient;
   records: MedicalRecord[];
-  lastVitals?: any;
+  lastVitals?: MedicalRecord['objetivo']['sinaisVitais'];
 }) {
   // Últimos diagnósticos
   const recentDiagnoses = records
@@ -663,16 +666,16 @@ function ClinicalSummaryTab({
       </div>
 
       {/* Alertas do Paciente */}
-      {(patient.alergias?.length > 0 || patient.medicamentosEmUso?.length > 0) && (
+      {((patient.alergias && patient.alergias.length > 0) || (patient.medicamentosEmUso && patient.medicamentosEmUso.length > 0)) && (
         <div className="grid sm:grid-cols-2 gap-4">
-          {patient.alergias?.length > 0 && (
+          {patient.alergias && patient.alergias.length > 0 && (
             <div className="bg-red-50 border border-red-200 rounded-xl p-4">
               <div className="flex items-center gap-2 mb-3">
                 <AlertCircle className="w-5 h-5 text-red-600" />
                 <h3 className="font-semibold text-red-800">Alergias</h3>
               </div>
               <div className="flex flex-wrap gap-2">
-                {patient.alergias.map((a: string, i: number) => (
+                {patient.alergias.map((a, i) => (
                   <span key={i} className="px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs font-medium">
                     {a}
                   </span>
@@ -680,14 +683,14 @@ function ClinicalSummaryTab({
               </div>
             </div>
           )}
-          {patient.medicamentosEmUso?.length > 0 && (
+          {patient.medicamentosEmUso && patient.medicamentosEmUso.length > 0 && (
             <div className="bg-violet-50 border border-violet-200 rounded-xl p-4">
               <div className="flex items-center gap-2 mb-3">
                 <Pill className="w-5 h-5 text-violet-600" />
                 <h3 className="font-semibold text-violet-800">Medicamentos em Uso</h3>
               </div>
               <div className="flex flex-wrap gap-2">
-                {patient.medicamentosEmUso.map((m: string, i: number) => (
+                {patient.medicamentosEmUso.map((m, i) => (
                   <span key={i} className="px-2 py-1 bg-violet-100 text-violet-700 rounded-full text-xs font-medium">
                     {m}
                   </span>
