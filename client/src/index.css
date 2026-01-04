@@ -1603,7 +1603,7 @@ body {
   padding: 1.5rem 2rem;
   color: white;
   position: relative;
-  overflow: hidden;
+  /* overflow: visible para permitir que o dropdown de ações rápidas apareça */
 }
 
 .medical-record-header::before {
