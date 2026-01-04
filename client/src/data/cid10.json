@@ -8,6 +8,18 @@
     "description": "Febre tifóide e paratifóide"
   },
   {
+    "code": "A03",
+    "description": "Shiguelose"
+  },
+  {
+    "code": "A04",
+    "description": "Outras infecções intestinais bacterianas"
+  },
+  {
+    "code": "A09",
+    "description": "Diarréia e gastroenterite de origem infecciosa presumível"
+  },
+  {
     "code": "A90",
     "description": "Dengue [dengue clássico]"
   },
@@ -20,28 +32,116 @@
     "description": "Malária não especificada"
   },
   {
+    "code": "B34.2",
+    "description": "Infecção por coronavírus de localização não especificada"
+  },
+  {
+    "code": "J00",
+    "description": "Nasofaringite aguda [resfriado comum]"
+  },
+  {
+    "code": "J01",
+    "description": "Sinusite aguda"
+  },
+  {
+    "code": "J02",
+    "description": "Faringite aguda"
+  },
+  {
+    "code": "J03",
+    "description": "Amigdalite aguda"
+  },
+  {
+    "code": "J06",
+    "description": "Infecções agudas das vias aéreas superiores"
+  },
+  {
+    "code": "J10",
+    "description": "Influenza devida a vírus da influenza identificado"
+  },
+  {
     "code": "J11",
     "description": "Influenza devida a vírus não identificado"
+  },
+  {
+    "code": "J12",
+    "description": "Pneumonia viral"
+  },
+  {
+    "code": "J18",
+    "description": "Pneumonia por microorganismo não especificado"
   },
   {
     "code": "J18.9",
     "description": "Pneumonia não especificada"
   },
   {
+    "code": "J20",
+    "description": "Bronquite aguda"
+  },
+  {
+    "code": "J44",
+    "description": "Outras doenças pulmonares obstrutivas crônicas"
+  },
+  {
     "code": "J45",
     "description": "Asma"
   },
   {
-    "code": "K29.7",
-    "description": "Gastrite não especificada"
+    "code": "I10",
+    "description": "Hipertensão essencial (primária)"
+  },
+  {
+    "code": "I20",
+    "description": "Angina pectoris"
+  },
+  {
+    "code": "I21",
+    "description": "Infarto agudo do miocárdio"
+  },
+  {
+    "code": "I50",
+    "description": "Insuficiência cardíaca"
+  },
+  {
+    "code": "E10",
+    "description": "Diabetes mellitus insulino-dependente"
+  },
+  {
+    "code": "E11",
+    "description": "Diabetes mellitus não-insulino-dependente"
+  },
+  {
+    "code": "E66",
+    "description": "Obesidade"
+  },
+  {
+    "code": "F32",
+    "description": "Episódios depressivos"
+  },
+  {
+    "code": "F41",
+    "description": "Outros transtornos ansiosos"
+  },
+  {
+    "code": "M54",
+    "description": "Dorsalgia"
   },
   {
     "code": "M54.5",
     "description": "Dor lombar baixa"
   },
   {
+    "code": "R50",
+    "description": "Febre de outra origem e de origem desconhecida"
+  },
+  {
     "code": "R51",
     "description": "Cefaléia"
+  },
+  {
+    "code": "R52",
+    "description": "Dor não classificada em outra parte"
   },
   {
     "code": "S82",
@@ -52,19 +152,7 @@
     "description": "Exame geral e investigação de pessoas sem queixas ou diagnóstico relatado"
   },
   {
-    "code": "I10",
-    "description": "Hipertensão essencial (primária)"
-  },
-  {
-    "code": "E11",
-    "description": "Diabetes mellitus não-insulino-dependente"
-  },
-  {
-    "code": "F32",
-    "description": "Episódios depressivos"
-  },
-  {
-    "code": "F41",
-    "description": "Outros transtornos ansiosos"
+    "code": "Z76",
+    "description": "Pessoas em contato com serviços de saúde em outras circunstâncias"
   }
 ]
