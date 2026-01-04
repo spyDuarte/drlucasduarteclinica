@@ -17,6 +17,7 @@ import { VitalSignsValidator } from '../../components/VitalSignsValidator';
 import { DrugInteractionChecker } from '../../components/DrugInteractionChecker';
 import { OrientationTemplateSelector } from '../../components/OrientationTemplateSelector';
 import { MedicalAttachments } from '../../components/MedicalAttachments';
+import { CID10Selector } from '../../components/CID10Selector';
 import { generateId } from '../../utils/helpers';
 
 interface MedicalRecordModalProps {
@@ -566,20 +567,11 @@ function AssessmentSection({ formData, updateField, formErrors }: FormSectionPro
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <InputField label="Diagnóstico principal" value={formData.diagnosticoPrincipal} onChange={v => updateField('diagnosticoPrincipal', v)} placeholder="Diagnóstico mais provável" isSmall={false} />
           <div className={formErrors?.cid10 ? 'field-error' : ''}>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              CID-10 <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={formData.cid10}
-              onChange={e => updateField('cid10', e.target.value)}
-              className={`input-field ${formErrors?.cid10 ? 'border-red-500 focus:ring-red-500' : ''}`}
-              placeholder="Ex: J11, R50.9 (separados por vírgula)"
-              required
+            <CID10Selector
+              selectedCodes={formData.cid10 ? formData.cid10.split(',').map(c => c.trim()).filter(Boolean) : []}
+              onChange={(codes) => updateField('cid10', codes.join(', '))}
+              error={formErrors?.cid10}
             />
-            {formErrors?.cid10 && (
-              <p className="text-red-500 text-xs mt-1">{formErrors.cid10}</p>
-            )}
           </div>
         </div>
 
