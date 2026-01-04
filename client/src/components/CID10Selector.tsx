@@ -38,8 +38,9 @@ export function CID10Selector({ selectedCodes, onChange, error }: CID10SelectorP
   }, [query]);
 
   const handleSelect = (code: string) => {
-    if (!selectedCodes.includes(code)) {
-      onChange([...selectedCodes, code]);
+    const normalizedCode = code.toUpperCase().trim();
+    if (!selectedCodes.includes(normalizedCode)) {
+      onChange([...selectedCodes, normalizedCode]);
     }
     setQuery('');
     setIsOpen(false);
@@ -48,6 +49,13 @@ export function CID10Selector({ selectedCodes, onChange, error }: CID10SelectorP
 
   const handleRemove = (codeToRemove: string) => {
     onChange(selectedCodes.filter(code => code !== codeToRemove));
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && query.trim()) {
+      e.preventDefault();
+      handleSelect(query);
+    }
   };
 
   return (
@@ -83,6 +91,7 @@ export function CID10Selector({ selectedCodes, onChange, error }: CID10SelectorP
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={handleKeyDown}
             onFocus={() => query.length >= 2 && setIsOpen(true)}
             className="w-full text-sm outline-none bg-transparent placeholder-gray-400"
             placeholder={selectedCodes.length === 0 ? "Buscar por código ou descrição..." : "Adicionar outro..."}
@@ -124,9 +133,13 @@ export function CID10Selector({ selectedCodes, onChange, error }: CID10SelectorP
       )}
 
       {isOpen && results.length === 0 && query.length >= 2 && (
-        <div className="absolute z-50 w-full mt-1 bg-white rounded-xl shadow-xl border border-gray-100 p-4 text-center text-gray-500 text-sm animate-scale-in">
-          Nenhum resultado encontrado para "{query}"
-        </div>
+        <button
+          type="button"
+          onClick={() => handleSelect(query)}
+          className="absolute z-50 w-full mt-1 bg-white rounded-xl shadow-xl border border-gray-100 p-4 text-center text-primary-600 hover:bg-primary-50 text-sm font-medium animate-scale-in cursor-pointer transition-colors"
+        >
+          Adicionar "{query}"
+        </button>
       )}
     </div>
   );

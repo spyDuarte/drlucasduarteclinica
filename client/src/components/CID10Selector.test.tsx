@@ -1,8 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import '@testing-library/jest-dom';
 import { CID10Selector } from './CID10Selector';
-import React from 'react';
 
 describe('CID10Selector', () => {
   it('renders correctly', () => {
@@ -54,8 +54,6 @@ describe('CID10Selector', () => {
     expect(screen.getByText('J45')).toBeInTheDocument();
 
     // Find the remove button (X icon)
-    // Since there might be other buttons (if results were shown), we should be specific.
-    // But here only the chip button exists initially.
     const removeButton = screen.getByRole('button');
     await user.click(removeButton);
 
@@ -71,5 +69,45 @@ describe('CID10Selector', () => {
       />
     );
     expect(screen.getByText('Campo obrigatório')).toBeInTheDocument();
+  });
+
+  it('adds a custom code not in the list', async () => {
+    const user = userEvent.setup();
+    const handleChange = vi.fn();
+
+    render(
+      <CID10Selector
+        selectedCodes={[]}
+        onChange={handleChange}
+      />
+    );
+
+    const input = screen.getByPlaceholderText('Buscar por código ou descrição...');
+    await user.type(input, 'XYZ123');
+
+    await waitFor(() => {
+      expect(screen.getByText('Adicionar "XYZ123"')).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByText('Adicionar "XYZ123"'));
+
+    expect(handleChange).toHaveBeenCalledWith(['XYZ123']);
+  });
+
+  it('adds code on Enter key', async () => {
+    const user = userEvent.setup();
+    const handleChange = vi.fn();
+
+    render(
+      <CID10Selector
+        selectedCodes={[]}
+        onChange={handleChange}
+      />
+    );
+
+    const input = screen.getByPlaceholderText('Buscar por código ou descrição...');
+    await user.type(input, 'ABC000{Enter}');
+
+    expect(handleChange).toHaveBeenCalledWith(['ABC000']);
   });
 });
