@@ -1,6 +1,6 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { Search, X, Check } from 'lucide-react';
-import { searchCID10, type CID10 } from '../data/cid10';
+import { searchCID10 } from '../data/cid10';
 
 interface CID10SelectorProps {
   selectedCodes: string[];
@@ -11,9 +11,15 @@ interface CID10SelectorProps {
 export function CID10Selector({ selectedCodes, onChange, error }: CID10SelectorProps) {
   const [query, setQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
-  const [results, setResults] = useState<CID10[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const results = useMemo(() => {
+    if (query.length >= 2) {
+      return searchCID10(query);
+    }
+    return [];
+  }, [query]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -26,16 +32,15 @@ export function CID10Selector({ selectedCodes, onChange, error }: CID10SelectorP
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  useEffect(() => {
-    if (query.length >= 2) {
-      const searchResults = searchCID10(query);
-      setResults(searchResults);
-      setIsOpen(true);
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newQuery = e.target.value;
+    setQuery(newQuery);
+    if (newQuery.length >= 2) {
+        setIsOpen(true);
     } else {
-      setResults([]);
-      setIsOpen(false);
+        setIsOpen(false);
     }
-  }, [query]);
+  };
 
   const handleSelect = (code: string) => {
     const normalizedCode = code.toUpperCase().trim();
@@ -90,7 +95,7 @@ export function CID10Selector({ selectedCodes, onChange, error }: CID10SelectorP
             ref={inputRef}
             type="text"
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={handleInputChange}
             onKeyDown={handleKeyDown}
             onFocus={() => query.length >= 2 && setIsOpen(true)}
             className="w-full text-sm outline-none bg-transparent placeholder-gray-400"
