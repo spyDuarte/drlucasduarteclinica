@@ -179,8 +179,8 @@ export default function MedicalRecords() {
 
             {showQuickActions && (
               <>
-                <div className="fixed inset-0 z-40" onClick={() => setShowQuickActions(false)} />
-                <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-xl shadow-2xl border border-gray-100 py-2 z-50 animate-scale-in">
+                <div className="fixed inset-0 z-[55]" onClick={() => setShowQuickActions(false)} />
+                <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-xl shadow-2xl border border-gray-100 py-2 z-[56] animate-scale-in">
                   <button
                     onClick={() => handleQuickAction('atendimento')}
                     className="w-full px-4 py-3 flex items-center gap-3 hover:bg-primary-50 transition-colors text-left"
