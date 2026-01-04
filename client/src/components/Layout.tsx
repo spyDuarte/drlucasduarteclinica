@@ -58,7 +58,7 @@ export default function Layout() {
       <Sidebar isOpen={sidebarOpen} onClose={handleCloseSidebar} />
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col overflow-hidden relative z-10">
+      <div className="flex-1 flex flex-col overflow-hidden relative">
         <Header onMenuClick={handleOpenSidebar} />
         <main className="flex-1 overflow-y-auto scroll-smooth overscroll-contain">
           <div className="p-4 md:p-6 lg:p-8 max-w-[1600px] mx-auto animate-fade-in">
