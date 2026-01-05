@@ -17,3 +17,9 @@ export function searchCID10(query: string): CID10[] {
       item.description.toLowerCase().includes(normalizedQuery)
   );
 }
+
+export function getCID10Description(code: string): string | null {
+  const normalizedCode = code.toUpperCase().trim();
+  const item = CID10_DATA.find(item => item.code.toUpperCase() === normalizedCode);
+  return item ? item.description : null;
+}
