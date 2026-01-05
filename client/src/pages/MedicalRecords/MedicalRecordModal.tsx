@@ -289,20 +289,17 @@ function SubjectiveSection({ formData, updateField, expandedSections, toggleSect
           </div>
         </div>
 
-        <div className={formErrors.historicoDoencaAtual ? 'field-error' : ''}>
+        <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            História da doença atual <span className="text-red-500">*</span>
+            História da doença atual
           </label>
           <textarea
             value={formData.historicoDoencaAtual}
             onChange={e => updateField('historicoDoencaAtual', e.target.value)}
-            className={`input-field ${formErrors.historicoDoencaAtual ? 'border-red-500 focus:ring-red-500' : ''}`}
+            className="input-field"
             rows={3}
             placeholder="Descreva a evolução dos sintomas..."
           />
-          {formErrors.historicoDoencaAtual && (
-            <p className="text-red-500 text-xs mt-1">{formErrors.historicoDoencaAtual}</p>
-          )}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -498,20 +495,17 @@ function ObjectiveSection({ formData, updateField, expandedSections, toggleSecti
           }}
         />
 
-        <div className={formErrors.exameFisico ? 'field-error' : ''}>
+        <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Exame físico geral <span className="text-red-500">*</span>
+            Exame físico geral
           </label>
           <textarea
             value={formData.exameFisico}
             onChange={e => updateField('exameFisico', e.target.value)}
-            className={`input-field ${formErrors.exameFisico ? 'border-red-500 focus:ring-red-500' : ''}`}
+            className="input-field"
             rows={3}
             placeholder="Descreva os achados do exame físico..."
           />
-          {formErrors.exameFisico && (
-            <p className="text-red-500 text-xs mt-1">{formErrors.exameFisico}</p>
-          )}
         </div>
 
         {/* Exame Físico Detalhado */}
