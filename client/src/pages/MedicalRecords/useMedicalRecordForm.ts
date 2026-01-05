@@ -24,8 +24,6 @@ const INITIAL_SECTIONS: ExpandedSections = {
 
 export interface FormErrors {
   queixaPrincipal?: string;
-  historicoDoencaAtual?: string;
-  exameFisico?: string;
   cid10?: string;
   conduta?: string;
 }
@@ -59,14 +57,6 @@ export function useMedicalRecordForm(record: MedicalRecord | null) {
 
     if (!formData.queixaPrincipal.trim()) {
       errors.queixaPrincipal = 'Queixa principal é obrigatória';
-    }
-
-    if (!formData.historicoDoencaAtual.trim()) {
-      errors.historicoDoencaAtual = 'Histórico da doença atual é obrigatório';
-    }
-
-    if (!formData.exameFisico.trim()) {
-      errors.exameFisico = 'Exame físico é obrigatório';
     }
 
     if (!formData.cid10.trim()) {
