@@ -7,33 +7,33 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Cor primária - Azul Royal Premium (confiança e profissionalismo)
+        // Cor primária - Azul Profissional (Confiança e Estabilidade)
         primary: {
-          50: '#eef4ff',
-          100: '#e0eaff',
-          200: '#c6d8ff',
-          300: '#a4bdfd',
-          400: '#7a96fa',
-          500: '#5570f4',
-          600: '#3d4de9',
-          700: '#333fd6',
-          800: '#2c36ad',
-          900: '#2a3488',
-          950: '#1a1f52',
+          50: '#eff6ff',
+          100: '#dbeafe',
+          200: '#bfdbfe',
+          300: '#93c5fd',
+          400: '#60a5fa',
+          500: '#3b82f6',
+          600: '#2563eb',
+          700: '#1d4ed8',
+          800: '#1e40af',
+          900: '#1e3a8a',
+          950: '#172554',
         },
-        // Cor médica - Turquesa Sofisticado (saúde e bem-estar)
+        // Cor médica - Teal Clínico (Limpeza e Modernidade)
         medical: {
-          50: '#effefa',
-          100: '#c8fff2',
-          200: '#91fee6',
-          300: '#53f5d6',
-          400: '#1ee3c1',
-          500: '#06c9aa',
-          600: '#02a38c',
-          700: '#068271',
-          800: '#0a675c',
-          900: '#0d554c',
-          950: '#003330',
+          50: '#f0fdfa',
+          100: '#ccfbf1',
+          200: '#99f6e4',
+          300: '#5eead4',
+          400: '#2dd4bf',
+          500: '#14b8a6',
+          600: '#0d9488',
+          700: '#0f766e',
+          800: '#115e59',
+          900: '#134e4a',
+          950: '#042f2e',
         },
         // Cor accent - Âmbar Elegante (destaque e premium)
         accent: {
