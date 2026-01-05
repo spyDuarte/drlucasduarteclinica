@@ -18,6 +18,7 @@ import { DrugInteractionChecker } from '../../components/DrugInteractionChecker'
 import { OrientationTemplateSelector } from '../../components/OrientationTemplateSelector';
 import { MedicalAttachments } from '../../components/MedicalAttachments';
 import { CID10Selector } from '../../components/CID10Selector';
+import { MedicationSelector } from '../../components/MedicationSelector';
 import { generateId } from '../../utils/helpers';
 
 interface MedicalRecordModalProps {
@@ -868,7 +869,11 @@ function PrescriptionSection({ prescricoes, newPrescription, setNewPrescription,
         </div>
       )}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 mb-2">
-        <input type="text" value={newPrescription.medicamento} onChange={e => setNewPrescription({ ...newPrescription, medicamento: e.target.value })} className="input-field text-sm" placeholder="Medicamento" />
+        <MedicationSelector
+          value={newPrescription.medicamento}
+          onChange={value => setNewPrescription({ ...newPrescription, medicamento: value })}
+          className="input-field text-sm w-full"
+        />
         <input type="text" value={newPrescription.concentracao} onChange={e => setNewPrescription({ ...newPrescription, concentracao: e.target.value })} className="input-field text-sm" placeholder="Concentração" />
         <select value={newPrescription.formaFarmaceutica} onChange={e => setNewPrescription({ ...newPrescription, formaFarmaceutica: e.target.value })} className="input-field text-sm">
           <option>Comprimido</option>
