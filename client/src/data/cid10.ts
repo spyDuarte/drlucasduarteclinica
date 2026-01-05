@@ -1,4 +1,4 @@
-import cidData from './cid10.json';
+import cidData from './tabela_cid.json';
 
 export interface CID10 {
   code: string;

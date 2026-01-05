@@ -7,7 +7,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const INPUT_FILE = process.argv[2];
-const OUTPUT_FILE = path.resolve(__dirname, '../client/src/data/cid10.json');
+const OUTPUT_FILE = path.resolve(__dirname, '../client/src/data/tabela_cid.json');
 
 if (!INPUT_FILE) {
   console.error('Please provide the path to the input file (CSV or XLSX).');
