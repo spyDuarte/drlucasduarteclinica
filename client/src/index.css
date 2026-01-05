@@ -6,33 +6,33 @@
      Design System Moderno e Sofisticado
      ======================================== */
 
-  /* Cor Primária - Azul Profundo Elegante */
-  --color-primary-50: #eef2ff;
-  --color-primary-100: #e0e7ff;
-  --color-primary-200: #c7d2fe;
-  --color-primary-300: #a5b4fc;
-  --color-primary-400: #818cf8;
-  --color-primary-500: #6366f1;
-  --color-primary-600: #4f46e5;
-  --color-primary-700: #4338ca;
-  --color-primary-800: #3730a3;
-  --color-primary-900: #312e81;
-  --color-primary-950: #1e1b4b;
+  /* Cor Primária - Azul Profissional (Confiança e Estabilidade) */
+  --color-primary-50: #eff6ff;
+  --color-primary-100: #dbeafe;
+  --color-primary-200: #bfdbfe;
+  --color-primary-300: #93c5fd;
+  --color-primary-400: #60a5fa;
+  --color-primary-500: #3b82f6;
+  --color-primary-600: #2563eb;
+  --color-primary-700: #1d4ed8;
+  --color-primary-800: #1e40af;
+  --color-primary-900: #1e3a8a;
+  --color-primary-950: #172554;
 
-  /* Cor Médica - Esmeralda Premium (Saúde & Bem-estar) */
-  --color-medical-50: #ecfdf5;
-  --color-medical-100: #d1fae5;
-  --color-medical-200: #a7f3d0;
-  --color-medical-300: #6ee7b7;
-  --color-medical-400: #34d399;
-  --color-medical-500: #10b981;
-  --color-medical-600: #059669;
-  --color-medical-700: #047857;
-  --color-medical-800: #065f46;
-  --color-medical-900: #064e3b;
-  --color-medical-light: #d1fae5;
-  --color-medical: #059669;
-  --color-medical-dark: #047857;
+  /* Cor Médica - Teal Clínico (Limpeza e Modernidade) */
+  --color-medical-50: #f0fdfa;
+  --color-medical-100: #ccfbf1;
+  --color-medical-200: #99f6e4;
+  --color-medical-300: #5eead4;
+  --color-medical-400: #2dd4bf;
+  --color-medical-500: #14b8a6;
+  --color-medical-600: #0d9488;
+  --color-medical-700: #0f766e;
+  --color-medical-800: #115e59;
+  --color-medical-900: #134e4a;
+  --color-medical-light: #ccfbf1;
+  --color-medical: #0d9488;
+  --color-medical-dark: #0f766e;
 
   /* Cor Accent - Âmbar Caloroso (Destaques) */
   --color-accent-50: #fffbeb;
@@ -133,8 +133,8 @@ body.modal-open {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, var(--color-primary-400, #818cf8) 0%, var(--color-primary-500, #6366f1) 100%);
-  border-color: var(--color-primary-100, #e0e7ff);
+  background: linear-gradient(180deg, var(--color-primary-400, #60a5fa) 0%, var(--color-primary-500, #3b82f6) 100%);
+  border-color: var(--color-primary-100, #dbeafe);
 }
 
 /* Scrollbar para Firefox */
@@ -171,8 +171,8 @@ body.modal-open {
 
 /* Selection styling */
 ::selection {
-  background-color: var(--color-primary-200, #c7d2fe);
-  color: var(--color-primary-900, #312e81);
+  background-color: var(--color-primary-200, #bfdbfe);
+  color: var(--color-primary-900, #1e3a8a);
 }
 
 /* ========================================
@@ -185,7 +185,7 @@ body.modal-open {
   justify-content: center;
   gap: 0.5rem;
   padding: 0.625rem 1.25rem;
-  background: linear-gradient(135deg, var(--color-primary-600, #4f46e5) 0%, var(--color-primary-700, #4338ca) 100%);
+  background: linear-gradient(135deg, var(--color-primary-600, #2563eb) 0%, var(--color-primary-700, #1d4ed8) 100%);
   color: white;
   border-radius: 0.75rem;
   font-weight: 600;
@@ -198,7 +198,7 @@ body.modal-open {
 }
 
 .btn-primary:hover {
-  background: linear-gradient(135deg, var(--color-primary-500, #6366f1) 0%, var(--color-primary-600, #4f46e5) 100%);
+  background: linear-gradient(135deg, var(--color-primary-500, #3b82f6) 0%, var(--color-primary-600, #2563eb) 100%);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(79, 70, 229, 0.35), 0 2px 4px rgba(0, 0, 0, 0.1);
 }
@@ -272,7 +272,7 @@ body.modal-open {
   justify-content: center;
   gap: 0.5rem;
   padding: 0.625rem 1.25rem;
-  background: linear-gradient(135deg, var(--color-medical-500, #10b981) 0%, var(--color-medical-600, #059669) 100%);
+  background: linear-gradient(135deg, var(--color-medical-500, #14b8a6) 0%, var(--color-medical-600, #0d9488) 100%);
   color: white;
   border-radius: 0.75rem;
   font-weight: 600;
@@ -284,7 +284,7 @@ body.modal-open {
 }
 
 .btn-success:hover {
-  background: linear-gradient(135deg, var(--color-medical-600, #059669) 0%, var(--color-medical-700, #047857) 100%);
+  background: linear-gradient(135deg, var(--color-medical-600, #0d9488) 0%, var(--color-medical-700, #0f766e) 100%);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35), 0 2px 4px rgba(0, 0, 0, 0.1);
 }
@@ -297,7 +297,7 @@ body.modal-open {
   gap: 0.5rem;
   padding: 0.625rem 1.25rem;
   background: transparent;
-  color: var(--color-primary-600, #4f46e5);
+  color: var(--color-primary-600, #2563eb);
   border-radius: 0.75rem;
   font-weight: 600;
   font-size: 0.875rem;
@@ -307,8 +307,8 @@ body.modal-open {
 }
 
 .btn-ghost:hover {
-  background: var(--color-primary-50, #eef2ff);
-  border-color: var(--color-primary-100, #e0e7ff);
+  background: var(--color-primary-50, #eff6ff);
+  border-color: var(--color-primary-100, #dbeafe);
 }
 
 /* ========================================
@@ -338,7 +338,7 @@ body.modal-open {
 
 .input-field:focus {
   background: white;
-  border-color: var(--color-primary-500, #6366f1);
+  border-color: var(--color-primary-500, #3b82f6);
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
 }
 
@@ -409,14 +409,14 @@ body.modal-open {
   transform: translateY(-50%);
   width: 3px;
   height: 0;
-  background: linear-gradient(180deg, var(--color-primary-500, #6366f1), var(--color-primary-600, #4f46e5));
+  background: linear-gradient(180deg, var(--color-primary-500, #3b82f6), var(--color-primary-600, #2563eb));
   border-radius: 0 3px 3px 0;
   transition: height 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .sidebar-link:hover {
-  background: linear-gradient(90deg, var(--color-primary-50, #eef2ff) 0%, transparent 100%);
-  color: var(--color-primary-700, #4338ca);
+  background: linear-gradient(90deg, var(--color-primary-50, #eff6ff) 0%, transparent 100%);
+  color: var(--color-primary-700, #1d4ed8);
   transform: translateX(2px);
 }
 
@@ -425,8 +425,8 @@ body.modal-open {
 }
 
 .sidebar-link.active {
-  background: linear-gradient(135deg, var(--color-primary-50, #eef2ff) 0%, rgba(224, 231, 255, 0.5) 100%);
-  color: var(--color-primary-700, #4338ca);
+  background: linear-gradient(135deg, var(--color-primary-50, #eff6ff) 0%, rgba(224, 231, 255, 0.5) 100%);
+  color: var(--color-primary-700, #1d4ed8);
   font-weight: 600;
   box-shadow: 0 2px 8px rgba(99, 102, 241, 0.1);
 }
@@ -528,8 +528,8 @@ body.modal-open {
 }
 
 .status-confirmed {
-  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-  color: #047857;
+  background: linear-gradient(135deg, #ccfbf1 0%, #99f6e4 100%);
+  color: #0f766e;
   box-shadow: 0 1px 2px rgba(4, 120, 87, 0.1);
 }
 
@@ -552,8 +552,8 @@ body.modal-open {
 }
 
 .status-in-progress {
-  background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
-  color: #4338ca;
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  color: #1d4ed8;
   box-shadow: 0 1px 2px rgba(67, 56, 202, 0.1);
 }
 
@@ -921,7 +921,7 @@ body.modal-open {
 
 /* Form validation icons */
 .validation-icon-success {
-  color: var(--color-emerald-500, #10b981);
+  color: var(--color-emerald-500, #14b8a6);
   animation: pop-in 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
@@ -1320,7 +1320,7 @@ textarea:disabled {
 }
 
 .pagination-btn:focus-visible {
-  outline: 2px solid var(--color-primary-500, #6366f1);
+  outline: 2px solid var(--color-primary-500, #3b82f6);
   outline-offset: 2px;
 }
 
@@ -1722,7 +1722,7 @@ body {
 }
 
 .soap-section-o {
-  border-left: 4px solid #10b981;
+  border-left: 4px solid #14b8a6;
   background: linear-gradient(90deg, rgba(16, 185, 129, 0.04) 0%, transparent 50%);
 }
 
@@ -1770,9 +1770,9 @@ body {
 }
 
 .vital-normal {
-  --vital-color: #10b981;
-  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-  color: #047857;
+  --vital-color: #14b8a6;
+  background: linear-gradient(135deg, #ccfbf1 0%, #99f6e4 100%);
+  color: #0f766e;
 }
 
 .vital-warning {
@@ -1807,10 +1807,10 @@ body {
 }
 
 .type-consulta { background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); color: #1e40af; }
-.type-retorno { background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%); color: #4338ca; }
+.type-retorno { background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); color: #1d4ed8; }
 .type-urgencia { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); color: #92400e; }
 .type-emergencia { background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); color: #b91c1c; }
-.type-teleconsulta { background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); color: #047857; }
+.type-teleconsulta { background: linear-gradient(135deg, #ccfbf1 0%, #99f6e4 100%); color: #0f766e; }
 .type-procedimento { background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%); color: #6d28d9; }
 .type-pre-op { background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%); color: #c2410c; }
 .type-pos-op { background: linear-gradient(135deg, #ccfbf1 0%, #99f6e4 100%); color: #0f766e; }
@@ -2078,7 +2078,7 @@ body {
   letter-spacing: 0.05em;
 }
 
-.severity-leve { background: #d1fae5; color: #047857; }
+.severity-leve { background: #ccfbf1; color: #0f766e; }
 .severity-moderada { background: #fef3c7; color: #b45309; }
 .severity-grave { background: #fed7aa; color: #c2410c; }
 .severity-critica { background: #fee2e2; color: #b91c1c; }
