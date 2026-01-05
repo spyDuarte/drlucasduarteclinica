@@ -35,7 +35,9 @@ describe('CID10Selector', () => {
       expect(screen.getByText('J45.9')).toBeInTheDocument();
     });
 
-    await user.click(screen.getByText('J45.9'));
+    // Click on the dropdown result button
+    const resultButton = screen.getByRole('button', { name: /J45\.9/i });
+    await user.click(resultButton);
 
     expect(handleChange).toHaveBeenCalledWith(['J45.9']);
   });
@@ -51,11 +53,15 @@ describe('CID10Selector', () => {
       />
     );
 
-    expect(screen.getByText('J45.9')).toBeInTheDocument();
+    // The code is displayed in a bold span
+    const codeElement = screen.getByText('J45.9');
+    expect(codeElement).toBeInTheDocument();
 
-    // Find the remove button (X icon)
-    const removeButton = screen.getByRole('button');
-    await user.click(removeButton);
+    // Find the remove button (X icon) within the selected code badge
+    const badge = codeElement.closest('span.inline-flex');
+    const removeButton = badge?.querySelector('button');
+    expect(removeButton).toBeTruthy();
+    await user.click(removeButton!);
 
     expect(handleChange).toHaveBeenCalledWith([]);
   });
