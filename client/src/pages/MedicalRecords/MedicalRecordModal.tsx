@@ -418,7 +418,7 @@ function SubjectiveSection({ formData, updateField, expandedSections, toggleSect
 }
 
 // Objective Section
-function ObjectiveSection({ formData, updateField, expandedSections, toggleSection, formErrors }: ExpandableSectionProps) {
+function ObjectiveSection({ formData, updateField, expandedSections, toggleSection }: ExpandableSectionProps) {
   return (
     <div className="soap-section-o rounded-xl p-5">
       <div className="flex items-center gap-3 mb-4">
