@@ -57,9 +57,9 @@ describe('CID10Selector', () => {
     const codeElement = screen.getByText('J45.9');
     expect(codeElement).toBeInTheDocument();
 
-    // Find the remove button (X icon) within the selected code badge
-    const badge = codeElement.closest('span.inline-flex');
-    const removeButton = badge?.querySelector('button');
+    // Find the remove button (X icon) - it's within the parent span that has the code
+    const parentBadge = codeElement.parentElement;
+    const removeButton = parentBadge?.querySelector('button');
     expect(removeButton).toBeTruthy();
     await user.click(removeButton!);
 
