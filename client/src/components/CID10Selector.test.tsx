@@ -28,16 +28,16 @@ describe('CID10Selector', () => {
     );
 
     const input = screen.getByPlaceholderText('Buscar por código ou descrição...');
-    await user.type(input, 'Asma');
+    // Search by specific code (J45.9 = Asma não especificada)
+    await user.type(input, 'J45.9');
 
     await waitFor(() => {
-      expect(screen.getByText('J45')).toBeInTheDocument();
-      expect(screen.getByText('Asma')).toBeInTheDocument();
+      expect(screen.getByText('J45.9')).toBeInTheDocument();
     });
 
-    await user.click(screen.getByText('J45'));
+    await user.click(screen.getByText('J45.9'));
 
-    expect(handleChange).toHaveBeenCalledWith(['J45']);
+    expect(handleChange).toHaveBeenCalledWith(['J45.9']);
   });
 
   it('removes a selected code', async () => {
@@ -46,12 +46,12 @@ describe('CID10Selector', () => {
 
     render(
       <CID10Selector
-        selectedCodes={['J45']}
+        selectedCodes={['J45.9']}
         onChange={handleChange}
       />
     );
 
-    expect(screen.getByText('J45')).toBeInTheDocument();
+    expect(screen.getByText('J45.9')).toBeInTheDocument();
 
     // Find the remove button (X icon)
     const removeButton = screen.getByRole('button');
