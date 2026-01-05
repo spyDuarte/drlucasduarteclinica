@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { Search, X, Check } from 'lucide-react';
-import { searchCID10 } from '../data/cid10';
+import { searchCID10, getCID10Description } from '../data/cid10';
 
 interface CID10SelectorProps {
   selectedCodes: string[];
@@ -74,21 +74,25 @@ export function CID10Selector({ selectedCodes, onChange, error }: CID10SelectorP
         bg-white border rounded-xl transition-all
         ${error ? 'border-red-500 focus-within:ring-red-500' : 'border-gray-200 focus-within:ring-2 focus-within:ring-primary-500 focus-within:border-transparent'}
       `}>
-        {selectedCodes.map(code => (
-          <span
-            key={code}
-            className="inline-flex items-center gap-1 px-2.5 py-1 bg-primary-50 text-primary-700 rounded-lg text-sm font-medium border border-primary-100"
-          >
-            {code}
-            <button
-              type="button"
-              onClick={() => handleRemove(code)}
-              className="text-primary-400 hover:text-primary-600 transition-colors"
+        {selectedCodes.map(code => {
+          const description = getCID10Description(code);
+          return (
+            <span
+              key={code}
+              className="inline-flex items-center gap-1 px-2.5 py-1 bg-primary-50 text-primary-700 rounded-lg text-sm font-medium border border-primary-100"
             >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          </span>
-        ))}
+              <span className="font-bold">{code}</span>
+              {description && <span className="text-primary-600">- {description}</span>}
+              <button
+                type="button"
+                onClick={() => handleRemove(code)}
+                className="text-primary-400 hover:text-primary-600 transition-colors ml-1"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </span>
+          );
+        })}
 
         <div className="flex-1 min-w-[120px] relative flex items-center">
           <input
