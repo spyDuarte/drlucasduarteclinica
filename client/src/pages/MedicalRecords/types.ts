@@ -16,6 +16,8 @@ export interface MedicalRecordFormData {
   tratamentosPrevios: string;
   impactoQualidadeVida: string;
   revisaoSistemas: string;
+  dataInicioSintomas: string;
+  historicoFamiliar: string;
   // Hábitos de vida
   tabagismo: string;
   etilismo: string;
@@ -152,6 +154,8 @@ export function createInitialFormData(record: MedicalRecord | null): MedicalReco
     tratamentosPrevios: record?.subjetivo?.tratamentosPrevios || '',
     impactoQualidadeVida: record?.subjetivo?.impactoQualidadeVida || '',
     revisaoSistemas: record?.subjetivo?.revisaoSistemas || '',
+    dataInicioSintomas: record?.subjetivo?.dataInicioSintomas || '',
+    historicoFamiliar: record?.subjetivo?.historicoFamiliar || '',
     tabagismo: record?.subjetivo?.habitosVida?.tabagismo || '',
     etilismo: record?.subjetivo?.habitosVida?.etilismo || '',
     atividadeFisica: record?.subjetivo?.habitosVida?.atividadeFisica || '',

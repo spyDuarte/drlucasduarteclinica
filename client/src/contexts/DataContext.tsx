@@ -65,7 +65,7 @@ interface DataContextType {
   clearAllData: () => void;
 }
 
-const DataContext = createContext<DataContextType | undefined>(undefined);
+export const DataContext = createContext<DataContextType | undefined>(undefined);
 
 export function DataProvider({ children }: { children: ReactNode }) {
   const [patients, setPatients] = useState<Patient[]>(() => {

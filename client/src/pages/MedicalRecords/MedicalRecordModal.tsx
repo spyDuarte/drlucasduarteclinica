@@ -39,6 +39,11 @@ export function MedicalRecordModal({ patientId, record, onClose, onSave }: Medic
   const currentPatient = getPatient(patientId);
   const patientRecords = getMedicalRecordsByPatient(patientId);
 
+  // Alerta de alergias
+  const patientAllergies = currentPatient?.alergias && currentPatient.alergias.length > 0
+    ? (Array.isArray(currentPatient.alergias) ? currentPatient.alergias.join(', ') : currentPatient.alergias)
+    : null;
+
   const {
     formData,
     updateField,
@@ -157,6 +162,16 @@ export function MedicalRecordModal({ patientId, record, onClose, onSave }: Medic
             <X className="w-5 h-5" />
           </button>
         </div>
+
+        {patientAllergies && (
+          <div className="bg-red-50 border-b border-red-100 px-6 py-3 flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
+            <div>
+              <h3 className="text-sm font-bold text-red-800">Alergias do Paciente</h3>
+              <p className="text-sm text-red-700">{patientAllergies}</p>
+            </div>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-6 scroll-smooth bg-slate-50/50">
           {/* Timeline e Histórico (Colapsável) */}
@@ -342,6 +357,18 @@ function SubjectiveSection({ formData, updateField, expandedSections, toggleSect
             )}
           </div>
           <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Início dos sintomas</label>
+            <input
+              type="date"
+              value={formData.dataInicioSintomas}
+              onChange={e => updateField('dataInicioSintomas', e.target.value)}
+              className="input-field"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">Duração dos sintomas</label>
             <input
               type="text"
@@ -453,12 +480,22 @@ function SubjectiveSection({ formData, updateField, expandedSections, toggleSect
 
         {/* Histórico Patológico */}
         <CollapsibleSection
-          title="Histórico Patológico Pregresso"
+          title="Histórico Patológico e Familiar"
           icon={<Clipboard className="w-4 h-4 text-primary-500" />}
           isExpanded={expandedSections.historicoPregrasso}
           onToggle={() => toggleSection('historicoPregrasso')}
         >
           <div className="space-y-3">
+             <div>
+              <label className="block text-xs font-medium text-slate-500 mb-1">Histórico Familiar</label>
+              <textarea
+                value={formData.historicoFamiliar}
+                onChange={e => updateField('historicoFamiliar', e.target.value)}
+                className="input-field text-sm"
+                rows={2}
+                placeholder="Histórico de doenças na família (pai, mãe, irmãos...)"
+              />
+            </div>
             <div>
               <label className="block text-xs font-medium text-slate-500 mb-1">Doenças prévias</label>
               <textarea
@@ -537,8 +574,20 @@ function ObjectiveSection({ formData, updateField, expandedSections, toggleSecti
             <NumberField label="Temp (°C)" value={formData.temperatura} onChange={v => updateField('temperatura', v)} step={0.1} />
             <NumberField label="SpO2 (%)" value={formData.saturacaoO2} onChange={v => updateField('saturacaoO2', v)} />
             <NumberField label="Glicemia (mg/dL)" value={formData.glicemiaCapilar} onChange={v => updateField('glicemiaCapilar', v)} />
-            <NumberField label="Peso (kg)" value={formData.peso} onChange={v => updateField('peso', v)} step={0.1} />
-            <NumberField label="Altura (cm)" value={formData.altura} onChange={v => updateField('altura', v)} />
+            <div className="relative">
+              <NumberField label="Peso (kg)" value={formData.peso} onChange={v => updateField('peso', v)} step={0.1} />
+            </div>
+            <div className="relative">
+              <NumberField label="Altura (cm)" value={formData.altura} onChange={v => updateField('altura', v)} />
+            </div>
+            {formData.peso && formData.altura && (
+              <div className="flex flex-col justify-end pb-1">
+                <span className="text-xs font-medium text-slate-500 mb-1">IMC</span>
+                <div className="h-10 flex items-center px-3 bg-slate-100 rounded-lg border border-slate-200 text-sm font-semibold text-slate-700">
+                  {(Number(formData.peso) / ((Number(formData.altura) / 100) ** 2)).toFixed(2)}
+                </div>
+              </div>
+            )}
             <NumberField label="Circ. Abdominal (cm)" value={formData.circunferenciaAbdominal} onChange={v => updateField('circunferenciaAbdominal', v)} step={0.1} />
             <NumberField label="Circ. Pescoço (cm)" value={formData.circunferenciaPescoco} onChange={v => updateField('circunferenciaPescoco', v)} step={0.1} />
           </div>

@@ -133,6 +133,8 @@ export function useMedicalRecordForm(record: MedicalRecord | null) {
         tratamentosPrevios: formData.tratamentosPrevios || undefined,
         impactoQualidadeVida: formData.impactoQualidadeVida || undefined,
         revisaoSistemas: formData.revisaoSistemas || undefined,
+        dataInicioSintomas: formData.dataInicioSintomas || undefined,
+        historicoFamiliar: formData.historicoFamiliar || undefined,
         habitosVida: (formData.tabagismo || formData.etilismo || formData.atividadeFisica || formData.alimentacao || formData.sono || formData.estresse) ? {
           tabagismo: formData.tabagismo || undefined,
           etilismo: formData.etilismo || undefined,

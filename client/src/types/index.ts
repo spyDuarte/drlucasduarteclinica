@@ -133,7 +133,9 @@ export interface MedicalRecord {
     tratamentosPrevios?: string;
     impactoQualidadeVida?: string;
     revisaoSistemas?: string;
+    dataInicioSintomas?: string;
     // Anamnese complementar
+    historicoFamiliar?: string;
     habitosVida?: {
       tabagismo?: string;
       etilismo?: string;
