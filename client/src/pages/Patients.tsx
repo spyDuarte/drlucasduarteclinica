@@ -5,7 +5,6 @@ import {
   Search,
   Phone,
   Mail,
-  Calendar,
   Edit2,
   Trash2,
   User,

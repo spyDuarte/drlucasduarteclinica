@@ -8,27 +8,22 @@ import {
   Plus,
   User,
   X,
-  Phone,
-  AlertCircle,
-  Calendar,
   FileText,
-  Clock,
   Search,
   Stethoscope,
   RefreshCw,
   AlertTriangle,
   Activity,
   Scissors,
-  CreditCard,
   Heart,
-  Mail,
-  CalendarDays,
   UserCheck,
-  Bell,
-  Pill,
-  ClipboardList,
   Trash2,
-  Check
+  Check,
+  Phone,
+  Mail,
+  AlertCircle,
+  Pill,
+  Bell
 } from 'lucide-react';
 import {
   formatDate,
@@ -284,17 +279,6 @@ const APPOINTMENT_TYPE_CONFIG: Record<AppointmentType, {
   procedimento: { icon: Scissors, color: 'text-orange-600', bgColor: 'bg-orange-50', label: 'Procedimento' },
 };
 
-// Status com cores
-const STATUS_CONFIG: Record<AppointmentStatus, { color: string; bgColor: string; label: string }> = {
-  agendada: { color: 'text-blue-700', bgColor: 'bg-blue-100', label: 'Agendada' },
-  confirmada: { color: 'text-green-700', bgColor: 'bg-green-100', label: 'Confirmada' },
-  aguardando: { color: 'text-yellow-700', bgColor: 'bg-yellow-100', label: 'Aguardando' },
-  em_atendimento: { color: 'text-purple-700', bgColor: 'bg-purple-100', label: 'Em Atendimento' },
-  finalizada: { color: 'text-gray-700', bgColor: 'bg-gray-100', label: 'Finalizada' },
-  cancelada: { color: 'text-red-700', bgColor: 'bg-red-100', label: 'Cancelada' },
-  faltou: { color: 'text-orange-700', bgColor: 'bg-orange-100', label: 'Faltou' },
-};
-
 // Durações disponíveis
 const DURATION_OPTIONS = [
   { value: 15, label: '15 min' },
@@ -339,7 +323,7 @@ function AppointmentModal({
   onSave,
   onDelete
 }: AppointmentModalProps) {
-  const { checkAppointmentConflict } = useData();
+  const { checkAppointmentConflict, getAppointmentsByPatient } = useData();
   const { showToast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [showPatientSearch, setShowPatientSearch] = useState(false);
@@ -392,6 +376,15 @@ function AppointmentModal({
 
   // Paciente selecionado
   const selectedPatient = patients.find(p => p.id === formData.patientId);
+
+  // Histórico de consultas do paciente
+  const patientAppointments = useMemo(() => {
+    if (!formData.patientId) return [];
+    return getAppointmentsByPatient(formData.patientId)
+      .filter(a => a.status === 'finalizada')
+      .sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime())
+      .slice(0, 3);
+  }, [formData.patientId, getAppointmentsByPatient]);
 
   // Validação de data passada
   const isDateInPast = (dateStr: string): boolean => {
@@ -554,6 +547,73 @@ function AppointmentModal({
                 <p className="text-red-500 text-xs mt-1">{formErrors.patientId}</p>
               )}
             </div>
+
+            {/* Card Detalhes do Paciente (Restored) */}
+            {selectedPatient && (
+              <div className="bg-slate-50 rounded-lg p-3 border border-slate-200 space-y-2 mt-2">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center border border-slate-200 text-slate-400">
+                    <User className="w-5 h-5" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-medium text-slate-900">{selectedPatient.nome}</h3>
+                    <p className="text-xs text-slate-500">
+                      {calculateAge(selectedPatient.dataNascimento)} anos • {selectedPatient.sexo === 'M' ? 'Masculino' : selectedPatient.sexo === 'F' ? 'Feminino' : 'Outro'}
+                    </p>
+                    <div className="flex flex-wrap gap-2 mt-1 text-xs text-slate-600">
+                      <span className="flex items-center gap-1">
+                        <Phone className="w-3 h-3" />
+                        {selectedPatient.telefone}
+                      </span>
+                      {selectedPatient.email && (
+                         <span className="flex items-center gap-1">
+                          <Mail className="w-3 h-3" />
+                          {selectedPatient.email}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Alertas Médicos */}
+                {((selectedPatient.alergias && selectedPatient.alergias.length > 0) || (selectedPatient.medicamentosEmUso && selectedPatient.medicamentosEmUso.length > 0)) && (
+                  <div className="space-y-2 pt-2 border-t border-slate-200">
+                    {selectedPatient.alergias && selectedPatient.alergias.length > 0 && (
+                      <div className="flex items-start gap-2 text-xs text-red-700 bg-red-50 p-2 rounded border border-red-100">
+                        <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                        <div>
+                          <span className="font-bold block">Alergias:</span>
+                          {selectedPatient.alergias.join(', ')}
+                        </div>
+                      </div>
+                    )}
+                    {selectedPatient.medicamentosEmUso && selectedPatient.medicamentosEmUso.length > 0 && (
+                      <div className="flex items-start gap-2 text-xs text-amber-700 bg-amber-50 p-2 rounded border border-amber-100">
+                        <Pill className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                        <div>
+                          <span className="font-bold block">Uso contínuo:</span>
+                          {selectedPatient.medicamentosEmUso.join(', ')}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                 {/* Histórico Recente */}
+                {patientAppointments.length > 0 && (
+                  <div className="pt-2 border-t border-slate-200">
+                    <p className="text-xs font-medium text-slate-500 mb-1">Últimas consultas:</p>
+                    <div className="flex flex-wrap gap-1">
+                      {patientAppointments.map(apt => (
+                        <span key={apt.id} className="px-1.5 py-0.5 bg-white border border-slate-200 rounded text-[10px] text-slate-600">
+                          {formatDate(new Date(apt.data), 'dd/MM')} - {translateAppointmentType(apt.tipo)}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -675,6 +735,25 @@ function AppointmentModal({
                       </button>
                   </div>
               </div>
+          </div>
+
+          {/* Lembrete (Restored) */}
+          <div
+             className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
+               formData.enviarLembrete ? 'bg-amber-50 border-amber-200' : 'bg-slate-50 border-slate-200'
+             }`}
+             onClick={() => setFormData({ ...formData, enviarLembrete: !formData.enviarLembrete })}
+          >
+             <div className={`p-2 rounded-full ${formData.enviarLembrete ? 'bg-amber-100 text-amber-600' : 'bg-slate-200 text-slate-500'}`}>
+                <Bell className="w-4 h-4" />
+             </div>
+             <div className="flex-1">
+                <p className={`text-sm font-medium ${formData.enviarLembrete ? 'text-amber-900' : 'text-slate-700'}`}>Lembrete Automático</p>
+                <p className="text-xs text-slate-500">Enviar notificação ao paciente antes da consulta</p>
+             </div>
+             <div className={`w-10 h-6 rounded-full p-1 transition-colors ${formData.enviarLembrete ? 'bg-amber-500' : 'bg-slate-300'}`}>
+                <div className={`w-4 h-4 bg-white rounded-full shadow-sm transition-transform ${formData.enviarLembrete ? 'translate-x-4' : 'translate-x-0'}`} />
+             </div>
           </div>
 
         </form>
