@@ -9,12 +9,9 @@ import {
   DollarSign,
   BarChart3,
   Stethoscope,
-  Activity,
   X,
-  Sparkles,
   FileSignature
 } from 'lucide-react';
-import { BrandIcon, NavIcon } from './Icon';
 
 const menuItems: Array<{
   path: string;
@@ -43,52 +40,39 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     <aside
       className={`
         fixed lg:static inset-y-0 left-0 z-50
-        w-72 bg-white/95 backdrop-blur-xl border-r border-slate-200/60 flex flex-col
-        shadow-xl shadow-slate-900/5
-        transform transition-all duration-300 ease-out
+        w-64 bg-white border-r border-slate-200 flex flex-col
+        shadow-sm
+        transform transition-transform duration-300 ease-in-out
         ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}
     >
-      {/* Decorative gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-primary-50/40 via-transparent to-medical-50/30 pointer-events-none" />
-
       {/* Logo */}
-      <div className="relative p-6 border-b border-slate-100/80">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3.5">
-            <div className="relative">
-              <BrandIcon icon={Stethoscope} size="md" />
-              <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-br from-medical-400 to-medical-500 rounded-full flex items-center justify-center shadow-sm">
-                <Sparkles className="w-2.5 h-2.5 text-white" />
-              </div>
-            </div>
-            <div>
-              <h1 className="font-bold text-slate-900 tracking-tight text-lg">Dr. Lucas Duarte</h1>
-              <div className="flex items-center gap-1.5">
-                <Activity className="w-3 h-3 text-medical-500 animate-pulse" />
-                <p className="text-xs text-slate-500 font-medium">Sistema Médico</p>
-              </div>
-            </div>
+      <div className="p-4 border-b border-slate-100 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-primary-50 rounded-lg text-primary-600">
+            <Stethoscope className="w-6 h-6" />
           </div>
-          {/* Close button - Mobile only */}
-          <button
-            onClick={onClose}
-            className="lg:hidden p-2.5 hover:bg-slate-100 rounded-xl transition-all duration-200 hover:rotate-90"
-            aria-label="Fechar menu"
-          >
-            <X className="w-5 h-5 text-slate-400" />
-          </button>
+          <div>
+            <h1 className="font-semibold text-slate-900 text-sm leading-tight">Dr. Lucas Duarte</h1>
+            <p className="text-xs text-slate-500">Clínica Médica</p>
+          </div>
         </div>
+        {/* Close button - Mobile only */}
+        <button
+          onClick={onClose}
+          className="lg:hidden p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-md"
+          aria-label="Fechar menu"
+        >
+          <X className="w-5 h-5" />
+        </button>
       </div>
 
       {/* Navigation */}
-      <nav className="relative flex-1 p-4 space-y-1">
-        <div className="flex items-center gap-2 px-3 mb-4">
-          <div className="h-px flex-1 bg-gradient-to-r from-slate-200 to-transparent" />
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-            Menu
+      <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
+        <div className="px-3 mb-2 mt-2">
+          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+            Menu Principal
           </p>
-          <div className="h-px flex-1 bg-gradient-to-l from-slate-200 to-transparent" />
         </div>
         {menuItems.map(item => {
           const hasAccess = hasPermission(item.roles);
@@ -100,16 +84,13 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               to={item.path}
               onClick={() => onClose()}
               className={({ isActive }) =>
-                `sidebar-link ${isActive ? 'active' : ''}`
+                `sidebar-link group ${isActive ? 'active' : ''}`
               }
             >
               {({ isActive }) => (
                 <>
-                  <NavIcon icon={item.icon} isActive={isActive} />
+                  <item.icon className={`w-5 h-5 ${isActive ? 'text-primary-600' : 'text-slate-400 group-hover:text-slate-600'}`} />
                   <span className="font-medium">{item.label}</span>
-                  {isActive && (
-                    <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary-500 animate-pulse" />
-                  )}
                 </>
               )}
             </NavLink>
@@ -118,28 +99,18 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       </nav>
 
       {/* User info */}
-      <div className="relative p-4 border-t border-slate-100/80">
-        <div className="p-3 bg-gradient-to-r from-slate-50 to-slate-100/50 rounded-2xl">
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <div className="w-12 h-12 bg-gradient-to-br from-primary-500 via-primary-600 to-primary-700 rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/25 ring-2 ring-white">
-                <span className="text-base font-bold text-white">
-                  {user?.nome?.charAt(0).toUpperCase()}
-                </span>
-              </div>
-              <span className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-gradient-to-br from-medical-400 to-medical-500 rounded-full border-[2.5px] border-white shadow-sm flex items-center justify-center">
-                <span className="w-1.5 h-1.5 bg-white rounded-full" />
-              </span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-slate-900 truncate">
-                {user?.nome}
-              </p>
-              <p className="text-xs text-slate-500 capitalize flex items-center gap-1.5 mt-0.5">
-                <span className="w-2 h-2 bg-gradient-to-r from-primary-400 to-primary-500 rounded-full" />
-                {user?.role === 'medico' ? 'Médico' : 'Secretária'}
-              </p>
-            </div>
+      <div className="p-4 border-t border-slate-100 bg-slate-50/50">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 bg-primary-100 text-primary-700 rounded-full flex items-center justify-center font-bold text-sm">
+            {user?.nome?.charAt(0).toUpperCase()}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-slate-900 truncate">
+              {user?.nome}
+            </p>
+            <p className="text-xs text-slate-500 capitalize">
+              {user?.role === 'medico' ? 'Médico' : 'Secretária'}
+            </p>
           </div>
         </div>
       </div>
