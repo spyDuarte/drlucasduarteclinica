@@ -2,8 +2,8 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useData } from '../contexts/DataContext';
-import { LogOut, Bell, Search, CalendarDays, Sparkles, Menu, Command, X, User, Calendar, Clock, DollarSign } from 'lucide-react';
-import { formatRelativeDate, formatCurrency } from '../utils/helpers';
+import { LogOut, Bell, Search, Menu, X, User, DollarSign, Calendar } from 'lucide-react';
+import { formatCurrency } from '../utils/helpers';
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -17,10 +17,8 @@ export default function Header({ onMenuClick }: HeaderProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [showQuickActions, setShowQuickActions] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const notificationsRef = useRef<HTMLDivElement>(null);
-  const quickActionsRef = useRef<HTMLDivElement>(null);
 
   // Busca de pacientes
   const searchResults = useMemo(() => {
@@ -70,9 +68,6 @@ export default function Header({ onMenuClick }: HeaderProps) {
       if (notificationsRef.current && !notificationsRef.current.contains(event.target as Node)) {
         setShowNotifications(false);
       }
-      if (quickActionsRef.current && !quickActionsRef.current.contains(event.target as Node)) {
-        setShowQuickActions(false);
-      }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
@@ -90,7 +85,6 @@ export default function Header({ onMenuClick }: HeaderProps) {
       if (event.key === 'Escape') {
         setIsSearchFocused(false);
         setShowNotifications(false);
-        setShowQuickActions(false);
       }
     };
 
@@ -109,69 +103,59 @@ export default function Header({ onMenuClick }: HeaderProps) {
     navigate(`/pacientes/${patientId}`);
   };
 
-  const today = new Date();
-  const formattedDate = today.toLocaleDateString('pt-BR', {
-    weekday: 'long',
-    day: '2-digit',
-    month: 'long'
-  });
-
   return (
-    <header className="h-[72px] bg-white/80 backdrop-blur-xl border-b border-slate-200/60 flex items-center justify-between px-4 md:px-6 lg:px-8 shadow-sm shadow-slate-900/5">
+    <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 md:px-6 shadow-sm z-20">
       {/* Mobile menu button */}
       <button
         onClick={onMenuClick}
-        className="lg:hidden p-2.5 hover:bg-slate-100 rounded-xl transition-all duration-200 active:scale-95 flex-shrink-0"
+        className="lg:hidden p-2 hover:bg-slate-100 rounded-md transition-colors mr-2"
         aria-label="Abrir menu"
       >
-        <Menu className="w-6 h-6 text-slate-600" />
+        <Menu className="w-5 h-5 text-slate-600" />
       </button>
 
       {/* Search */}
-      <div className="flex-1 max-w-xl mx-2 md:mx-0" ref={searchRef}>
-        <div className="relative input-icon-wrapper group">
-          <Search className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-slate-400 transition-all duration-200 group-focus-within:text-primary-500 group-focus-within:scale-110 z-10" />
+      <div className="flex-1 max-w-md mx-2 md:mx-0" ref={searchRef}>
+        <div className="relative group">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-primary-500 transition-colors" />
           <input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             onFocus={() => setIsSearchFocused(true)}
-            placeholder="Buscar..."
-            className="search-input w-full pl-9 md:pl-12 pr-10 md:pr-24 py-2.5 md:py-3 bg-slate-50/80 border border-slate-200/80 rounded-xl md:rounded-2xl focus:ring-4 focus:ring-primary-500/10 focus:border-primary-400 focus:bg-white outline-none transition-all duration-200 text-sm font-medium placeholder:text-slate-400"
+            placeholder="Buscar pacientes..."
+            className="w-full pl-9 pr-10 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 focus:bg-white outline-none transition-all text-sm placeholder:text-slate-400"
           />
           {searchTerm ? (
             <button
               onClick={() => setSearchTerm('')}
-              className="absolute right-2 md:right-3 top-1/2 -translate-y-1/2 p-1.5 hover:bg-slate-200 rounded-lg transition-colors"
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 hover:bg-slate-200 rounded-md transition-colors"
             >
-              <X className="w-4 h-4 text-slate-400" />
+              <X className="w-3.5 h-3.5 text-slate-400" />
             </button>
           ) : (
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 hidden md:flex items-center gap-1.5 text-xs opacity-60 group-focus-within:opacity-100 transition-opacity">
-              <kbd className="px-2 py-1 bg-slate-100 rounded-lg text-slate-500 font-medium flex items-center gap-0.5 border border-slate-200/50">
-                <Command className="w-3 h-3" />
-                <span>K</span>
-              </kbd>
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 hidden md:flex items-center gap-1 text-xs opacity-50">
+              <span className="text-slate-500 font-sans border border-slate-200 px-1.5 rounded bg-slate-100">⌘K</span>
             </div>
           )}
 
           {/* Search Results Dropdown */}
           {isSearchFocused && searchTerm && (
-            <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden z-[70] animate-fade-in max-h-[60vh] overflow-y-auto">
+            <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-lg border border-slate-200 overflow-hidden z-[70] max-h-[60vh] overflow-y-auto">
               {searchResults.length > 0 ? (
-                <ul className="py-2">
+                <ul className="py-1">
                   {searchResults.map(patient => (
                     <li key={patient.id}>
                       <button
                         onClick={() => handlePatientSelect(patient.id)}
-                        className="w-full flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2.5 md:py-3 hover:bg-slate-50 transition-colors text-left"
+                        className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-colors text-left"
                       >
-                        <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-primary-100 to-primary-50 rounded-lg md:rounded-xl flex items-center justify-center flex-shrink-0">
-                          <User className="w-4 h-4 md:w-5 md:h-5 text-primary-600" />
+                        <div className="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center flex-shrink-0 text-slate-500">
+                          <User className="w-4 h-4" />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="font-semibold text-slate-900 text-sm md:text-base truncate">{patient.nome}</p>
-                          <p className="text-xs md:text-sm text-slate-500 truncate">{patient.telefone}</p>
+                          <p className="font-medium text-slate-900 text-sm truncate">{patient.nome}</p>
+                          <p className="text-xs text-slate-500 truncate">{patient.telefone}</p>
                         </div>
                       </button>
                     </li>
@@ -182,157 +166,71 @@ export default function Header({ onMenuClick }: HeaderProps) {
                   <p className="text-sm">Nenhum paciente encontrado</p>
                 </div>
               )}
-              <div className="border-t border-slate-100 px-3 md:px-4 py-2 bg-slate-50">
-                <Link
-                  to="/pacientes"
-                  onClick={() => setIsSearchFocused(false)}
-                  className="text-xs text-primary-600 hover:text-primary-700 font-medium"
-                >
-                  Ver todos os pacientes
-                </Link>
-              </div>
             </div>
           )}
         </div>
       </div>
 
       {/* Right side */}
-      <div className="flex items-center gap-1.5 md:gap-2 lg:gap-3 flex-shrink-0">
-        {/* Date Badge - Hidden on mobile */}
-        <div className="hidden xl:flex items-center gap-3 px-4 py-2 bg-gradient-to-r from-primary-50 to-primary-100/50 rounded-2xl border border-primary-100/60">
-          <div className="w-8 h-8 bg-white rounded-xl flex items-center justify-center shadow-sm">
-            <CalendarDays className="w-4 h-4 text-primary-600" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-xs font-bold text-primary-600 uppercase tracking-wide">
-              {formatRelativeDate(today)}
-            </span>
-            <span className="text-sm text-slate-600 capitalize">
-              {formattedDate}
-            </span>
-          </div>
-        </div>
-
-        {/* Divider */}
-        <div className="hidden md:block w-px h-10 bg-gradient-to-b from-transparent via-slate-200 to-transparent mx-1" />
-
+      <div className="flex items-center gap-2 md:gap-4 flex-shrink-0 ml-4">
         {/* Notifications */}
         <div className="relative" ref={notificationsRef}>
           <button
             onClick={() => setShowNotifications(!showNotifications)}
-            className="relative p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 transition-all duration-200 group active:scale-95"
+            className="relative p-2 rounded-md hover:bg-slate-100 text-slate-500 hover:text-slate-700 transition-colors"
             title="Notificações"
           >
-            <Bell className="w-5 h-5 text-slate-600 transition-transform duration-200 group-hover:scale-110 group-hover:text-slate-700" />
+            <Bell className="w-5 h-5" />
             {notifications.length > 0 && (
-              <span className="absolute top-1 right-1 min-w-[20px] h-[20px] flex items-center justify-center text-[10px] font-bold text-white bg-gradient-to-br from-rose-500 to-rose-600 rounded-full border-2 border-white shadow-lg shadow-rose-500/30">
-                {notifications.length}
-              </span>
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-white" />
             )}
           </button>
 
           {/* Notifications Dropdown */}
           {showNotifications && (
-            <div className="absolute top-full right-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden z-50 animate-fade-in">
+            <div className="absolute top-full right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-slate-200 overflow-hidden z-50">
               <div className="px-4 py-3 border-b border-slate-100 bg-slate-50">
-                <h3 className="font-semibold text-slate-900">Notificações</h3>
+                <h3 className="font-semibold text-slate-900 text-sm">Notificações</h3>
               </div>
               {notifications.length > 0 ? (
-                <ul className="py-2">
+                <ul className="py-1">
                   {notifications.map(notification => (
                     <li key={notification.id}>
                       <Link
                         to={notification.link}
                         onClick={() => setShowNotifications(false)}
-                        className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 transition-colors"
+                        className="flex items-start gap-3 px-4 py-3 hover:bg-slate-50 transition-colors"
                       >
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                          notification.type === 'warning'
-                            ? 'bg-amber-100 text-amber-600'
-                            : 'bg-primary-100 text-primary-600'
-                        }`}>
-                          <notification.icon className="w-5 h-5" />
-                        </div>
-                        <div className="flex-1">
+                        <div className={`mt-0.5 w-2 h-2 rounded-full flex-shrink-0 ${
+                          notification.type === 'warning' ? 'bg-amber-500' : 'bg-primary-500'
+                        }`} />
+                        <div className="flex-1 min-w-0">
                           <p className="font-medium text-slate-900 text-sm">{notification.title}</p>
-                          <p className="text-xs text-slate-500">{notification.description}</p>
+                          <p className="text-xs text-slate-500 mt-0.5">{notification.description}</p>
                         </div>
                       </Link>
                     </li>
                   ))}
                 </ul>
               ) : (
-                <div className="p-6 text-center">
-                  <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center mx-auto mb-3">
-                    <Bell className="w-6 h-6 text-slate-400" />
-                  </div>
-                  <p className="text-sm text-slate-500">Nenhuma notificação</p>
+                <div className="p-8 text-center">
+                  <p className="text-sm text-slate-500">Nenhuma notificação nova</p>
                 </div>
               )}
             </div>
           )}
         </div>
 
-        {/* Quick Actions - Hidden on small screens */}
-        <div className="relative hidden sm:block" ref={quickActionsRef}>
-          <button
-            onClick={() => setShowQuickActions(!showQuickActions)}
-            className="p-2.5 rounded-xl bg-slate-50 hover:bg-gradient-to-br hover:from-amber-50 hover:to-orange-50 transition-all duration-200 group active:scale-95"
-            title="Ações rápidas"
-          >
-            <Sparkles className="w-5 h-5 text-slate-600 transition-all duration-200 group-hover:scale-110 group-hover:text-amber-500" />
-          </button>
-
-          {/* Quick Actions Dropdown */}
-          {showQuickActions && (
-            <div className="absolute top-full right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden z-50 animate-fade-in">
-              <div className="px-4 py-3 border-b border-slate-100 bg-slate-50">
-                <h3 className="font-semibold text-slate-900">Ações Rápidas</h3>
-              </div>
-              <ul className="py-2">
-                <li>
-                  <Link
-                    to="/pacientes"
-                    onClick={() => setShowQuickActions(false)}
-                    className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-colors"
-                  >
-                    <User className="w-4 h-4 text-slate-500" />
-                    <span className="text-sm text-slate-700">Novo Paciente</span>
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/agenda"
-                    onClick={() => setShowQuickActions(false)}
-                    className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-colors"
-                  >
-                    <Clock className="w-4 h-4 text-slate-500" />
-                    <span className="text-sm text-slate-700">Agendar Consulta</span>
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/financeiro"
-                    onClick={() => setShowQuickActions(false)}
-                    className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-colors"
-                  >
-                    <DollarSign className="w-4 h-4 text-slate-500" />
-                    <span className="text-sm text-slate-700">Registrar Pagamento</span>
-                  </Link>
-                </li>
-              </ul>
-            </div>
-          )}
-        </div>
+        <div className="h-6 w-px bg-slate-200 hidden md:block" />
 
         {/* Logout */}
         <button
           onClick={handleLogout}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-50 hover:bg-rose-50 text-slate-600 hover:text-rose-600 transition-all duration-200 group active:scale-95"
+          className="flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-slate-100 text-slate-600 hover:text-rose-600 transition-colors text-sm font-medium"
           title="Sair do sistema"
         >
-          <LogOut className="w-5 h-5 transition-all duration-200 group-hover:translate-x-0.5" />
-          <span className="hidden md:inline text-sm font-semibold">Sair</span>
+          <LogOut className="w-4 h-4" />
+          <span className="hidden md:inline">Sair</span>
         </button>
       </div>
     </header>
