@@ -19,7 +19,9 @@ const INITIAL_SECTIONS: ExpandedSections = {
   historicoPregrasso: false,
   exameFisicoDetalhado: false,
   documentos: false,
-  planoTerapeutico: false
+  planoTerapeutico: false,
+  historico: false,
+  problemas: true
 };
 
 export interface FormErrors {
