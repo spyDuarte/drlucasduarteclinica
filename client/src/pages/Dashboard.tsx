@@ -18,11 +18,8 @@ import {
 import { formatCurrency, translateAppointmentStatus, getStatusColor } from '../utils/helpers';
 
 export default function Dashboard() {
-  const { getDashboardStats, getAppointmentsByDate, patients } = useData();
+  const { dashboardStats: stats, getAppointmentsByDate, patients } = useData();
   const { user } = useAuth();
-
-  // Memoizar stats para evitar recálculo desnecessário
-  const stats = useMemo(() => getDashboardStats(), [getDashboardStats]);
 
   // Memoizar consultas do dia
   const todayAppointments = useMemo(() => {
