@@ -100,32 +100,30 @@ export function MedicalRecordModal({ patientId, patient, record, onClose, onSave
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] p-2 sm:p-4 animate-fade-in overflow-y-auto overscroll-contain">
-      <div className="medical-modal w-full max-w-5xl my-4 sm:my-8 animate-scale-in max-h-[95vh] flex flex-col">
+    <div className="fixed inset-0 bg-slate-900/50 flex items-center justify-center z-[60] p-4 animate-fade-in">
+      <div className="bg-white w-full max-w-5xl rounded-xl shadow-2xl max-h-[95vh] flex flex-col border border-slate-200">
         {/* Header */}
-        <div className="medical-modal-header sticky top-0 z-10">
-          <div className="flex items-center justify-between relative z-10">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
-                <Stethoscope className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h2 className="text-xl font-bold text-white">
-                  {record ? 'Editar Atendimento' : 'Novo Atendimento'}
-                </h2>
-                <p className="text-sm text-white/70">Registro SOAP completo</p>
-              </div>
+        <div className="flex items-center justify-between p-5 border-b border-slate-100 bg-white rounded-t-xl z-10">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-primary-50 rounded-lg flex items-center justify-center text-primary-600">
+              <Stethoscope className="w-5 h-5" />
             </div>
-            <button
-              onClick={onClose}
-              className="p-2.5 bg-white/10 hover:bg-white/20 rounded-xl transition-all text-white"
-            >
-              <X className="w-5 h-5" />
-            </button>
+            <div>
+              <h2 className="text-lg font-bold text-slate-900">
+                {record ? 'Editar Atendimento' : 'Novo Atendimento'}
+              </h2>
+              <p className="text-sm text-slate-500">Registro Clínico</p>
+            </div>
           </div>
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600 transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto overscroll-contain p-6 space-y-6 scroll-smooth">
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-6 scroll-smooth bg-slate-50/50">
           {/* Informações Gerais */}
           <GeneralInfoSection formData={formData} updateField={updateField} />
 
@@ -169,17 +167,17 @@ export function MedicalRecordModal({ patientId, patient, record, onClose, onSave
           />
 
           {/* Actions */}
-          <div className="flex gap-3 justify-end pt-6 border-t border-gray-100 mt-6">
+          <div className="flex gap-3 justify-end pt-4 border-t border-slate-200 mt-4 bg-white p-6 -mx-6 -mb-6 rounded-b-xl sticky bottom-0">
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-semibold transition-all"
+              className="btn-secondary"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="px-6 py-2.5 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white rounded-xl font-semibold shadow-lg shadow-primary-500/25 transition-all flex items-center gap-2"
+              className="btn-primary"
             >
               <FileCheck className="w-4 h-4" />
               {record ? 'Salvar alterações' : 'Registrar atendimento'}
@@ -200,11 +198,11 @@ interface FormSectionProps {
 
 function GeneralInfoSection({ formData, updateField }: FormSectionProps) {
   return (
-    <div className="bg-gradient-to-r from-slate-50 to-slate-100 rounded-xl p-5 border border-slate-200">
-      <h3 className="text-sm font-semibold text-gray-700 mb-3">Informações do Atendimento</h3>
+    <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
+      <h3 className="text-sm font-semibold text-slate-700 mb-4 border-b border-slate-100 pb-2">Informações Gerais</h3>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-          <label className="block text-xs text-gray-500 mb-1">Data do atendimento</label>
+          <label className="block text-xs font-medium text-slate-500 mb-1">Data do atendimento</label>
           <input
             type="date"
             value={formData.data}
@@ -213,7 +211,7 @@ function GeneralInfoSection({ formData, updateField }: FormSectionProps) {
           />
         </div>
         <div>
-          <label className="block text-xs text-gray-500 mb-1">Tipo de atendimento</label>
+          <label className="block text-xs font-medium text-slate-500 mb-1">Tipo de atendimento</label>
           <select
             value={formData.tipoAtendimento}
             onChange={e => updateField('tipoAtendimento', e.target.value)}
@@ -230,7 +228,7 @@ function GeneralInfoSection({ formData, updateField }: FormSectionProps) {
           </select>
         </div>
         <div>
-          <label className="block text-xs text-gray-500 mb-1">Local do atendimento</label>
+          <label className="block text-xs font-medium text-slate-500 mb-1">Local do atendimento</label>
           <input
             type="text"
             value={formData.localAtendimento}
@@ -253,18 +251,18 @@ interface ExpandableSectionProps extends FormSectionProps {
 
 function SubjectiveSection({ formData, updateField, expandedSections, toggleSection, formErrors }: ExpandableSectionProps) {
   return (
-    <div className="soap-section-s rounded-xl p-5">
-      <div className="flex items-center gap-3 mb-4">
-        <span className="w-10 h-10 bg-sky-500 text-white rounded-xl flex items-center justify-center text-lg font-bold shadow-lg shadow-sky-500/20">S</span>
+    <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
+      <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">
+        <span className="w-8 h-8 bg-primary-100 text-primary-600 rounded-lg flex items-center justify-center text-sm font-bold">S</span>
         <div>
-          <h3 className="text-lg font-bold text-sky-700">Subjetivo</h3>
-          <p className="text-xs text-sky-600/70">Relato do paciente</p>
+          <h3 className="text-base font-bold text-slate-800">Subjetivo</h3>
+          <p className="text-xs text-slate-500">Relato do paciente</p>
         </div>
       </div>
       <div className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className={formErrors.queixaPrincipal ? 'field-error' : ''}>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-slate-700 mb-1">
               Queixa principal <span className="text-red-500">*</span>
             </label>
             <input
@@ -279,7 +277,7 @@ function SubjectiveSection({ formData, updateField, expandedSections, toggleSect
             )}
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Duração dos sintomas</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Duração dos sintomas</label>
             <input
               type="text"
               value={formData.duracaoSintomas}
@@ -291,7 +289,7 @@ function SubjectiveSection({ formData, updateField, expandedSections, toggleSect
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-slate-700 mb-1">
             História da doença atual
           </label>
           <textarea
@@ -305,7 +303,7 @@ function SubjectiveSection({ formData, updateField, expandedSections, toggleSect
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Fatores de melhora</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Fatores de melhora</label>
             <input
               type="text"
               value={formData.fatoresMelhora}
@@ -315,7 +313,7 @@ function SubjectiveSection({ formData, updateField, expandedSections, toggleSect
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Fatores de piora</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Fatores de piora</label>
             <input
               type="text"
               value={formData.fatoresPiora}
@@ -328,7 +326,7 @@ function SubjectiveSection({ formData, updateField, expandedSections, toggleSect
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Sintomas associados</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Sintomas associados</label>
             <input
               type="text"
               value={formData.sintomasAssociados}
@@ -338,7 +336,7 @@ function SubjectiveSection({ formData, updateField, expandedSections, toggleSect
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Tratamentos prévios</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Tratamentos prévios</label>
             <input
               type="text"
               value={formData.tratamentosPrevios}
@@ -350,7 +348,7 @@ function SubjectiveSection({ formData, updateField, expandedSections, toggleSect
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Impacto na qualidade de vida</label>
+          <label className="block text-sm font-medium text-slate-700 mb-1">Impacto na qualidade de vida</label>
           <input
             type="text"
             value={formData.impactoQualidadeVida}
@@ -361,7 +359,7 @@ function SubjectiveSection({ formData, updateField, expandedSections, toggleSect
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Revisão de sistemas</label>
+          <label className="block text-sm font-medium text-slate-700 mb-1">Revisão de sistemas</label>
           <textarea
             value={formData.revisaoSistemas}
             onChange={e => updateField('revisaoSistemas', e.target.value)}
@@ -374,7 +372,7 @@ function SubjectiveSection({ formData, updateField, expandedSections, toggleSect
         {/* Hábitos de Vida */}
         <CollapsibleSection
           title="Hábitos de Vida"
-          icon={<Activity className="w-4 h-4 text-sky-500" />}
+          icon={<Activity className="w-4 h-4 text-primary-500" />}
           isExpanded={expandedSections.habitosVida}
           onToggle={() => toggleSection('habitosVida')}
         >
@@ -391,13 +389,13 @@ function SubjectiveSection({ formData, updateField, expandedSections, toggleSect
         {/* Histórico Patológico */}
         <CollapsibleSection
           title="Histórico Patológico Pregresso"
-          icon={<Clipboard className="w-4 h-4 text-sky-500" />}
+          icon={<Clipboard className="w-4 h-4 text-primary-500" />}
           isExpanded={expandedSections.historicoPregrasso}
           onToggle={() => toggleSection('historicoPregrasso')}
         >
           <div className="space-y-3">
             <div>
-              <label className="block text-xs text-gray-500 mb-1">Doenças prévias</label>
+              <label className="block text-xs font-medium text-slate-500 mb-1">Doenças prévias</label>
               <textarea
                 value={formData.historicoPatologicoPregrasso}
                 onChange={e => updateField('historicoPatologicoPregrasso', e.target.value)}
@@ -421,12 +419,12 @@ function SubjectiveSection({ formData, updateField, expandedSections, toggleSect
 // Objective Section
 function ObjectiveSection({ formData, updateField, expandedSections, toggleSection }: ExpandableSectionProps) {
   return (
-    <div className="soap-section-o rounded-xl p-5">
-      <div className="flex items-center gap-3 mb-4">
-        <span className="w-10 h-10 bg-emerald-500 text-white rounded-xl flex items-center justify-center text-lg font-bold shadow-lg shadow-emerald-500/20">O</span>
+    <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
+      <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">
+        <span className="w-8 h-8 bg-success-50 text-success-600 rounded-lg flex items-center justify-center text-sm font-bold">O</span>
         <div>
-          <h3 className="text-lg font-bold text-emerald-700">Objetivo</h3>
-          <p className="text-xs text-emerald-600/70">Exame físico e sinais vitais</p>
+          <h3 className="text-base font-bold text-slate-800">Objetivo</h3>
+          <p className="text-xs text-slate-500">Exame físico e sinais vitais</p>
         </div>
       </div>
       <div className="space-y-4">
@@ -463,8 +461,8 @@ function ObjectiveSection({ formData, updateField, expandedSections, toggleSecti
         </div>
 
         {/* Sinais Vitais */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Sinais Vitais</label>
+        <div className="bg-slate-50 p-4 rounded-lg border border-slate-100">
+          <label className="block text-sm font-medium text-slate-700 mb-3">Sinais Vitais</label>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
             <InputField label="PA (mmHg)" value={formData.pressaoArterial} onChange={v => updateField('pressaoArterial', v)} placeholder="120/80" />
             <InputField label="PA deitado" value={formData.pressaoArterialDeitado} onChange={v => updateField('pressaoArterialDeitado', v)} placeholder="120/80" />
@@ -497,7 +495,7 @@ function ObjectiveSection({ formData, updateField, expandedSections, toggleSecti
         />
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-slate-700 mb-1">
             Exame físico geral
           </label>
           <textarea
@@ -512,7 +510,7 @@ function ObjectiveSection({ formData, updateField, expandedSections, toggleSecti
         {/* Exame Físico Detalhado */}
         <CollapsibleSection
           title="Exame Físico Detalhado por Sistemas"
-          icon={<Stethoscope className="w-4 h-4 text-emerald-500" />}
+          icon={<Stethoscope className="w-4 h-4 text-success-500" />}
           isExpanded={expandedSections.exameFisicoDetalhado}
           onToggle={() => toggleSection('exameFisicoDetalhado')}
         >
@@ -533,7 +531,7 @@ function ObjectiveSection({ formData, updateField, expandedSections, toggleSecti
         </CollapsibleSection>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Exames complementares</label>
+          <label className="block text-sm font-medium text-slate-700 mb-1">Exames complementares</label>
           <textarea
             value={formData.examesComplementares}
             onChange={e => updateField('examesComplementares', e.target.value)}
@@ -550,12 +548,12 @@ function ObjectiveSection({ formData, updateField, expandedSections, toggleSecti
 // Assessment Section
 function AssessmentSection({ formData, updateField, formErrors }: FormSectionProps) {
   return (
-    <div className="soap-section-a rounded-xl p-5">
-      <div className="flex items-center gap-3 mb-4">
-        <span className="w-10 h-10 bg-amber-500 text-white rounded-xl flex items-center justify-center text-lg font-bold shadow-lg shadow-amber-500/20">A</span>
+    <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
+      <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">
+        <span className="w-8 h-8 bg-warning-50 text-warning-600 rounded-lg flex items-center justify-center text-sm font-bold">A</span>
         <div>
-          <h3 className="text-lg font-bold text-amber-700">Avaliação</h3>
-          <p className="text-xs text-amber-600/70">Diagnóstico e hipóteses</p>
+          <h3 className="text-base font-bold text-slate-800">Avaliação</h3>
+          <p className="text-xs text-slate-500">Diagnóstico e hipóteses</p>
         </div>
       </div>
       <div className="space-y-4">
@@ -608,17 +606,17 @@ interface PlanSectionProps extends ExpandableSectionProps {
 
 function PlanSection({ formData, updateField, expandedSections, toggleSection, newPrescription, setNewPrescription, addPrescription, removePrescription, formErrors, patient }: PlanSectionProps) {
   return (
-    <div className="soap-section-p rounded-xl p-5">
-      <div className="flex items-center gap-3 mb-4">
-        <span className="w-10 h-10 bg-violet-500 text-white rounded-xl flex items-center justify-center text-lg font-bold shadow-lg shadow-violet-500/20">P</span>
+    <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
+      <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">
+        <span className="w-8 h-8 bg-purple-50 text-purple-600 rounded-lg flex items-center justify-center text-sm font-bold">P</span>
         <div>
-          <h3 className="text-lg font-bold text-violet-700">Plano</h3>
-          <p className="text-xs text-violet-600/70">Conduta e tratamento</p>
+          <h3 className="text-base font-bold text-slate-800">Plano</h3>
+          <p className="text-xs text-slate-500">Conduta e tratamento</p>
         </div>
       </div>
       <div className="space-y-4">
         <div className={formErrors.conduta ? 'field-error' : ''}>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-slate-700 mb-1">
             Conduta <span className="text-red-500">*</span>
           </label>
           <textarea
@@ -670,23 +668,23 @@ function PlanSection({ formData, updateField, expandedSections, toggleSection, n
         <InputField label="Encaminhamentos (formato: Especialidade: Motivo; separados por ponto e vírgula)" value={formData.encaminhamentos} onChange={v => updateField('encaminhamentos', v)} placeholder="Cardiologia: avaliação de sopro; Ortopedia: dor lombar crônica" isSmall={false} />
 
         {/* Documentos */}
-        <div className="border rounded-lg">
+        <div className="border border-slate-200 rounded-lg overflow-hidden">
           <button
             type="button"
             onClick={() => toggleSection('documentos')}
-            className="w-full px-4 py-2 text-left text-sm font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-t-lg flex items-center justify-between"
+            className="w-full px-4 py-3 text-left text-sm font-medium text-slate-700 bg-slate-50 hover:bg-slate-100 flex items-center justify-between transition-colors"
           >
             <span>Atestados e Documentos</span>
             <span>{expandedSections.documentos ? '−' : '+'}</span>
           </button>
           {expandedSections.documentos && (
-            <div className="p-4 space-y-3">
+            <div className="p-4 space-y-3 bg-white">
               <label className="flex items-center gap-2">
                 <input
                   type="checkbox"
                   checked={formData.atestadoEmitido}
                   onChange={e => updateField('atestadoEmitido', e.target.checked)}
-                  className="rounded"
+                  className="rounded text-primary-600 focus:ring-primary-500"
                 />
                 <span className="text-sm">Atestado emitido</span>
               </label>
@@ -714,7 +712,7 @@ function PlanSection({ formData, updateField, expandedSections, toggleSection, n
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <InputField label="Retorno" value={formData.retorno} onChange={v => updateField('retorno', v)} placeholder="Ex: 30 dias, 1 semana, se necessário" isSmall={false} />
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Data do retorno</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Data do retorno</label>
             <input
               type="date"
               value={formData.dataRetorno}
@@ -725,7 +723,7 @@ function PlanSection({ formData, updateField, expandedSections, toggleSection, n
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Orientações ao paciente</label>
+          <label className="block text-sm font-medium text-slate-700 mb-2">Orientações ao paciente</label>
 
           {/* Seletor de Templates */}
           <OrientationTemplateSelector
@@ -746,7 +744,7 @@ function PlanSection({ formData, updateField, expandedSections, toggleSection, n
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Orientações alimentares</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Orientações alimentares</label>
             <textarea
               value={formData.orientacoesAlimentares}
               onChange={e => updateField('orientacoesAlimentares', e.target.value)}
@@ -756,7 +754,7 @@ function PlanSection({ formData, updateField, expandedSections, toggleSection, n
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Restrições de atividades</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Restrições de atividades</label>
             <textarea
               value={formData.restricoesAtividades}
               onChange={e => updateField('restricoesAtividades', e.target.value)}
@@ -770,13 +768,13 @@ function PlanSection({ formData, updateField, expandedSections, toggleSection, n
         {/* Plano Terapêutico */}
         <CollapsibleSection
           title="Plano Terapêutico Detalhado"
-          icon={<ClipboardList className="w-4 h-4 text-violet-500" />}
+          icon={<ClipboardList className="w-4 h-4 text-purple-500" />}
           isExpanded={expandedSections.planoTerapeutico}
           onToggle={() => toggleSection('planoTerapeutico')}
         >
           <div className="space-y-3">
             <div>
-              <label className="block text-xs text-gray-500 mb-1">Objetivos do tratamento</label>
+              <label className="block text-xs font-medium text-slate-500 mb-1">Objetivos do tratamento</label>
               <textarea
                 value={formData.objetivosTratamento}
                 onChange={e => updateField('objetivosTratamento', e.target.value)}
@@ -791,7 +789,7 @@ function PlanSection({ formData, updateField, expandedSections, toggleSection, n
         </CollapsibleSection>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Intercorrências durante o atendimento</label>
+          <label className="block text-sm font-medium text-slate-700 mb-1">Intercorrências durante o atendimento</label>
           <textarea
             value={formData.intercorrencias}
             onChange={e => updateField('intercorrencias', e.target.value)}
@@ -801,14 +799,14 @@ function PlanSection({ formData, updateField, expandedSections, toggleSection, n
           />
         </div>
 
-        <label className="flex items-center gap-2">
+        <label className="flex items-center gap-2 mt-4 p-3 bg-slate-50 rounded-lg border border-slate-100">
           <input
             type="checkbox"
             checked={formData.consentimentoInformado}
             onChange={e => updateField('consentimentoInformado', e.target.checked)}
-            className="rounded"
+            className="rounded text-primary-600 focus:ring-primary-500"
           />
-          <span className="text-sm text-gray-700">
+          <span className="text-sm text-slate-700">
             Paciente recebeu e compreendeu as orientações e consentiu com o plano terapêutico
           </span>
         </label>
@@ -826,14 +824,14 @@ interface AttachmentsSectionProps {
 
 function AttachmentsSection({ attachments, onAdd, onRemove }: AttachmentsSectionProps) {
   return (
-    <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-5 border border-indigo-200">
+    <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
       <div className="flex items-center gap-3 mb-4">
-        <span className="w-10 h-10 bg-indigo-500 text-white rounded-xl flex items-center justify-center text-lg font-bold shadow-lg shadow-indigo-500/20">
+        <span className="w-10 h-10 bg-slate-100 text-slate-600 rounded-xl flex items-center justify-center text-lg font-bold">
           <Paperclip className="w-5 h-5" />
         </span>
         <div>
-          <h3 className="text-lg font-bold text-indigo-700">Anexos e Documentos</h3>
-          <p className="text-xs text-indigo-600/70">Exames, laudos, imagens</p>
+          <h3 className="text-lg font-bold text-slate-700">Anexos e Documentos</h3>
+          <p className="text-xs text-slate-500">Exames, laudos, imagens</p>
         </div>
       </div>
       <MedicalAttachments attachments={attachments} onAdd={onAdd} onRemove={onRemove} />
@@ -852,23 +850,23 @@ interface PrescriptionSectionProps {
 
 function PrescriptionSection({ prescricoes, newPrescription, setNewPrescription, addPrescription, removePrescription }: PrescriptionSectionProps) {
   return (
-    <div>
-      <label className="block text-sm font-medium text-gray-700 mb-2">Prescrições Medicamentosas</label>
+    <div className="p-4 bg-slate-50 rounded-lg border border-slate-200">
+      <label className="block text-sm font-medium text-slate-700 mb-3">Prescrições Medicamentosas</label>
       {prescricoes.length > 0 && (
-        <div className="space-y-2 mb-3">
+        <div className="space-y-2 mb-4">
           {prescricoes.map((rx, idx) => (
-            <div key={idx} className="flex items-center gap-2 p-2 bg-gray-50 rounded">
+            <div key={idx} className="flex items-center gap-2 p-3 bg-white rounded-lg border border-slate-200 shadow-sm">
               <span className="flex-1 text-sm">
                 <strong>{rx.medicamento}</strong> {rx.concentracao} - {rx.formaFarmaceutica} - {rx.posologia}
-                {rx.viaAdministracao && <span className="text-gray-500"> | Via: {rx.viaAdministracao}</span>}
-                {rx.usoControlado && <span className="text-red-500 ml-2">[Controlado]</span>}
+                {rx.viaAdministracao && <span className="text-slate-500"> | Via: {rx.viaAdministracao}</span>}
+                {rx.usoControlado && <span className="text-red-500 ml-2 font-medium">[Controlado]</span>}
               </span>
-              <button type="button" onClick={() => removePrescription(idx)} className="text-red-500 hover:text-red-700">×</button>
+              <button type="button" onClick={() => removePrescription(idx)} className="text-red-500 hover:text-red-700 p-1">×</button>
             </div>
           ))}
         </div>
       )}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 mb-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 mb-3">
         <MedicationSelector
           value={newPrescription.medicamento}
           onChange={value => setNewPrescription({ ...newPrescription, medicamento: value })}
@@ -896,7 +894,7 @@ function PrescriptionSection({ prescricoes, newPrescription, setNewPrescription,
         </select>
         <input type="text" value={newPrescription.posologia} onChange={e => setNewPrescription({ ...newPrescription, posologia: e.target.value })} className="input-field text-sm" placeholder="Posologia" />
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
         <input type="text" value={newPrescription.quantidade} onChange={e => setNewPrescription({ ...newPrescription, quantidade: e.target.value })} className="input-field text-sm" placeholder="Quantidade" />
         <input type="text" value={newPrescription.duracao} onChange={e => setNewPrescription({ ...newPrescription, duracao: e.target.value })} className="input-field text-sm" placeholder="Duração" />
         <select value={newPrescription.viaAdministracao} onChange={e => setNewPrescription({ ...newPrescription, viaAdministracao: e.target.value })} className="input-field text-sm">
@@ -912,9 +910,9 @@ function PrescriptionSection({ prescricoes, newPrescription, setNewPrescription,
           <option value="Oftálmica">Oftálmica</option>
           <option value="Otológica">Otológica</option>
         </select>
-        <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" checked={newPrescription.usoControlado} onChange={e => setNewPrescription({ ...newPrescription, usoControlado: e.target.checked })} className="rounded" />
-          Uso controlado
+        <label className="flex items-center gap-2 text-sm bg-white px-2 rounded border border-slate-200">
+          <input type="checkbox" checked={newPrescription.usoControlado} onChange={e => setNewPrescription({ ...newPrescription, usoControlado: e.target.checked })} className="rounded text-primary-600" />
+          Controlado
         </label>
         <button type="button" onClick={addPrescription} className="btn-secondary text-sm">Adicionar</button>
       </div>
@@ -933,8 +931,8 @@ interface CollapsibleSectionProps {
 
 function CollapsibleSection({ title, icon, isExpanded, onToggle, children }: CollapsibleSectionProps) {
   return (
-    <div className="collapsible-section">
-      <button type="button" onClick={onToggle} className="collapsible-header">
+    <div className="border border-slate-200 rounded-lg overflow-hidden bg-white">
+      <button type="button" onClick={onToggle} className="w-full px-4 py-3 bg-slate-50 hover:bg-slate-100 flex items-center justify-between transition-colors">
         <div className="flex items-center gap-2">
           {icon}
           <span className="text-sm font-semibold text-slate-700">{title}</span>
@@ -958,7 +956,7 @@ interface InputFieldProps {
 function InputField({ label, value, onChange, placeholder, required, isSmall = true }: InputFieldProps) {
   return (
     <div>
-      <label className={`block ${isSmall ? 'text-xs text-gray-500' : 'text-sm font-medium text-gray-700'} mb-1`}>{label}</label>
+      <label className={`block ${isSmall ? 'text-xs font-medium text-slate-500' : 'text-sm font-medium text-slate-700'} mb-1`}>{label}</label>
       <input
         type="text"
         value={value}
@@ -984,7 +982,7 @@ interface NumberFieldProps {
 function NumberField({ label, value, onChange, min, max, step, placeholder }: NumberFieldProps) {
   return (
     <div>
-      <label className="block text-xs text-gray-500 mb-1">{label}</label>
+      <label className="block text-xs font-medium text-slate-500 mb-1">{label}</label>
       <input
         type="number"
         value={value}
@@ -1010,7 +1008,7 @@ interface SelectFieldProps {
 function SelectField({ label, value, onChange, options, isSmall = true }: SelectFieldProps) {
   return (
     <div>
-      <label className={`block ${isSmall ? 'text-xs text-gray-500' : 'text-sm font-medium text-gray-700'} mb-1`}>{label}</label>
+      <label className={`block ${isSmall ? 'text-xs font-medium text-slate-500' : 'text-sm font-medium text-slate-700'} mb-1`}>{label}</label>
       <select
         value={value}
         onChange={e => onChange(e.target.value)}

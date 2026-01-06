@@ -149,30 +149,30 @@ export default function MedicalRecords() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* Header Premium */}
-      <div className="medical-record-header">
-        <div className="flex items-center gap-4 relative z-10">
+      {/* Header */}
+      <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+        <div className="flex items-center gap-4">
           <button
             onClick={() => navigate('/pacientes')}
-            className="p-2.5 bg-white/10 hover:bg-white/20 rounded-xl transition-all duration-200 backdrop-blur-sm"
+            className="p-2.5 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors text-slate-600"
           >
-            <ArrowLeft className="w-5 h-5 text-white" />
+            <ArrowLeft className="w-5 h-5" />
           </button>
           <div className="flex-1">
-            <div className="flex items-center gap-2 text-white/70 text-sm mb-1">
+            <div className="flex items-center gap-2 text-slate-500 text-sm mb-1">
               <Stethoscope className="w-4 h-4" />
               <span>Prontuário Médico</span>
             </div>
-            <h1 className="text-2xl font-bold text-white">{patient.nome}</h1>
+            <h1 className="text-2xl font-bold text-slate-900">{patient.nome}</h1>
           </div>
 
           {/* Quick Actions Dropdown */}
           <div className="relative">
             <button
               onClick={() => setShowQuickActions(!showQuickActions)}
-              className="flex items-center gap-2 px-5 py-2.5 bg-white text-primary-600 rounded-xl font-semibold hover:bg-white/90 transition-all duration-200 shadow-lg shadow-black/10"
+              className="btn-primary flex items-center gap-2"
             >
-              <Plus className="w-5 h-5" />
+              <Plus className="w-4 h-4" />
               Ações Rápidas
               <ChevronDown className={`w-4 h-4 transition-transform ${showQuickActions ? 'rotate-180' : ''}`} />
             </button>
@@ -180,7 +180,7 @@ export default function MedicalRecords() {
             {showQuickActions && (
               <>
                 <div className="fixed inset-0 z-[55]" onClick={() => setShowQuickActions(false)} />
-                <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-xl shadow-2xl border border-gray-100 py-2 z-[56] animate-scale-in origin-top-right">
+                <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-lg shadow-xl border border-slate-200 py-2 z-[56] animate-fade-in origin-top-right">
                   <button
                     onClick={() => handleQuickAction('atendimento')}
                     className="w-full px-4 py-3 flex items-center gap-3 hover:bg-primary-50 transition-colors text-left"
