@@ -47,7 +47,7 @@ interface DataContextType {
   markPaymentAsPaid: (id: string) => void;
 
   // Dashboard
-  getDashboardStats: () => DashboardStats;
+  dashboardStats: DashboardStats;
 
   // Documentos Médicos
   documents: MedicalDocument[];
@@ -462,7 +462,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // Dashboard Stats - memoizado para evitar recálculos desnecessários
-  const getDashboardStats = useCallback((): DashboardStats => {
+  const dashboardStats = useMemo((): DashboardStats => {
     const now = new Date();
     const todayStr = now.toISOString().split('T')[0];
     const startOfWeek = new Date(now);
@@ -583,7 +583,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     getDocumentsByType,
     emitDocument,
     cancelDocument,
-    getDashboardStats,
+    dashboardStats,
     exportData,
     clearAllData
   }), [
@@ -593,7 +593,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     medicalRecords, addMedicalRecord, updateMedicalRecord, getMedicalRecordsByPatient, getLastMedicalRecord,
     payments, addPayment, updatePayment, getPaymentsByPatient, getPendingPayments, markPaymentAsPaid,
     documents, addDocument, updateDocument, deleteDocument, getDocument, getDocumentsByPatient, getDocumentsByType, emitDocument, cancelDocument,
-    getDashboardStats, exportData, clearAllData
+    dashboardStats, exportData, clearAllData
   ]);
 
   return (

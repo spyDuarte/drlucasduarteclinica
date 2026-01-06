@@ -28,13 +28,11 @@ import {
 const COLORS = ['#0284c7', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
 
 export default function Reports() {
-  const { patients, appointments, payments, getDashboardStats } = useData();
+  const { patients, appointments, payments, dashboardStats: stats } = useData();
   const [dateRange, setDateRange] = useState({
     start: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0],
     end: new Date().toISOString().split('T')[0]
   });
-
-  const stats = getDashboardStats();
 
   // Filter data by date range
   const filteredAppointments = appointments.filter(a => {

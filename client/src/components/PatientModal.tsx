@@ -1,6 +1,7 @@
 import { X } from 'lucide-react';
 import { usePatientForm } from '../hooks/usePatientForm';
 import type { Patient } from '../types';
+import { useEffect, useRef } from 'react';
 
 interface PatientModalProps {
   patient: Patient | null;
@@ -10,6 +11,9 @@ interface PatientModalProps {
 }
 
 export default function PatientModal({ patient, onClose, onSave, isLoading = false }: PatientModalProps) {
+  const modalRef = useRef<HTMLDivElement>(null);
+  const previousActiveElement = useRef<HTMLElement | null>(null);
+
   const {
     formData,
     errors,
@@ -20,6 +24,46 @@ export default function PatientModal({ patient, onClose, onSave, isLoading = fal
     validateForm,
     buildPatientData
   } = usePatientForm(patient);
+
+  useEffect(() => {
+    previousActiveElement.current = document.activeElement as HTMLElement;
+
+    const modal = modalRef.current;
+    if (modal) {
+      const focusableElements = modal.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      const firstElement = focusableElements[0];
+      const lastElement = focusableElements[focusableElements.length - 1];
+
+      firstElement?.focus();
+
+      const handleTabKey = (e: KeyboardEvent) => {
+        if (e.key === 'Tab') {
+          if (e.shiftKey) {
+            if (document.activeElement === firstElement) {
+              e.preventDefault();
+              lastElement.focus();
+            }
+          } else {
+            if (document.activeElement === lastElement) {
+              e.preventDefault();
+              firstElement.focus();
+            }
+          }
+        }
+        if (e.key === 'Escape') {
+          onClose();
+        }
+      };
+
+      modal.addEventListener('keydown', handleTabKey);
+      return () => {
+        modal.removeEventListener('keydown', handleTabKey);
+        previousActiveElement.current?.focus();
+      };
+    }
+  }, [onClose]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,7 +79,10 @@ export default function PatientModal({ patient, onClose, onSave, isLoading = fal
       aria-modal="true"
       aria-labelledby="modal-title"
     >
-      <div className="bg-white rounded-xl w-full max-w-3xl max-h-[85vh] sm:max-h-[90vh] overflow-y-auto animate-scale-in">
+      <div
+        ref={modalRef}
+        className="bg-white rounded-xl w-full max-w-3xl max-h-[85vh] sm:max-h-[90vh] overflow-y-auto animate-scale-in"
+      >
         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
           <h2 id="modal-title" className="text-xl font-semibold text-gray-900">
             {patient ? 'Editar Paciente' : 'Novo Paciente'}
