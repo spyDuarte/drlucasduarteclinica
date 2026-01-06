@@ -8,9 +8,11 @@ import {
   ChevronDown,
   ClipboardList,
   FileCheck,
-  Paperclip
+  Paperclip,
+  History,
+  AlertTriangle
 } from 'lucide-react';
-import type { MedicalRecord, MedicalRecordAttachment } from '../../types';
+import type { MedicalRecord, MedicalRecordAttachment, ActiveProblem } from '../../types';
 import { useMedicalRecordForm, type FormErrors } from './useMedicalRecordForm';
 import type { PrescriptionData } from './types';
 import { VitalSignsValidator } from '../../components/VitalSignsValidator';
@@ -19,6 +21,9 @@ import { OrientationTemplateSelector } from '../../components/OrientationTemplat
 import { MedicalAttachments } from '../../components/MedicalAttachments';
 import { CID10Selector } from '../../components/CID10Selector';
 import { MedicationSelector } from '../../components/MedicationSelector';
+import { ActiveProblemsManager } from '../../components/ActiveProblemsManager';
+import { PatientTimeline } from '../../components/PatientTimeline';
+import { useData } from '../../contexts/DataContext';
 import { generateId } from '../../utils/helpers';
 
 interface MedicalRecordModalProps {
@@ -29,7 +34,11 @@ interface MedicalRecordModalProps {
   onSave: (data: Partial<MedicalRecord>) => void;
 }
 
-export function MedicalRecordModal({ patientId, patient, record, onClose, onSave }: MedicalRecordModalProps) {
+export function MedicalRecordModal({ patientId, record, onClose, onSave }: MedicalRecordModalProps) {
+  const { getPatient, updatePatient, getMedicalRecordsByPatient } = useData();
+  const currentPatient = getPatient(patientId);
+  const patientRecords = getMedicalRecordsByPatient(patientId);
+
   const {
     formData,
     updateField,
@@ -48,6 +57,32 @@ export function MedicalRecordModal({ patientId, patient, record, onClose, onSave
   const [attachments, setAttachments] = useState<MedicalRecordAttachment[]>(
     record?.attachments || []
   );
+
+  // Handlers para problemas ativos
+  const handleAddProblem = (problem: Omit<ActiveProblem, 'id'>) => {
+    if (!currentPatient) return;
+    const newProblem: ActiveProblem = {
+      ...problem,
+      id: generateId(),
+      patientId: patientId
+    };
+    const updatedProblems = [...(currentPatient.activeProblems || []), newProblem];
+    updatePatient(patientId, { activeProblems: updatedProblems });
+  };
+
+  const handleUpdateProblem = (id: string, updates: Partial<ActiveProblem>) => {
+    if (!currentPatient?.activeProblems) return;
+    const updatedProblems = currentPatient.activeProblems.map(p =>
+      p.id === id ? { ...p, ...updates } : p
+    );
+    updatePatient(patientId, { activeProblems: updatedProblems });
+  };
+
+  const handleRemoveProblem = (id: string) => {
+    if (!currentPatient?.activeProblems) return;
+    const updatedProblems = currentPatient.activeProblems.filter(p => p.id !== id);
+    updatePatient(patientId, { activeProblems: updatedProblems });
+  };
 
   // Handlers para anexos
   const handleAddAttachment = (attachment: Omit<MedicalRecordAttachment, 'id' | 'medicalRecordId' | 'uploadedAt'>) => {
@@ -124,6 +159,36 @@ export function MedicalRecordModal({ patientId, patient, record, onClose, onSave
         </div>
 
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-6 scroll-smooth bg-slate-50/50">
+          {/* Timeline e Histórico (Colapsável) */}
+          <CollapsibleSection
+            title="Histórico Clínico e Evolução"
+            icon={<History className="w-4 h-4 text-indigo-500" />}
+            isExpanded={expandedSections.historico || false}
+            onToggle={() => toggleSection('historico')}
+          >
+            <PatientTimeline
+              medicalRecords={patientRecords}
+              patientName={currentPatient?.nome || ''}
+              showLimit={3}
+            />
+          </CollapsibleSection>
+
+          {/* Lista de Problemas Ativos */}
+          <CollapsibleSection
+            title="Lista de Problemas (Problem List)"
+            icon={<AlertTriangle className="w-4 h-4 text-amber-500" />}
+            isExpanded={expandedSections.problemas || true}
+            onToggle={() => toggleSection('problemas')}
+          >
+            <ActiveProblemsManager
+              problems={currentPatient?.activeProblems || []}
+              onAdd={handleAddProblem}
+              onUpdate={handleUpdateProblem}
+              onRemove={handleRemoveProblem}
+              currentMedicalRecordId={record?.id}
+            />
+          </CollapsibleSection>
+
           {/* Informações Gerais */}
           <GeneralInfoSection formData={formData} updateField={updateField} />
 
@@ -156,7 +221,7 @@ export function MedicalRecordModal({ patientId, patient, record, onClose, onSave
             addPrescription={addPrescription}
             removePrescription={removePrescription}
             formErrors={formErrors}
-            patient={patient}
+            patient={currentPatient}
           />
 
           {/* Anexos e Documentos */}

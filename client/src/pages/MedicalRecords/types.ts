@@ -114,6 +114,8 @@ export interface ExpandedSections {
   exameFisicoDetalhado: boolean;
   documentos: boolean;
   planoTerapeutico: boolean;
+  historico?: boolean;
+  problemas?: boolean;
 }
 
 export interface AppointmentTypeInfo {
