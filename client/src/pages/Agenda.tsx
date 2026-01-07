@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useMemo, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useData } from '../contexts/DataContext';
 import { useToast } from '../components/Toast';
 import {
@@ -38,6 +38,7 @@ import type { Appointment, AppointmentStatus, AppointmentType, Patient } from '.
 const TIME_SLOTS = generateTimeSlots('08:00', '18:00', 30);
 
 export default function Agenda() {
+  const [searchParams] = useSearchParams();
   const { patients, addAppointment, updateAppointment, deleteAppointment, getAppointmentsByDate } = useData();
   const { showToast } = useToast();
   const navigate = useNavigate();
@@ -45,6 +46,18 @@ export default function Agenda() {
   const [showModal, setShowModal] = useState(false);
   const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null);
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string | null>(null);
+
+  // Auto-open modal from query params
+  useEffect(() => {
+    if (searchParams.get('action') === 'new') {
+      const timer = setTimeout(() => {
+        setShowModal(true);
+        setEditingAppointment(null);
+        setSelectedTimeSlot(null);
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [searchParams]);
 
   // Função para navegar para o prontuário do paciente
   const handleOpenMedicalRecord = (patientId: string) => {

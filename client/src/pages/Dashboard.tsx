@@ -10,7 +10,10 @@ import {
   Clock,
   UserPlus,
   AlertCircle,
-  Activity
+  Activity,
+  CalendarPlus,
+  FileText,
+  Stethoscope
 } from 'lucide-react';
 import { formatCurrency, translateAppointmentStatus } from '../utils/helpers';
 
@@ -85,6 +88,48 @@ export default function Dashboard() {
         </Link>
       </div>
 
+      {/* Quick Actions */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <Link
+          to="/pacientes?action=new"
+          className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:border-primary-300 hover:shadow-md transition-all flex items-center gap-4 group"
+        >
+          <div className="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center group-hover:bg-primary-100 transition-colors">
+            <UserPlus className="w-6 h-6 text-primary-600" />
+          </div>
+          <div>
+            <h3 className="font-bold text-slate-900 group-hover:text-primary-700 transition-colors">Novo Paciente</h3>
+            <p className="text-sm text-slate-500">Cadastrar paciente</p>
+          </div>
+        </Link>
+
+        <Link
+          to="/agenda?action=new"
+          className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:border-primary-300 hover:shadow-md transition-all flex items-center gap-4 group"
+        >
+          <div className="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center group-hover:bg-primary-100 transition-colors">
+            <CalendarPlus className="w-6 h-6 text-primary-600" />
+          </div>
+          <div>
+            <h3 className="font-bold text-slate-900 group-hover:text-primary-700 transition-colors">Agendar Consulta</h3>
+            <p className="text-sm text-slate-500">Novo agendamento</p>
+          </div>
+        </Link>
+
+        <Link
+          to="/pacientes"
+          className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:border-primary-300 hover:shadow-md transition-all flex items-center gap-4 group"
+        >
+          <div className="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center group-hover:bg-primary-100 transition-colors">
+            <FileText className="w-6 h-6 text-primary-600" />
+          </div>
+          <div>
+            <h3 className="font-bold text-slate-900 group-hover:text-primary-700 transition-colors">Prontuários</h3>
+            <p className="text-sm text-slate-500">Buscar registros</p>
+          </div>
+        </Link>
+      </div>
+
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {statCards.map((stat) => (
@@ -137,6 +182,15 @@ export default function Dashboard() {
                            <p className="text-sm font-bold text-slate-900 truncate">{patient?.nome}</p>
                            <p className="text-xs text-slate-500 truncate">{appointment.motivo}</p>
                         </div>
+
+                        <Link
+                          to={`/pacientes/${patient?.id}`}
+                          className="p-2 text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
+                          title="Iniciar Atendimento"
+                        >
+                          <Stethoscope className="w-4 h-4" />
+                        </Link>
+
                         <span className={`text-xs px-2.5 py-1 rounded-full font-medium border ${
                           appointment.status === 'confirmada' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
                           appointment.status === 'agendada' ? 'bg-blue-50 text-blue-700 border-blue-100' :

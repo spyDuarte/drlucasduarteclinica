@@ -1,6 +1,6 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useData } from '../contexts/DataContext';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import {
   Search,
   Phone,
@@ -18,6 +18,7 @@ import { useDebounce, usePagination } from '../hooks';
 import type { Patient } from '../types';
 
 export default function Patients() {
+  const [searchParams] = useSearchParams();
   const { patients, addPatient, updatePatient, deletePatient } = useData();
   const { showToast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
@@ -25,6 +26,17 @@ export default function Patients() {
   const [editingPatient, setEditingPatient] = useState<Patient | null>(null);
   const [patientToDelete, setPatientToDelete] = useState<Patient | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Auto-open modal from query params
+  useEffect(() => {
+    if (searchParams.get('action') === 'new') {
+      const timer = setTimeout(() => {
+        setShowModal(true);
+        setEditingPatient(null);
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [searchParams]);
 
   // Debounce na busca para evitar filtragem excessiva durante digitação
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
