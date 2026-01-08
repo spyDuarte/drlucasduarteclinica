@@ -16,7 +16,7 @@ import {
   Info,
   AlertCircle
 } from 'lucide-react';
-import type { MedicalRecord, MedicalRecordAttachment, ActiveProblem } from '../../types';
+import type { MedicalRecord, MedicalRecordAttachment, ActiveProblem, Patient } from '../../types';
 import { useMedicalRecordForm, type FormErrors } from './useMedicalRecordForm';
 import type { PrescriptionData, MedicalRecordFormData, ExpandedSections } from './types';
 import { VitalSignsValidator } from '../../components/VitalSignsValidator';
@@ -28,7 +28,7 @@ import { MedicationSelector } from '../../components/MedicationSelector';
 import { ActiveProblemsManager } from '../../components/ActiveProblemsManager';
 import { PatientTimeline } from '../../components/PatientTimeline';
 import { useData } from '../../contexts/DataContext';
-import { generateId } from '../../utils/helpers';
+import { generateId, calculateAge, formatDate, formatCPF, formatPhone, sortBy } from '../../utils/helpers';
 
 interface MedicalRecordModalProps {
   patientId: string;
@@ -160,7 +160,7 @@ export function MedicalRecordModal({ patientId, record, onClose, onSave }: Medic
                 {record ? 'Editar Prontuário' : 'Novo Atendimento'}
               </h2>
               <div className="flex items-center gap-2 text-sm text-slate-500">
-                <span className="font-medium text-slate-700">{currentPatient?.nome}</span>
+                <span className="font-medium text-slate-700">Prontuário Eletrônico</span>
                 <span>•</span>
                 <span>{record ? 'Edição de registro' : 'Consulta SOAP'}</span>
               </div>
@@ -174,15 +174,9 @@ export function MedicalRecordModal({ patientId, record, onClose, onSave }: Medic
           </button>
         </div>
 
-        {/* Alerta de Alergias */}
-        {patientAllergies && (
-          <div className="bg-red-50 border-b border-red-100 px-6 py-3 flex items-start gap-3 shrink-0">
-            <AlertTriangle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
-            <div>
-              <h3 className="text-sm font-bold text-red-800">Alergias Conhecidas</h3>
-              <p className="text-sm text-red-700 font-medium">{patientAllergies}</p>
-            </div>
-          </div>
+        {/* Patient Header */}
+        {currentPatient && (
+          <PatientHeader patient={currentPatient} records={patientRecords} />
         )}
 
         <div className="flex flex-1 overflow-hidden">
@@ -698,8 +692,6 @@ function AssessmentSection({ formData, updateField, formErrors }: SectionProps) 
 }
 
 // Plan Section
-import type { Patient } from '../../types';
-
 interface PlanSectionProps extends SectionProps {
   newPrescription: PrescriptionData;
   setNewPrescription: (data: PrescriptionData) => void;
@@ -836,6 +828,79 @@ function PlanSection({ formData, updateField, newPrescription, setNewPrescriptio
                )}
            </div>
         </div>
+    </div>
+  );
+}
+
+function PatientHeader({ patient, records }: { patient: Patient; records: MedicalRecord[] }) {
+  const sortedRecords = sortBy(records, 'data', 'desc');
+  const lastVisit = sortedRecords.length > 0 ? sortedRecords[0] : null;
+  const age = calculateAge(patient.dataNascimento);
+
+  return (
+    <div className="bg-slate-50 border-b border-slate-200 px-6 py-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 shrink-0">
+      {/* Nome e CPF */}
+      <div className="flex flex-col justify-center">
+        <h2 className="text-lg font-bold text-slate-900 leading-tight">{patient.nome}</h2>
+        <p className="text-sm text-slate-500 mt-1">{formatCPF(patient.cpf)}</p>
+      </div>
+
+      {/* Idade e Nascimento */}
+      <div className="flex flex-col justify-center border-l border-slate-200 pl-6 md:border-l-0 lg:border-l">
+        <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Idade / Nascimento</span>
+        <div className="flex items-baseline gap-2">
+           <span className="text-base font-medium text-slate-700">{age} anos</span>
+           <span className="text-slate-400">|</span>
+           <span className="text-sm text-slate-600">{formatDate(patient.dataNascimento)}</span>
+        </div>
+      </div>
+
+      {/* Contato */}
+      <div className="flex flex-col justify-center lg:border-l border-slate-200 lg:pl-6">
+         <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Contato</span>
+         <div className="text-sm text-slate-700 font-medium">{formatPhone(patient.telefone)}</div>
+         <div className="text-xs text-slate-500 truncate max-w-[200px]" title={patient.email}>{patient.email}</div>
+      </div>
+
+      {/* Alergias e Medicamentos */}
+      <div className="flex flex-col justify-center lg:border-l border-slate-200 lg:pl-6">
+         <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Alergias / Medicamentos</span>
+         <div className="text-sm font-medium truncate">
+            {patient.alergias && patient.alergias.length > 0 ? (
+               <span className="text-red-600" title={Array.isArray(patient.alergias) ? patient.alergias.join(', ') : patient.alergias}>
+                 {Array.isArray(patient.alergias) ? patient.alergias[0] + (patient.alergias.length > 1 ? '...' : '') : patient.alergias}
+               </span>
+            ) : (
+               <span className="text-slate-400">Nenhuma</span>
+            )}
+         </div>
+         <div className="text-xs text-slate-500 truncate mt-0.5">
+            {patient.medicamentosEmUso && patient.medicamentosEmUso.length > 0 ? (
+               <span title={Array.isArray(patient.medicamentosEmUso) ? patient.medicamentosEmUso.join(', ') : patient.medicamentosEmUso}>
+                 {Array.isArray(patient.medicamentosEmUso) ? patient.medicamentosEmUso[0] + (patient.medicamentosEmUso.length > 1 ? '...' : '') : patient.medicamentosEmUso}
+               </span>
+            ) : (
+               <span className="text-slate-400">Sem medicamentos</span>
+            )}
+         </div>
+      </div>
+
+      {/* Resumo */}
+      <div className="flex flex-col justify-center lg:border-l border-slate-200 lg:pl-6">
+         <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Resumo</span>
+         <div className="flex items-center gap-4">
+            <div>
+               <span className="text-xl font-bold text-primary-600">{records.length}</span>
+               <span className="text-xs text-slate-500 ml-1">Atendimentos</span>
+            </div>
+            {lastVisit && (
+               <div className="pl-4 border-l border-slate-200">
+                  <div className="text-[10px] text-slate-400 uppercase">Último</div>
+                  <div className="text-sm font-medium text-slate-700">{formatDate(lastVisit.data, 'dd/MM')}</div>
+               </div>
+            )}
+         </div>
+      </div>
     </div>
   );
 }
