@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type ReactNode, type ElementType } from 'react';
 import {
   Stethoscope,
   X,
@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import type { MedicalRecord, MedicalRecordAttachment, ActiveProblem } from '../../types';
 import { useMedicalRecordForm, type FormErrors } from './useMedicalRecordForm';
-import type { PrescriptionData, MedicalRecordFormData } from './types';
+import type { PrescriptionData, MedicalRecordFormData, ExpandedSections } from './types';
 import { VitalSignsValidator } from '../../components/VitalSignsValidator';
 import { DrugInteractionChecker } from '../../components/DrugInteractionChecker';
 import { OrientationTemplateSelector } from '../../components/OrientationTemplateSelector';
@@ -375,7 +375,7 @@ export function MedicalRecordModal({ patientId, record, onClose, onSave }: Medic
 
 function SidebarItem({ label, icon: Icon, active, onClick, hasError }: {
   label: string;
-  icon: any;
+  icon: ElementType;
   active: boolean;
   onClick: () => void;
   hasError?: boolean;
@@ -398,7 +398,7 @@ function SidebarItem({ label, icon: Icon, active, onClick, hasError }: {
   );
 }
 
-function SectionHeader({ title, subtitle, icon: Icon, color }: { title: string; subtitle?: string; icon: any; color: string }) {
+function SectionHeader({ title, subtitle, icon: Icon, color }: { title: string; subtitle?: string; icon: ElementType; color: string }) {
   const colorClass = color.replace('bg-', 'text-').replace('-500', '-600');
   const bgClass = color.replace('bg-', 'bg-').replace('-500', '-100');
 
@@ -417,10 +417,15 @@ function SectionHeader({ title, subtitle, icon: Icon, color }: { title: string; 
 
 interface SectionProps {
   formData: MedicalRecordFormData;
-  updateField: (field: keyof MedicalRecordFormData, value: any) => void;
-  expandedSections?: any;
-  toggleSection?: any;
+  updateField: <K extends keyof MedicalRecordFormData>(field: K, value: MedicalRecordFormData[K]) => void;
+  expandedSections?: ExpandedSections;
+  toggleSection?: (section: keyof ExpandedSections) => void;
   formErrors?: FormErrors;
+}
+
+interface SectionWithToggleProps extends SectionProps {
+  expandedSections: ExpandedSections;
+  toggleSection: (section: keyof ExpandedSections) => void;
 }
 
 // Reuse existing sections but cleaner
@@ -470,7 +475,7 @@ function GeneralInfoSection({ formData, updateField }: SectionProps) {
 }
 
 // Subjective Section
-function SubjectiveSection({ formData, updateField, expandedSections, toggleSection, formErrors }: SectionProps) {
+function SubjectiveSection({ formData, updateField, expandedSections, toggleSection, formErrors }: SectionWithToggleProps) {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 gap-6">
@@ -571,7 +576,7 @@ function SubjectiveSection({ formData, updateField, expandedSections, toggleSect
 }
 
 // Objective Section
-function ObjectiveSection({ formData, updateField, expandedSections, toggleSection }: SectionProps) {
+function ObjectiveSection({ formData, updateField, expandedSections, toggleSection }: SectionWithToggleProps) {
   return (
     <div className="space-y-8">
       {/* Sinais Vitais em destaque */}
@@ -693,12 +698,14 @@ function AssessmentSection({ formData, updateField, formErrors }: SectionProps) 
 }
 
 // Plan Section
+import type { Patient } from '../../types';
+
 interface PlanSectionProps extends SectionProps {
   newPrescription: PrescriptionData;
   setNewPrescription: (data: PrescriptionData) => void;
   addPrescription: () => void;
   removePrescription: (index: number) => void;
-  patient?: any;
+  patient?: Patient;
 }
 
 function PlanSection({ formData, updateField, newPrescription, setNewPrescription, addPrescription, removePrescription, formErrors, patient }: PlanSectionProps) {
@@ -735,7 +742,7 @@ function PlanSection({ formData, updateField, newPrescription, setNewPrescriptio
             {formData.prescricoes.length > 0 && (
               <div className="mt-4">
                 <DrugInteractionChecker
-                  prescriptions={formData.prescricoes.map((p: any) => ({
+                  prescriptions={formData.prescricoes.map((p: PrescriptionData) => ({
                     id: generateId(),
                     ...p
                   }))}
@@ -834,7 +841,13 @@ function PlanSection({ formData, updateField, newPrescription, setNewPrescriptio
 }
 
 // Attachments Section
-function AttachmentsSection({ attachments, onAdd, onRemove }: any) {
+interface AttachmentsSectionProps {
+  attachments: MedicalRecordAttachment[];
+  onAdd: (attachment: Omit<MedicalRecordAttachment, 'id' | 'medicalRecordId' | 'uploadedAt'>) => void;
+  onRemove: (id: string) => void;
+}
+
+function AttachmentsSection({ attachments, onAdd, onRemove }: AttachmentsSectionProps) {
   return (
     <div className="space-y-4">
       <div className="bg-slate-50 p-6 rounded-xl border border-dashed border-slate-300 text-center">
@@ -846,12 +859,20 @@ function AttachmentsSection({ attachments, onAdd, onRemove }: any) {
 }
 
 // Prescription Section Logic (Reused)
-function PrescriptionSection({ prescricoes, newPrescription, setNewPrescription, addPrescription, removePrescription }: any) {
+interface PrescriptionSectionProps {
+  prescricoes: PrescriptionData[];
+  newPrescription: PrescriptionData;
+  setNewPrescription: (data: PrescriptionData) => void;
+  addPrescription: () => void;
+  removePrescription: (index: number) => void;
+}
+
+function PrescriptionSection({ prescricoes, newPrescription, setNewPrescription, addPrescription, removePrescription }: PrescriptionSectionProps) {
   return (
     <div>
       {prescricoes.length > 0 && (
         <div className="space-y-2 mb-4">
-          {prescricoes.map((rx: any, idx: number) => (
+          {prescricoes.map((rx: PrescriptionData, idx: number) => (
             <div key={idx} className="flex items-center gap-2 p-3 bg-white rounded-lg border border-slate-200 shadow-sm">
               <span className="flex-1 text-sm">
                 <strong>{rx.medicamento}</strong> {rx.concentracao} - {rx.posologia}
@@ -893,7 +914,16 @@ function PrescriptionSection({ prescricoes, newPrescription, setNewPrescription,
 }
 
 // Helpers
-function InputField({ label, value, onChange, placeholder, required, isSmall = true }: any) {
+interface InputFieldProps {
+  label: string;
+  value: string | number;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  required?: boolean;
+  isSmall?: boolean;
+}
+
+function InputField({ label, value, onChange, placeholder, required, isSmall = true }: InputFieldProps) {
   return (
     <div>
       <label className={`block ${isSmall ? 'text-xs font-medium text-slate-500' : 'text-sm font-medium text-slate-700'} mb-1`}>{label}</label>
@@ -909,7 +939,17 @@ function InputField({ label, value, onChange, placeholder, required, isSmall = t
   );
 }
 
-function NumberField({ label, value, onChange, min, max, step, placeholder }: any) {
+interface NumberFieldProps {
+  label: string;
+  value: string | number;
+  onChange: (value: string) => void;
+  min?: number;
+  max?: number;
+  step?: number;
+  placeholder?: string;
+}
+
+function NumberField({ label, value, onChange, min, max, step, placeholder }: NumberFieldProps) {
   return (
     <div>
       <label className="block text-xs font-medium text-slate-500 mb-1">{label}</label>
@@ -927,7 +967,15 @@ function NumberField({ label, value, onChange, min, max, step, placeholder }: an
   );
 }
 
-function SelectField({ label, value, onChange, options, isSmall = true }: any) {
+interface SelectFieldProps {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: { value: string; label: string }[];
+  isSmall?: boolean;
+}
+
+function SelectField({ label, value, onChange, options, isSmall = true }: SelectFieldProps) {
   return (
     <div>
       <label className={`block ${isSmall ? 'text-xs font-medium text-slate-500' : 'text-sm font-medium text-slate-700'} mb-1`}>{label}</label>
@@ -936,7 +984,7 @@ function SelectField({ label, value, onChange, options, isSmall = true }: any) {
         onChange={e => onChange(e.target.value)}
         className="input-field w-full"
       >
-        {options.map((opt: any) => (
+        {options.map((opt: { value: string; label: string }) => (
           <option key={opt.value} value={opt.value}>{opt.label}</option>
         ))}
       </select>
@@ -944,7 +992,15 @@ function SelectField({ label, value, onChange, options, isSmall = true }: any) {
   );
 }
 
-function CollapsibleSection({ title, icon, isExpanded, onToggle, children }: any) {
+interface CollapsibleSectionProps {
+  title: string;
+  icon: ReactNode;
+  isExpanded: boolean;
+  onToggle: () => void;
+  children: ReactNode;
+}
+
+function CollapsibleSection({ title, icon, isExpanded, onToggle, children }: CollapsibleSectionProps) {
   return (
     <div className="border border-slate-200 rounded-xl overflow-hidden bg-white">
       <button type="button" onClick={onToggle} className="w-full px-4 py-3 bg-slate-50 hover:bg-slate-100 flex items-center justify-between transition-colors">
