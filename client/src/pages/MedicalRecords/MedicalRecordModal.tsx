@@ -723,8 +723,8 @@ function PlanSection({ formData, updateField, newPrescription, setNewPrescriptio
        </div>
 
        {/* Prescriptions */}
-        <div className="border border-slate-200 rounded-xl overflow-hidden">
-          <div className="bg-slate-50 px-4 py-3 border-b border-slate-200">
+        <div className="border border-slate-200 rounded-xl">
+          <div className="bg-slate-50 px-4 py-3 border-b border-slate-200 rounded-t-xl">
              <h4 className="font-bold text-slate-700 flex items-center gap-2">
                 <ClipboardList className="w-4 h-4" /> Prescrição Medicamentosa
              </h4>
