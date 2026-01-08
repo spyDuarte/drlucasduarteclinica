@@ -30,6 +30,7 @@ export interface MedicalRecordFormData {
   cirurgiasAnteriores: string;
   internacoesPrevias: string;
   vacinacao: string;
+  alergias: string; // Adicionado
 
   // Objetivo
   estadoGeral: string;
@@ -166,6 +167,7 @@ export function createInitialFormData(record: MedicalRecord | null): MedicalReco
     cirurgiasAnteriores: record?.subjetivo?.cirurgiasAnteriores?.join(', ') || '',
     internacoesPrevias: record?.subjetivo?.internacoesPrevias || '',
     vacinacao: record?.subjetivo?.vacinacao || '',
+    alergias: '', // Inicializando
     estadoGeral: record?.objetivo?.estadoGeral || '',
     nivelConsciencia: record?.objetivo?.nivelConsciencia || '',
     escalaGlasgow: record?.objetivo?.escalaGlasgow?.toString() || '',
