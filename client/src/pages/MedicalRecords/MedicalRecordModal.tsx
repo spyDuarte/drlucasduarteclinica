@@ -46,11 +46,6 @@ export function MedicalRecordModal({ patientId, record, onClose, onSave }: Medic
   const patientRecords = getMedicalRecordsByPatient(patientId);
   const [activeTab, setActiveTab] = useState<TabId>('resumo');
 
-  // Alerta de alergias
-  const patientAllergies = currentPatient?.alergias && currentPatient.alergias.length > 0
-    ? (Array.isArray(currentPatient.alergias) ? currentPatient.alergias.join(', ') : currentPatient.alergias)
-    : null;
-
   const {
     formData,
     updateField,
