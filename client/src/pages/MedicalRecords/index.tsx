@@ -43,10 +43,10 @@ export default function MedicalRecords() {
     getAppointmentsByPatient
   } = useData();
 
-  const patient = patientId ? getPatient(patientId) : null;
-  const records = patientId ? getMedicalRecordsByPatient(patientId) : [];
-  const documents = patientId ? getDocumentsByPatient(patientId) : [];
-  const appointments = patientId ? getAppointmentsByPatient(patientId) : [];
+  const patient = useMemo(() => (patientId ? getPatient(patientId) : null), [patientId, getPatient]);
+  const records = useMemo(() => (patientId ? getMedicalRecordsByPatient(patientId) : []), [patientId, getMedicalRecordsByPatient]);
+  const documents = useMemo(() => (patientId ? getDocumentsByPatient(patientId) : []), [patientId, getDocumentsByPatient]);
+  const appointments = useMemo(() => (patientId ? getAppointmentsByPatient(patientId) : []), [patientId, getAppointmentsByPatient]);
 
   const [showNewRecord, setShowNewRecord] = useState(false);
   const [editingRecord, setEditingRecord] = useState<MedicalRecord | null>(null);
@@ -63,18 +63,18 @@ export default function MedicalRecords() {
       .sort((a, b) => a.data.localeCompare(b.data))[0];
   }, [appointments]);
 
-  // Último atendimento com sinais vitais
-  const lastVitals = useMemo(() => {
-    const recordWithVitals = records.find(r => r.objetivo?.sinaisVitais);
-    return recordWithVitals?.objetivo?.sinaisVitais;
-  }, [records]);
-
   // Registros ordenados por data
   const sortedRecords = useMemo(() => {
     return [...records].sort((a, b) =>
       new Date(b.data).getTime() - new Date(a.data).getTime()
     );
   }, [records]);
+
+  // Último atendimento com sinais vitais
+  const lastVitals = useMemo(() => {
+    const recordWithVitals = sortedRecords.find(r => r.objetivo?.sinaisVitais);
+    return recordWithVitals?.objetivo?.sinaisVitais;
+  }, [sortedRecords]);
 
   // Filtrar registros
   const filteredRecords = useMemo(() => {
