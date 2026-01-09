@@ -14,7 +14,15 @@ import {
   User,
   CheckSquare,
   Info,
-  AlertCircle
+  AlertCircle,
+  Heart,
+  Wind,
+  Thermometer,
+  Droplets,
+  Weight,
+  Ruler,
+  Calculator,
+  Gauge
 } from 'lucide-react';
 import type { MedicalRecord, MedicalRecordAttachment, ActiveProblem, Patient } from '../../types';
 import { useMedicalRecordForm, type FormErrors } from './useMedicalRecordForm';
@@ -564,29 +572,237 @@ function SubjectiveSection({ formData, updateField, expandedSections, toggleSect
   );
 }
 
+// Helper component for vital sign cards
+interface VitalSignCardProps {
+  icon: ElementType;
+  label: string;
+  value: string;
+  unit: string;
+  color: string;
+  children: ReactNode;
+}
+
+function VitalSignCard({ icon: Icon, label, value, unit, color, children }: VitalSignCardProps) {
+  return (
+    <div className={`bg-white rounded-xl p-4 border-2 ${color} shadow-sm hover:shadow-md transition-shadow`}>
+      <div className="flex items-start justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <div className={`p-2 rounded-lg ${color.replace('border', 'bg').replace('slate-200', 'slate-100')}`}>
+            <Icon className={`w-5 h-5 ${color.replace('border', 'text').replace('200', '600')}`} />
+          </div>
+          <span className="text-xs font-semibold text-slate-600 uppercase tracking-wide">{label}</span>
+        </div>
+      </div>
+      <div className="mb-3">
+        {children}
+      </div>
+      {value && (
+        <div className="mt-2 pt-2 border-t border-slate-100">
+          <div className="flex items-baseline gap-1">
+            <span className="text-2xl font-bold text-slate-800">{value}</span>
+            <span className="text-sm font-medium text-slate-500">{unit}</span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // Objective Section
 function ObjectiveSection({ formData, updateField, expandedSections, toggleSection }: SectionWithToggleProps) {
+  // Calculate IMC
+  const calculateIMC = () => {
+    const peso = formData.peso ? Number(formData.peso) : 0;
+    const altura = formData.altura ? Number(formData.altura) : 0;
+    if (peso > 0 && altura > 0) {
+      const alturaMetros = altura / 100;
+      return (peso / (alturaMetros * alturaMetros)).toFixed(1);
+    }
+    return '';
+  };
+
+  const imc = calculateIMC();
+
   return (
     <div className="space-y-8">
       {/* Sinais Vitais em destaque */}
-      <div className="bg-slate-50 rounded-2xl p-6 border border-slate-200">
-        <h3 className="text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
-           <Activity className="w-4 h-4 text-slate-500" />
+      <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl p-6 border border-slate-200">
+        <h3 className="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2">
+           <Activity className="w-5 h-5 text-emerald-600" />
            Sinais Vitais
         </h3>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            <InputField label="PA (mmHg)" value={formData.pressaoArterial} onChange={(v: string) => updateField('pressaoArterial', v)} placeholder="120/80" isSmall />
-            <NumberField label="FC (bpm)" value={formData.frequenciaCardiaca} onChange={(v: string) => updateField('frequenciaCardiaca', v)} />
-            <NumberField label="FR (irpm)" value={formData.frequenciaRespiratoria} onChange={(v: string) => updateField('frequenciaRespiratoria', v)} />
-            <NumberField label="Temp (°C)" value={formData.temperatura} onChange={(v: string) => updateField('temperatura', v)} step={0.1} />
-            <NumberField label="SpO2 (%)" value={formData.saturacaoO2} onChange={(v: string) => updateField('saturacaoO2', v)} />
-            <NumberField label="Peso (kg)" value={formData.peso} onChange={(v: string) => updateField('peso', v)} step={0.1} />
-            <NumberField label="Altura (cm)" value={formData.altura} onChange={(v: string) => updateField('altura', v)} />
-            <NumberField label="Glicemia (mg/dL)" value={formData.glicemiaCapilar} onChange={(v: string) => updateField('glicemiaCapilar', v)} />
-            <NumberField label="Dor (0-10)" value={formData.escalaDor} onChange={(v: string) => updateField('escalaDor', v)} min={0} max={10} />
+
+        {/* Primary Vital Signs - Grid responsivo */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+          {/* Pressão Arterial */}
+          <VitalSignCard
+            icon={Heart}
+            label="Pressão Arterial"
+            value={formData.pressaoArterial || ''}
+            unit="mmHg"
+            color="border-rose-200"
+          >
+            <InputField
+              label=""
+              value={formData.pressaoArterial}
+              onChange={(v: string) => updateField('pressaoArterial', v)}
+              placeholder="120/80"
+              isSmall
+            />
+          </VitalSignCard>
+
+          {/* Frequência Cardíaca */}
+          <VitalSignCard
+            icon={Heart}
+            label="Frequência Cardíaca"
+            value={formData.frequenciaCardiaca || ''}
+            unit="bpm"
+            color="border-red-200"
+          >
+            <NumberField
+              label=""
+              value={formData.frequenciaCardiaca}
+              onChange={(v: string) => updateField('frequenciaCardiaca', v)}
+            />
+          </VitalSignCard>
+
+          {/* Frequência Respiratória */}
+          <VitalSignCard
+            icon={Wind}
+            label="Frequência Respiratória"
+            value={formData.frequenciaRespiratoria || ''}
+            unit="irpm"
+            color="border-sky-200"
+          >
+            <NumberField
+              label=""
+              value={formData.frequenciaRespiratoria}
+              onChange={(v: string) => updateField('frequenciaRespiratoria', v)}
+            />
+          </VitalSignCard>
+
+          {/* Temperatura */}
+          <VitalSignCard
+            icon={Thermometer}
+            label="Temperatura"
+            value={formData.temperatura || ''}
+            unit="°C"
+            color="border-orange-200"
+          >
+            <NumberField
+              label=""
+              value={formData.temperatura}
+              onChange={(v: string) => updateField('temperatura', v)}
+              step={0.1}
+            />
+          </VitalSignCard>
         </div>
 
-        <div className="mt-4 pt-4 border-t border-slate-200">
+        {/* Secondary Vital Signs */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          {/* Saturação O2 */}
+          <VitalSignCard
+            icon={Droplets}
+            label="SpO₂"
+            value={formData.saturacaoO2 || ''}
+            unit="%"
+            color="border-blue-200"
+          >
+            <NumberField
+              label=""
+              value={formData.saturacaoO2}
+              onChange={(v: string) => updateField('saturacaoO2', v)}
+            />
+          </VitalSignCard>
+
+          {/* Peso */}
+          <VitalSignCard
+            icon={Weight}
+            label="Peso"
+            value={formData.peso || ''}
+            unit="kg"
+            color="border-violet-200"
+          >
+            <NumberField
+              label=""
+              value={formData.peso}
+              onChange={(v: string) => updateField('peso', v)}
+              step={0.1}
+            />
+          </VitalSignCard>
+
+          {/* Altura */}
+          <VitalSignCard
+            icon={Ruler}
+            label="Altura"
+            value={formData.altura || ''}
+            unit="cm"
+            color="border-indigo-200"
+          >
+            <NumberField
+              label=""
+              value={formData.altura}
+              onChange={(v: string) => updateField('altura', v)}
+            />
+          </VitalSignCard>
+
+          {/* IMC Calculado */}
+          <VitalSignCard
+            icon={Calculator}
+            label="IMC"
+            value={imc}
+            unit="kg/m²"
+            color="border-purple-200"
+          >
+            <div className="text-xs text-slate-600 italic">
+              {imc && (
+                <span>
+                  {Number(imc) < 18.5 && 'Abaixo do peso'}
+                  {Number(imc) >= 18.5 && Number(imc) < 25 && 'Peso normal'}
+                  {Number(imc) >= 25 && Number(imc) < 30 && 'Sobrepeso'}
+                  {Number(imc) >= 30 && 'Obesidade'}
+                </span>
+              )}
+              {!imc && 'Calculado automaticamente'}
+            </div>
+          </VitalSignCard>
+
+          {/* Glicemia */}
+          <VitalSignCard
+            icon={Droplets}
+            label="Glicemia"
+            value={formData.glicemiaCapilar || ''}
+            unit="mg/dL"
+            color="border-amber-200"
+          >
+            <NumberField
+              label=""
+              value={formData.glicemiaCapilar}
+              onChange={(v: string) => updateField('glicemiaCapilar', v)}
+            />
+          </VitalSignCard>
+        </div>
+
+        {/* Escala de Dor */}
+        <div className="mt-4">
+          <VitalSignCard
+            icon={Gauge}
+            label="Escala de Dor"
+            value={formData.escalaDor || ''}
+            unit="/10"
+            color="border-slate-200"
+          >
+            <NumberField
+              label=""
+              value={formData.escalaDor}
+              onChange={(v: string) => updateField('escalaDor', v)}
+              min={0}
+              max={10}
+            />
+          </VitalSignCard>
+        </div>
+
+        <div className="mt-6 pt-6 border-t border-slate-300">
            <VitalSignsValidator
             vitalSigns={{
               pressaoArterial: formData.pressaoArterial,
