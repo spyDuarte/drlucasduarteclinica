@@ -11,7 +11,7 @@ import {
   FileText,
   UserPlus
 } from 'lucide-react';
-import { formatDate, calculateAge, formatCPF, formatPhone } from '../utils/helpers';
+import { formatDate, calculateAge, formatCPF, formatPhone, getInitials } from '../utils/helpers';
 import { PatientModal, ConfirmDialog, Pagination } from '../components';
 import { useToast } from '../components/Toast';
 import { useDebounce, usePagination } from '../hooks';
@@ -94,18 +94,18 @@ export default function Patients() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Pacientes</h1>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Pacientes</h1>
           <p className="text-slate-500">
             Gerencie o cadastro de pacientes da clínica.
           </p>
         </div>
         <button
           onClick={() => handleOpenModal()}
-          className="btn-primary"
+          className="btn-primary shadow-lg shadow-primary-500/20 hover:shadow-primary-500/30 transition-all"
         >
           <UserPlus className="w-5 h-5" />
           Novo Paciente
@@ -120,16 +120,16 @@ export default function Patients() {
           value={searchTerm}
           onChange={e => setSearchTerm(e.target.value)}
           placeholder="Buscar por nome, CPF ou telefone..."
-          className="input-field pl-10"
+          className="input-field pl-10 shadow-sm focus:shadow-md transition-shadow"
         />
       </div>
 
       {/* Patients List */}
-      <div className="card p-0 overflow-hidden flex flex-col max-h-[calc(100vh-280px)]">
+      <div className="card p-0 overflow-hidden flex flex-col max-h-[calc(100vh-280px)] border border-slate-200 shadow-sm">
         <div className="overflow-x-auto overflow-y-auto flex-1 scroll-smooth">
         <table className="w-full">
           <thead>
-            <tr>
+            <tr className="bg-slate-50/50">
               <th className="table-header">Paciente</th>
               <th className="table-header">Contato</th>
               <th className="table-header">Nascimento</th>
@@ -140,7 +140,10 @@ export default function Patients() {
           <tbody className="divide-y divide-slate-100">
             {pagination.paginatedItems.length === 0 ? (
               <tr>
-                <td colSpan={5} className="text-center py-12">
+                <td colSpan={5} className="text-center py-16">
+                   <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <User className="w-8 h-8 text-slate-300" />
+                   </div>
                    <p className="text-slate-500 font-medium">
                     {searchTerm ? 'Nenhum paciente encontrado' : 'Nenhum paciente cadastrado'}
                   </p>
@@ -148,15 +151,15 @@ export default function Patients() {
               </tr>
             ) : (
               pagination.paginatedItems.map(patient => (
-                <tr key={patient.id} className="hover:bg-slate-50 transition-colors">
+                <tr key={patient.id} className="hover:bg-slate-50 transition-colors group">
                   <td className="table-cell">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center text-slate-500">
-                        <User className="w-4 h-4" />
+                      <div className="w-10 h-10 bg-primary-50 rounded-full flex items-center justify-center text-primary-600 font-bold border border-primary-100 group-hover:bg-primary-100 group-hover:border-primary-200 transition-colors">
+                        {getInitials(patient.nome)}
                       </div>
                       <div>
-                        <p className="font-semibold text-slate-900">{patient.nome}</p>
-                        <p className="text-xs text-slate-500">{formatCPF(patient.cpf)}</p>
+                        <p className="font-semibold text-slate-900 group-hover:text-primary-700 transition-colors">{patient.nome}</p>
+                        <p className="text-xs text-slate-500 font-mono">{formatCPF(patient.cpf)}</p>
                       </div>
                     </div>
                   </td>
@@ -175,41 +178,41 @@ export default function Patients() {
                     </div>
                   </td>
                   <td className="table-cell">
-                     <span className="text-slate-700">{formatDate(patient.dataNascimento)}</span>
+                     <span className="text-slate-700 font-medium">{formatDate(patient.dataNascimento)}</span>
                      <span className="text-slate-400 text-xs ml-1">
                           ({calculateAge(patient.dataNascimento)} anos)
                      </span>
                   </td>
                   <td className="table-cell">
                     {patient.convenio ? (
-                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-100">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-100">
                         {patient.convenio.nome}
                       </span>
                     ) : (
-                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200">
                         Particular
                       </span>
                     )}
                   </td>
                   <td className="table-cell text-right">
-                    <div className="flex items-center justify-end gap-2">
+                    <div className="flex items-center justify-end gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
                       <Link
                         to={`/pacientes/${patient.id}`}
-                        className="btn-ghost p-1.5"
+                        className="p-2 text-slate-500 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
                         title="Ver prontuário"
                       >
                         <FileText className="w-4 h-4" />
                       </Link>
                       <button
                         onClick={() => handleOpenModal(patient)}
-                        className="btn-ghost p-1.5"
+                        className="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                         title="Editar"
                       >
                         <Edit2 className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => setPatientToDelete(patient)}
-                        className="btn-ghost p-1.5 text-red-600 hover:text-red-700 hover:bg-red-50"
+                        className="p-2 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                         title="Excluir"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -224,7 +227,7 @@ export default function Patients() {
 
         {/* Paginação */}
         {pagination.totalItems > 0 && (
-          <div className="p-4 border-t border-slate-100">
+          <div className="p-4 border-t border-slate-100 bg-slate-50/30">
              <Pagination
                 currentPage={pagination.currentPage}
                 totalPages={pagination.totalPages}
