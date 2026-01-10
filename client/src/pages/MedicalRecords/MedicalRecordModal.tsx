@@ -36,7 +36,7 @@ import { MedicationSelector } from '../../components/MedicationSelector';
 import { ActiveProblemsManager } from '../../components/ActiveProblemsManager';
 import { PatientTimeline } from '../../components/PatientTimeline';
 import { useData } from '../../contexts/DataContext';
-import { generateId, calculateAge, formatDate, formatCPF, formatPhone, sortBy } from '../../utils/helpers';
+import { generateId, calculateAge, formatDate, formatCPF, formatPhone, sortBy, calculateIMC } from '../../utils/helpers';
 
 interface MedicalRecordModalProps {
   patientId: string;
@@ -128,6 +128,11 @@ export function MedicalRecordModal({ patientId, record, onClose, onSave }: Medic
     const recordData = buildRecordData(patientId);
     const now = new Date().toISOString();
 
+    // Recupera usuário logado
+    const userJson = localStorage.getItem('clinica_user');
+    const user = userJson ? JSON.parse(userJson) : null;
+    const userName = user?.nome || (user?.email ? user.email.split('@')[0] : 'Usuário do Sistema');
+
     // Adiciona anexos
     const finalData = {
       ...recordData,
@@ -136,11 +141,11 @@ export function MedicalRecordModal({ patientId, record, onClose, onSave }: Medic
       audit: record?.audit
         ? {
             ...record.audit,
-            lastEditedBy: 'Usuário Atual', // TODO: pegar do contexto de autenticação
+            lastEditedBy: userName,
             lastEditedAt: now,
           }
         : {
-            createdBy: 'Usuário Atual', // TODO: pegar do contexto de autenticação
+            createdBy: userName,
             createdAt: now,
           },
     };
@@ -615,17 +620,11 @@ function VitalSignCard({ icon: Icon, label, value, unit, colorClass, children }:
 }
 
 function ObjectiveSection({ formData, updateField, expandedSections, toggleSection }: SectionWithToggleProps) {
-  const calculateIMC = () => {
+  const imcData = (() => {
     const peso = formData.peso ? Number(formData.peso) : 0;
     const altura = formData.altura ? Number(formData.altura) : 0;
-    if (peso > 0 && altura > 0) {
-      const alturaMetros = altura / 100;
-      return (peso / (alturaMetros * alturaMetros)).toFixed(1);
-    }
-    return '';
-  };
-
-  const imc = calculateIMC();
+    return calculateIMC(peso, altura);
+  })();
 
   return (
     <div className="space-y-8">
@@ -778,17 +777,14 @@ function ObjectiveSection({ formData, updateField, expandedSections, toggleSecti
               <VitalSignCard
                 icon={Calculator}
                 label="IMC"
-                value={imc}
+                value={imcData.value > 0 ? imcData.value.toString() : ''}
                 unit="kg/m²"
                 colorClass="bg-purple-50 text-purple-600"
               >
                 <div className="text-xs text-slate-600 italic py-2">
-                  {imc ? (
-                    <span>
-                      {Number(imc) < 18.5 && 'Abaixo do peso'}
-                      {Number(imc) >= 18.5 && Number(imc) < 25 && 'Peso normal'}
-                      {Number(imc) >= 25 && Number(imc) < 30 && 'Sobrepeso'}
-                      {Number(imc) >= 30 && 'Obesidade'}
+                  {imcData.value > 0 ? (
+                    <span style={{ color: imcData.color }}>
+                      {imcData.classification}
                     </span>
                   ) : 'Calculado auto.'}
                 </div>

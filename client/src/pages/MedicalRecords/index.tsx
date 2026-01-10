@@ -148,6 +148,7 @@ export default function MedicalRecords() {
   };
 
   return (
+    <>
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
       <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
@@ -452,6 +453,8 @@ export default function MedicalRecords() {
         </div>
       </div>
 
+    </div>
+
       {/* New/Edit Record Modal */}
       {(showNewRecord || editingRecord) && (
         <MedicalRecordModal
@@ -461,7 +464,7 @@ export default function MedicalRecords() {
           onSave={handleSaveRecord}
         />
       )}
-    </div>
+    </>
   );
 }
 
