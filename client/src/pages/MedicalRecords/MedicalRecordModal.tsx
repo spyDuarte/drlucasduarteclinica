@@ -118,7 +118,7 @@ export function MedicalRecordModal({ patientId, record, onClose, onSave }: Medic
 
     const recordData = buildRecordData(patientId);
     const now = new Date().toISOString();
-    const userName = user?.nome || 'Usuário do Sistema';
+    const userName = user?.nome;
 
     // Adiciona anexos
     const finalData = {
