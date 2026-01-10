@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Upload, File, X, FileText, Image, FileCheck, AlertCircle, Download, Eye } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 import type { MedicalRecordAttachment, AttachmentType } from '../types';
 
 interface MedicalAttachmentsProps {
@@ -44,6 +45,7 @@ export function MedicalAttachments({
   const [selectedType, setSelectedType] = useState<AttachmentType>('exame_laboratorial');
   const [description, setDescription] = useState('');
   const [previewFile, setPreviewFile] = useState<MedicalRecordAttachment | null>(null);
+  const { user } = useAuth();
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -76,7 +78,7 @@ export function MedicalAttachments({
         fileData: base64,
         attachmentType: selectedType,
         description: description.trim() || undefined,
-        uploadedBy: 'Usuário Atual' // TODO: pegar do contexto de autenticação
+        uploadedBy: user?.nome || 'Usuário do Sistema'
       };
 
       onAdd(newAttachment);

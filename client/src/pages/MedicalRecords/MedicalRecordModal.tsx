@@ -118,7 +118,8 @@ export function MedicalRecordModal({ patientId, record, onClose, onSave }: Medic
 
     const recordData = buildRecordData(patientId);
     const now = new Date().toISOString();
-    const userName = user?.nome || 'Usuário do Sistema';
+    // Obtém nome do usuário para auditoria
+    const currentUserName = user?.nome || 'Usuário do Sistema';
 
     // Adiciona anexos
     const finalData = {
@@ -128,11 +129,11 @@ export function MedicalRecordModal({ patientId, record, onClose, onSave }: Medic
       audit: record?.audit
         ? {
             ...record.audit,
-            lastEditedBy: userName,
+            lastEditedBy: currentUserName,
             lastEditedAt: now,
           }
         : {
-            createdBy: userName,
+            createdBy: currentUserName,
             createdAt: now,
           },
     };
