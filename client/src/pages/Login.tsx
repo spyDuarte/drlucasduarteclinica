@@ -33,7 +33,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex bg-slate-50">
+    <div className="min-h-screen flex bg-slate-50 font-sans">
       {/* Left side - Branding (Simplified) */}
       <div className="hidden lg:flex lg:w-1/2 bg-primary-900 relative items-center justify-center overflow-hidden">
         <div className="absolute inset-0 opacity-10" style={{
@@ -41,22 +41,25 @@ export default function Login() {
             backgroundSize: '24px 24px'
         }}></div>
 
-        <div className="relative z-10 text-center px-12">
-           <div className="w-24 h-24 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-8 ring-1 ring-white/20">
-              <Stethoscope className="w-12 h-12 text-white" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-primary-800/50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-primary-600/30 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
+
+        <div className="relative z-10 text-center px-12 animate-fade-in">
+           <div className="w-24 h-24 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center mx-auto mb-8 ring-1 ring-white/20 shadow-2xl shadow-black/20">
+              <Stethoscope className="w-12 h-12 text-white drop-shadow-md" />
             </div>
             <h1 className="text-4xl font-bold text-white mb-4 tracking-tight">
               Dr. Lucas Duarte
             </h1>
-            <p className="text-primary-200 text-lg max-w-md mx-auto leading-relaxed">
+            <p className="text-primary-100 text-lg max-w-md mx-auto leading-relaxed font-light">
               Excelência em gestão médica e atendimento humanizado.
             </p>
         </div>
       </div>
 
       {/* Right side - Login form */}
-      <div className="flex-1 flex items-center justify-center p-6 md:p-12">
-        <div className="w-full max-w-sm">
+      <div className="flex-1 flex items-center justify-center p-6 md:p-12 animate-fade-in-up">
+        <div className="w-full max-w-sm bg-white p-8 rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-100">
 
           <div className="lg:hidden text-center mb-10">
              <div className="w-16 h-16 bg-primary-600 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-primary-500/20">
