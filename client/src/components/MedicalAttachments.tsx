@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Upload, File, X, FileText, Image, FileCheck, AlertCircle, Download, Eye } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import type { MedicalRecordAttachment, AttachmentType } from '../types';
+import { useAuth } from '../contexts/AuthContext';
 
 interface MedicalAttachmentsProps {
   attachments: MedicalRecordAttachment[];
