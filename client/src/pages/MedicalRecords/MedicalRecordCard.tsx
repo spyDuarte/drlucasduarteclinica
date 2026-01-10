@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import {
   CalendarCheck,
   MapPin,
@@ -27,7 +28,7 @@ interface MedicalRecordCardProps {
   onEdit: (record: MedicalRecord) => void;
 }
 
-export function MedicalRecordCard({ record, index, onEdit }: MedicalRecordCardProps) {
+export const MedicalRecordCard = memo(function MedicalRecordCard({ record, index, onEdit }: MedicalRecordCardProps) {
   const typeInfo = getAppointmentTypeLabel(record.tipoAtendimento || 'consulta');
 
   return (
@@ -85,7 +86,7 @@ export function MedicalRecordCard({ record, index, onEdit }: MedicalRecordCardPr
       </div>
     </div>
   );
-}
+});
 
 function SOAPSubjectiveSection({ record }: { record: MedicalRecord }) {
   return (

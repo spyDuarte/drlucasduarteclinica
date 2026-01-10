@@ -44,6 +44,7 @@ export default function MedicalRecords() {
   } = useData();
 
   const patient = useMemo(() => (patientId ? getPatient(patientId) : null), [patientId, getPatient]);
+  // records já vem ordenado por data decrescente do getMedicalRecordsByPatient
   const records = useMemo(() => (patientId ? getMedicalRecordsByPatient(patientId) : []), [patientId, getMedicalRecordsByPatient]);
   const documents = useMemo(() => (patientId ? getDocumentsByPatient(patientId) : []), [patientId, getDocumentsByPatient]);
   const appointments = useMemo(() => (patientId ? getAppointmentsByPatient(patientId) : []), [patientId, getAppointmentsByPatient]);
@@ -63,22 +64,15 @@ export default function MedicalRecords() {
       .sort((a, b) => a.data.localeCompare(b.data))[0];
   }, [appointments]);
 
-  // Registros ordenados por data
-  const sortedRecords = useMemo(() => {
-    return [...records].sort((a, b) =>
-      new Date(b.data).getTime() - new Date(a.data).getTime()
-    );
-  }, [records]);
-
   // Último atendimento com sinais vitais
   const lastVitals = useMemo(() => {
-    const recordWithVitals = sortedRecords.find(r => r.objetivo?.sinaisVitais);
+    const recordWithVitals = records.find(r => r.objetivo?.sinaisVitais);
     return recordWithVitals?.objetivo?.sinaisVitais;
-  }, [sortedRecords]);
+  }, [records]);
 
   // Filtrar registros
   const filteredRecords = useMemo(() => {
-    return sortedRecords.filter(record => {
+    return records.filter(record => {
       const searchLower = searchTerm.toLowerCase();
       const matchesSearch = searchTerm === '' ||
         record.subjetivo?.queixaPrincipal?.toLowerCase().includes(searchLower) ||
@@ -90,7 +84,7 @@ export default function MedicalRecords() {
 
       return matchesSearch && matchesType;
     });
-  }, [sortedRecords, searchTerm, filterType]);
+  }, [records, searchTerm, filterType]);
 
   if (!patient) {
     return (
@@ -353,7 +347,7 @@ export default function MedicalRecords() {
 
       <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-4 lg:gap-6">
         {/* Patient Info - Sidebar */}
-        <PatientSidebar patient={patient} records={sortedRecords} />
+        <PatientSidebar patient={patient} records={records} />
 
         {/* Main Content Area */}
         <div className="space-y-5 min-w-0">
@@ -446,7 +440,7 @@ export default function MedicalRecords() {
           {activeTab === 'resumo' && (
             <ClinicalSummaryTab
               patient={patient}
-              records={sortedRecords}
+              records={records}
               lastVitals={lastVitals}
             />
           )}
