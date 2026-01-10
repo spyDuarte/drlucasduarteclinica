@@ -1,5 +1,5 @@
 import { CheckSquare, ClipboardList, X } from 'lucide-react';
-import { SectionHeader, InputField, SelectField, NumberField } from './components';
+import { SectionHeader, InputField, SelectField, NumberField, TextAreaField } from '../../../components/Shared/FormComponents';
 import { DrugInteractionChecker } from '../../../components/DrugInteractionChecker';
 import { OrientationTemplateSelector } from '../../../components/OrientationTemplateSelector';
 import { MedicationSelector } from '../../../components/MedicationSelector';
@@ -80,14 +80,15 @@ export function PlanSection({ formData, updateField, newPrescription, setNewPres
        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
           <div className="space-y-8">
              <div>
-                <label className="block text-sm font-bold text-slate-800 mb-2">Conduta Clínica <span className="text-red-500">*</span></label>
-                <textarea
-                  value={formData.conduta}
-                  onChange={e => updateField('conduta', e.target.value)}
-                  className={`input-field min-h-[120px] leading-relaxed ${formErrors?.conduta ? 'border-red-500 focus:ring-red-200' : ''}`}
+                <TextAreaField
+                  label="Conduta Clínica"
+                  required
+                  value={formData.conduta || ''}
+                  onChange={val => updateField('conduta', val)}
+                  rows={4}
                   placeholder="Descreva o plano de tratamento..."
+                  error={formErrors?.conduta}
                 />
-                {formErrors?.conduta && <p className="text-red-500 text-xs mt-1">{formErrors.conduta}</p>}
              </div>
 
               <div className="border border-slate-200 rounded-lg overflow-hidden">
@@ -121,21 +122,19 @@ export function PlanSection({ formData, updateField, newPrescription, setNewPres
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1.5">Solicitação de Exames</label>
-                    <textarea
-                      value={formData.solicitacaoExames}
-                      onChange={e => updateField('solicitacaoExames', e.target.value)}
-                      className="input-field"
+                    <TextAreaField
+                      label="Solicitação de Exames"
+                      value={formData.solicitacaoExames || ''}
+                      onChange={val => updateField('solicitacaoExames', val)}
                       rows={3}
                       placeholder="Exames laboratoriais, imagem..."
                     />
                  </div>
                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1.5">Encaminhamentos</label>
-                    <textarea
-                      value={formData.encaminhamentos}
-                      onChange={e => updateField('encaminhamentos', e.target.value)}
-                      className="input-field"
+                    <TextAreaField
+                      label="Encaminhamentos"
+                      value={formData.encaminhamentos || ''}
+                      onChange={val => updateField('encaminhamentos', val)}
                       rows={3}
                       placeholder="Especialidade: Motivo"
                     />
@@ -165,10 +164,10 @@ export function PlanSection({ formData, updateField, newPrescription, setNewPres
                  <div className="p-4 border border-slate-200 rounded-lg bg-slate-50">
                     <h4 className="font-semibold text-slate-700 mb-3 text-sm">Retorno</h4>
                     <div className="space-y-3">
-                       <InputField label="Previsão" value={formData.retorno} onChange={(v: string) => updateField('retorno', v)} placeholder="Ex: 30 dias" isSmall />
+                       <InputField label="Previsão" value={formData.retorno || ''} onChange={(v: string) => updateField('retorno', v)} placeholder="Ex: 30 dias" isSmall />
                        <div>
                           <label className="block text-xs font-medium text-slate-500 mb-1">Data agendada</label>
-                          <input type="date" value={formData.dataRetorno} onChange={e => updateField('dataRetorno', e.target.value)} className="input-field text-sm" />
+                          <input type="date" value={formData.dataRetorno || ''} onChange={e => updateField('dataRetorno', e.target.value)} className="input-field text-sm" />
                        </div>
                     </div>
                  </div>
@@ -188,14 +187,15 @@ export function PlanSection({ formData, updateField, newPrescription, setNewPres
                        <div className="space-y-3 animate-fade-in">
                           <SelectField
                             label="Tipo"
-                            value={formData.tipoAtestado}
+                            value={formData.tipoAtestado || ''}
                             onChange={(v: string) => updateField('tipoAtestado', v)}
                             options={[
                               { value: 'atestado_medico', label: 'Atestado Médico' },
                               { value: 'declaracao', label: 'Declaração' }
                             ]}
+                            isSmall
                           />
-                          <NumberField label="Dias de afastamento" value={formData.diasAfastamento} onChange={(v: string) => updateField('diasAfastamento', v)} />
+                          <NumberField label="Dias de afastamento" value={formData.diasAfastamento || ''} onChange={(v: string) => updateField('diasAfastamento', v)} />
                        </div>
                      )}
                  </div>

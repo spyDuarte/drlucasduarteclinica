@@ -34,6 +34,7 @@ import {
   calculateAge
 } from '../utils/helpers';
 import type { Appointment, AppointmentStatus, AppointmentType, Patient } from '../types';
+import { InputField, SelectField } from '../components/Shared/FormComponents';
 
 const TIME_SLOTS = generateTimeSlots('08:00', '18:00', 30);
 
@@ -478,7 +479,7 @@ function AppointmentModal({
 
   return (
     <div className="modal-overlay fixed inset-0 flex items-center justify-center z-50 p-4">
-      <div className="modal-container bg-white rounded-lg w-full max-w-2xl max-h-[90vh] flex flex-col">
+      <div className="modal-container bg-white rounded-lg w-full max-w-2xl max-h-[90vh] flex flex-col animate-scale-in">
         {/* Header */}
         <div className="p-4 border-b border-slate-200 flex items-center justify-between">
             <div>
@@ -631,28 +632,21 @@ function AppointmentModal({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
              {/* Data */}
-             <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">Data</label>
-                <input
-                  type="date"
-                  value={formData.data}
-                  onChange={e => setFormData({ ...formData, data: e.target.value })}
-                  className="input-field"
-                />
-             </div>
+             <InputField
+                label="Data"
+                type="date"
+                value={formData.data}
+                onChange={v => setFormData({ ...formData, data: v })}
+                error={formErrors.data}
+              />
               {/* Hora */}
-             <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">Horário</label>
-                <select
-                  value={formData.horaInicio}
-                  onChange={e => setFormData({ ...formData, horaInicio: e.target.value })}
-                  className="input-field"
-                >
-                  {TIME_SLOTS.map(time => (
-                    <option key={time} value={time}>{time}</option>
-                  ))}
-                </select>
-             </div>
+             <SelectField
+                label="Horário"
+                value={formData.horaInicio}
+                onChange={v => setFormData({ ...formData, horaInicio: v })}
+                options={TIME_SLOTS.map(time => ({ value: time, label: time }))}
+                error={formErrors.horaInicio}
+             />
           </div>
 
           {/* Duração */}
@@ -710,29 +704,22 @@ function AppointmentModal({
 
           {/* Detalhes */}
           <div className="space-y-4">
-             <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">Motivo</label>
-                <input
-                  type="text"
-                  value={formData.motivo}
-                  onChange={e => setFormData({ ...formData, motivo: e.target.value })}
-                  className="input-field"
-                  placeholder="Ex: Check-up de rotina"
-                />
-             </div>
+             <InputField
+                label="Motivo"
+                value={formData.motivo}
+                onChange={v => setFormData({ ...formData, motivo: v })}
+                placeholder="Ex: Check-up de rotina"
+             />
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-1">Valor (R$)</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={formData.valor}
-                      onChange={e => setFormData({ ...formData, valor: e.target.value })}
-                      className="input-field"
-                      placeholder="0,00"
-                    />
-                  </div>
+                  <InputField
+                    label="Valor (R$)"
+                    type="number"
+                    step="0.01"
+                    value={formData.valor}
+                    onChange={v => setFormData({ ...formData, valor: v })}
+                    placeholder="0,00"
+                  />
                   <div className="flex items-end">
                       <button
                         type="button"

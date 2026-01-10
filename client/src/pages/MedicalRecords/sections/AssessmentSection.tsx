@@ -1,5 +1,5 @@
 import { Clipboard } from 'lucide-react';
-import { SectionHeader, InputField } from './components';
+import { SectionHeader, InputField } from '../../../components/Shared/FormComponents';
 import { CID10Selector } from '../../../components/CID10Selector';
 import type { SectionProps } from './types';
 
@@ -18,12 +18,29 @@ export function AssessmentSection({ formData, updateField, formErrors }: Section
           </div>
 
           <div className="mb-6">
-             <InputField label="Diagnóstico por extenso / Hipótese Diagnóstica" value={formData.diagnosticoPrincipal} onChange={(v: string) => updateField('diagnosticoPrincipal', v)} isSmall={false} />
+             <InputField
+                label="Diagnóstico por extenso / Hipótese Diagnóstica"
+                value={formData.diagnosticoPrincipal || ''}
+                onChange={(v: string) => updateField('diagnosticoPrincipal', v)}
+                isSmall={false}
+             />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-             <InputField label="Diagnósticos Secundários" value={formData.diagnosticosSecundarios} onChange={(v: string) => updateField('diagnosticosSecundarios', v)} placeholder="Comorbidades..." isSmall />
-             <InputField label="Diagnóstico Diferencial" value={formData.diagnosticoDiferencial} onChange={(v: string) => updateField('diagnosticoDiferencial', v)} placeholder="A descartar..." isSmall />
+             <InputField
+                label="Diagnósticos Secundários"
+                value={formData.diagnosticosSecundarios || ''}
+                onChange={(v: string) => updateField('diagnosticosSecundarios', v)}
+                placeholder="Comorbidades..."
+                isSmall
+             />
+             <InputField
+                label="Diagnóstico Diferencial"
+                value={formData.diagnosticoDiferencial || ''}
+                onChange={(v: string) => updateField('diagnosticoDiferencial', v)}
+                placeholder="A descartar..."
+                isSmall
+             />
           </div>
        </div>
     </div>

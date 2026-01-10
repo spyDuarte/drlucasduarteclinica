@@ -1,5 +1,5 @@
 import { Paperclip } from 'lucide-react';
-import { SectionHeader } from './components';
+import { SectionHeader } from '../../../components/Shared/FormComponents';
 import { MedicalAttachments } from '../../../components/MedicalAttachments';
 import type { MedicalRecordAttachment } from '../../../types';
 

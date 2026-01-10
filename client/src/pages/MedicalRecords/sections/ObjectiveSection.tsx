@@ -1,6 +1,6 @@
 import { Activity, Thermometer, Heart, Wind, Droplets, Gauge, Ruler, Weight, Calculator, Stethoscope } from 'lucide-react';
 import { type ReactNode, type ElementType } from 'react';
-import { SectionHeader, InputField, NumberField, SelectField, CollapsibleSection } from './components';
+import { SectionHeader, InputField, NumberField, SelectField, TextAreaField, CollapsibleSection } from '../../../components/Shared/FormComponents';
 import { VitalSignsValidator } from '../../../components/VitalSignsValidator';
 import { calculateIMC } from '../../../utils/helpers';
 import type { SectionWithToggleProps } from './types';
@@ -68,7 +68,7 @@ export function ObjectiveSection({ formData, updateField, expandedSections, togg
             >
               <NumberField
                 label=""
-                value={formData.temperatura}
+                value={formData.temperatura || ''}
                 onChange={(v: string) => updateField('temperatura', v)}
                 step={0.1}
               />
@@ -83,7 +83,7 @@ export function ObjectiveSection({ formData, updateField, expandedSections, togg
             >
               <NumberField
                 label=""
-                value={formData.frequenciaCardiaca}
+                value={formData.frequenciaCardiaca || ''}
                 onChange={(v: string) => updateField('frequenciaCardiaca', v)}
               />
             </VitalSignCard>
@@ -97,7 +97,7 @@ export function ObjectiveSection({ formData, updateField, expandedSections, togg
             >
               <NumberField
                 label=""
-                value={formData.frequenciaRespiratoria}
+                value={formData.frequenciaRespiratoria || ''}
                 onChange={(v: string) => updateField('frequenciaRespiratoria', v)}
               />
             </VitalSignCard>
@@ -111,7 +111,7 @@ export function ObjectiveSection({ formData, updateField, expandedSections, togg
             >
               <InputField
                 label=""
-                value={formData.pressaoArterial}
+                value={formData.pressaoArterial || ''}
                 onChange={(v: string) => updateField('pressaoArterial', v)}
                 placeholder="120/80"
                 isSmall
@@ -127,7 +127,7 @@ export function ObjectiveSection({ formData, updateField, expandedSections, togg
             >
               <NumberField
                 label=""
-                value={formData.saturacaoO2}
+                value={formData.saturacaoO2 || ''}
                 onChange={(v: string) => updateField('saturacaoO2', v)}
               />
             </VitalSignCard>
@@ -141,7 +141,7 @@ export function ObjectiveSection({ formData, updateField, expandedSections, togg
             >
               <NumberField
                 label=""
-                value={formData.escalaDor}
+                value={formData.escalaDor || ''}
                 onChange={(v: string) => updateField('escalaDor', v)}
                 min={0}
                 max={10}
@@ -157,7 +157,7 @@ export function ObjectiveSection({ formData, updateField, expandedSections, togg
             >
               <NumberField
                 label=""
-                value={formData.glicemiaCapilar}
+                value={formData.glicemiaCapilar || ''}
                 onChange={(v: string) => updateField('glicemiaCapilar', v)}
               />
             </VitalSignCard>
@@ -177,7 +177,7 @@ export function ObjectiveSection({ formData, updateField, expandedSections, togg
                 >
                   <NumberField
                     label=""
-                    value={formData.peso}
+                    value={formData.peso || ''}
                     onChange={(v: string) => updateField('peso', v)}
                     step={0.1}
                   />
@@ -192,7 +192,7 @@ export function ObjectiveSection({ formData, updateField, expandedSections, togg
                 >
                   <NumberField
                     label=""
-                    value={formData.altura}
+                    value={formData.altura || ''}
                     onChange={(v: string) => updateField('altura', v)}
                   />
                 </VitalSignCard>
@@ -237,7 +237,7 @@ export function ObjectiveSection({ formData, updateField, expandedSections, togg
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             <SelectField
               label="Estado Geral"
-              value={formData.estadoGeral}
+              value={formData.estadoGeral || ''}
               onChange={(v: string) => updateField('estadoGeral', v)}
               options={[
                 { value: '', label: 'Selecione' },
@@ -249,7 +249,7 @@ export function ObjectiveSection({ formData, updateField, expandedSections, togg
             />
             <SelectField
               label="Consciência"
-              value={formData.nivelConsciencia}
+              value={formData.nivelConsciencia || ''}
               onChange={(v: string) => updateField('nivelConsciencia', v)}
               options={[
                 { value: '', label: 'Selecione' },
@@ -259,16 +259,16 @@ export function ObjectiveSection({ formData, updateField, expandedSections, togg
                 { value: 'comatoso', label: 'Comatoso' }
               ]}
             />
-            <NumberField label="Glasgow" value={formData.escalaGlasgow} onChange={(v: string) => updateField('escalaGlasgow', v)} min={3} max={15} />
+            <NumberField label="Glasgow" value={formData.escalaGlasgow || ''} onChange={(v: string) => updateField('escalaGlasgow', v)} min={3} max={15} />
           </div>
 
-          <label className="block text-sm font-medium text-slate-700 mb-2">Descrição Detalhada</label>
-          <textarea
-              value={formData.exameFisico}
-              onChange={e => updateField('exameFisico', e.target.value)}
-              className="input-field min-h-[100px] leading-relaxed"
-              placeholder="Descreva os achados..."
-            />
+          <TextAreaField
+            label="Descrição Detalhada"
+            value={formData.exameFisico || ''}
+            onChange={val => updateField('exameFisico', val)}
+            placeholder="Descreva os achados..."
+            className="input-field min-h-[100px] leading-relaxed"
+          />
         </div>
 
         <CollapsibleSection
@@ -278,12 +278,12 @@ export function ObjectiveSection({ formData, updateField, expandedSections, togg
             onToggle={() => toggleSection && toggleSection('exameFisicoDetalhado')}
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <InputField label="Cabeça e Pescoço" value={formData.exameCabecaPescoco} onChange={(v: string) => updateField('exameCabecaPescoco', v)} isSmall />
-              <InputField label="Cardiovascular" value={formData.exameCardiovascular} onChange={(v: string) => updateField('exameCardiovascular', v)} isSmall />
-              <InputField label="Respiratório" value={formData.examePulmonar} onChange={(v: string) => updateField('examePulmonar', v)} isSmall />
-              <InputField label="Abdome" value={formData.exameAbdome} onChange={(v: string) => updateField('exameAbdome', v)} isSmall />
-              <InputField label="Neurológico" value={formData.exameNeurologico} onChange={(v: string) => updateField('exameNeurologico', v)} isSmall />
-              <InputField label="Pele e Anexos" value={formData.examePele} onChange={(v: string) => updateField('examePele', v)} isSmall />
+              <InputField label="Cabeça e Pescoço" value={formData.exameCabecaPescoco || ''} onChange={(v: string) => updateField('exameCabecaPescoco', v)} isSmall />
+              <InputField label="Cardiovascular" value={formData.exameCardiovascular || ''} onChange={(v: string) => updateField('exameCardiovascular', v)} isSmall />
+              <InputField label="Respiratório" value={formData.examePulmonar || ''} onChange={(v: string) => updateField('examePulmonar', v)} isSmall />
+              <InputField label="Abdome" value={formData.exameAbdome || ''} onChange={(v: string) => updateField('exameAbdome', v)} isSmall />
+              <InputField label="Neurológico" value={formData.exameNeurologico || ''} onChange={(v: string) => updateField('exameNeurologico', v)} isSmall />
+              <InputField label="Pele e Anexos" value={formData.examePele || ''} onChange={(v: string) => updateField('examePele', v)} isSmall />
             </div>
           </CollapsibleSection>
        </div>

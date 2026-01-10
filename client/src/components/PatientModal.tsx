@@ -2,6 +2,7 @@ import { X } from 'lucide-react';
 import { usePatientForm } from '../hooks/usePatientForm';
 import type { Patient } from '../types';
 import { useEffect, useRef } from 'react';
+import { FormSection, InputField, SelectField, TextAreaField } from './Shared/FormComponents';
 
 interface PatientModalProps {
   patient: Patient | null;
@@ -101,18 +102,20 @@ export default function PatientModal({ patient, onClose, onSave, isLoading = fal
           <FormSection title="Dados Pessoais">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="md:col-span-2">
-                <FormInput
+                <InputField
                   id="nome"
-                  label="Nome completo *"
+                  label="Nome completo"
+                  required
                   value={formData.nome}
                   onChange={v => updateField('nome', v)}
                   error={errors.nome}
                   errorId="nome-error"
                 />
               </div>
-              <FormInput
+              <InputField
                 id="cpf"
-                label="CPF *"
+                label="CPF"
+                required
                 value={formData.cpf}
                 onChange={handleCPFChange}
                 error={errors.cpf}
@@ -120,9 +123,10 @@ export default function PatientModal({ patient, onClose, onSave, isLoading = fal
                 placeholder="000.000.000-00"
                 maxLength={14}
               />
-              <FormInput
+              <InputField
                 id="dataNascimento"
-                label="Data de nascimento *"
+                label="Data de nascimento"
+                required
                 type="date"
                 value={formData.dataNascimento}
                 onChange={v => updateField('dataNascimento', v)}
@@ -130,21 +134,23 @@ export default function PatientModal({ patient, onClose, onSave, isLoading = fal
                 errorId="data-error"
               />
               <div>
-                <label htmlFor="sexo" className="block text-sm text-gray-600 mb-1">Sexo *</label>
-                <select
+                <SelectField
                   id="sexo"
+                  label="Sexo"
+                  required
                   value={formData.sexo}
-                  onChange={e => updateField('sexo', e.target.value)}
-                  className="input-field"
-                >
-                  <option value="M">Masculino</option>
-                  <option value="F">Feminino</option>
-                  <option value="O">Outro</option>
-                </select>
+                  onChange={v => updateField('sexo', v)}
+                  options={[
+                    { value: 'M', label: 'Masculino' },
+                    { value: 'F', label: 'Feminino' },
+                    { value: 'O', label: 'Outro' }
+                  ]}
+                />
               </div>
-              <FormInput
+              <InputField
                 id="telefone"
-                label="Telefone *"
+                label="Telefone"
+                required
                 type="tel"
                 value={formData.telefone}
                 onChange={handlePhoneChange}
@@ -154,7 +160,7 @@ export default function PatientModal({ patient, onClose, onSave, isLoading = fal
                 maxLength={15}
               />
               <div className="md:col-span-2">
-                <FormInput
+                <InputField
                   id="email"
                   label="Email"
                   type="email"
@@ -169,45 +175,45 @@ export default function PatientModal({ patient, onClose, onSave, isLoading = fal
           <FormSection title="Endereço">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="md:col-span-2">
-                <FormInput
+                <InputField
                   id="logradouro"
                   label="Logradouro"
                   value={formData.logradouro}
                   onChange={v => updateField('logradouro', v)}
                 />
               </div>
-              <FormInput
+              <InputField
                 id="numero"
                 label="Número"
                 value={formData.numero}
                 onChange={v => updateField('numero', v)}
               />
-              <FormInput
+              <InputField
                 id="complemento"
                 label="Complemento"
                 value={formData.complemento}
                 onChange={v => updateField('complemento', v)}
               />
-              <FormInput
+              <InputField
                 id="bairro"
                 label="Bairro"
                 value={formData.bairro}
                 onChange={v => updateField('bairro', v)}
               />
-              <FormInput
+              <InputField
                 id="cidade"
                 label="Cidade"
                 value={formData.cidade}
                 onChange={v => updateField('cidade', v)}
               />
-              <FormInput
+              <InputField
                 id="estado"
                 label="Estado"
                 value={formData.estado}
                 onChange={v => updateField('estado', v)}
                 maxLength={2}
               />
-              <FormInput
+              <InputField
                 id="cep"
                 label="CEP"
                 value={formData.cep}
@@ -221,19 +227,19 @@ export default function PatientModal({ patient, onClose, onSave, isLoading = fal
           {/* Convênio */}
           <FormSection title="Convênio (opcional)">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <FormInput
+              <InputField
                 id="convenioNome"
                 label="Nome do convênio"
                 value={formData.convenioNome}
                 onChange={v => updateField('convenioNome', v)}
               />
-              <FormInput
+              <InputField
                 id="convenioNumero"
                 label="Número da carteira"
                 value={formData.convenioNumero}
                 onChange={v => updateField('convenioNumero', v)}
               />
-              <FormInput
+              <InputField
                 id="convenioValidade"
                 label="Validade"
                 type="date"
@@ -246,14 +252,14 @@ export default function PatientModal({ patient, onClose, onSave, isLoading = fal
           {/* Histórico Médico */}
           <FormSection title="Histórico Médico">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormInput
+              <InputField
                 id="alergias"
                 label="Alergias (separadas por vírgula)"
                 value={formData.alergias}
                 onChange={v => updateField('alergias', v)}
                 placeholder="Ex: Dipirona, Penicilina"
               />
-              <FormInput
+              <InputField
                 id="medicamentos"
                 label="Medicamentos em uso"
                 value={formData.medicamentosEmUso}
@@ -261,7 +267,7 @@ export default function PatientModal({ patient, onClose, onSave, isLoading = fal
                 placeholder="Ex: Losartana 50mg, Metformina 850mg"
               />
               <div className="md:col-span-2">
-                <FormTextarea
+                <TextAreaField
                   id="historicoFamiliar"
                   label="Histórico familiar"
                   value={formData.historicoFamiliar}
@@ -270,7 +276,7 @@ export default function PatientModal({ patient, onClose, onSave, isLoading = fal
                 />
               </div>
               <div className="md:col-span-2">
-                <FormTextarea
+                <TextAreaField
                   id="observacoes"
                   label="Observações"
                   value={formData.observacoes}
@@ -306,88 +312,6 @@ export default function PatientModal({ patient, onClose, onSave, isLoading = fal
           </div>
         </form>
       </div>
-    </div>
-  );
-}
-
-// Sub-components
-interface FormSectionProps {
-  title: string;
-  children: React.ReactNode;
-}
-
-function FormSection({ title, children }: FormSectionProps) {
-  return (
-    <div>
-      <h3 className="text-sm font-medium text-gray-700 mb-3">{title}</h3>
-      {children}
-    </div>
-  );
-}
-
-interface FormInputProps {
-  id: string;
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  type?: string;
-  error?: string;
-  errorId?: string;
-  placeholder?: string;
-  maxLength?: number;
-}
-
-function FormInput({
-  id,
-  label,
-  value,
-  onChange,
-  type = 'text',
-  error,
-  errorId,
-  placeholder,
-  maxLength
-}: FormInputProps) {
-  return (
-    <div>
-      <label htmlFor={id} className="block text-sm text-gray-600 mb-1">{label}</label>
-      <input
-        id={id}
-        type={type}
-        value={value}
-        onChange={e => onChange(e.target.value)}
-        className={`input-field ${error ? 'border-red-500 focus:ring-red-500' : ''}`}
-        placeholder={placeholder}
-        maxLength={maxLength}
-        aria-invalid={!!error}
-        aria-describedby={error && errorId ? errorId : undefined}
-      />
-      {error && errorId && (
-        <p id={errorId} className="mt-1 text-sm text-red-600">{error}</p>
-      )}
-    </div>
-  );
-}
-
-interface FormTextareaProps {
-  id: string;
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  rows?: number;
-}
-
-function FormTextarea({ id, label, value, onChange, rows = 3 }: FormTextareaProps) {
-  return (
-    <div>
-      <label htmlFor={id} className="block text-sm text-gray-600 mb-1">{label}</label>
-      <textarea
-        id={id}
-        value={value}
-        onChange={e => onChange(e.target.value)}
-        className="input-field"
-        rows={rows}
-      />
     </div>
   );
 }
