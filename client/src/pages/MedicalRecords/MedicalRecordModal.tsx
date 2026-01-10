@@ -632,22 +632,21 @@ function ObjectiveSection({ formData, updateField, expandedSections, toggleSecti
            Sinais Vitais
         </h3>
 
-        {/* Primary Vital Signs - Grid responsivo */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-          {/* Pressão Arterial */}
+        {/* Vital Signs Grid - Optimized flow */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
+          {/* Temperatura (Usually first or with PA) */}
           <VitalSignCard
-            icon={Heart}
-            label="Pressão Arterial"
-            value={formData.pressaoArterial || ''}
-            unit="mmHg"
-            color="border-rose-200"
+            icon={Thermometer}
+            label="Temperatura"
+            value={formData.temperatura || ''}
+            unit="°C"
+            color="border-orange-200"
           >
-            <InputField
+            <NumberField
               label=""
-              value={formData.pressaoArterial}
-              onChange={(v: string) => updateField('pressaoArterial', v)}
-              placeholder="120/80"
-              isSmall
+              value={formData.temperatura}
+              onChange={(v: string) => updateField('temperatura', v)}
+              step={0.1}
             />
           </VitalSignCard>
 
@@ -681,25 +680,23 @@ function ObjectiveSection({ formData, updateField, expandedSections, toggleSecti
             />
           </VitalSignCard>
 
-          {/* Temperatura */}
+          {/* Pressão Arterial */}
           <VitalSignCard
-            icon={Thermometer}
-            label="Temperatura"
-            value={formData.temperatura || ''}
-            unit="°C"
-            color="border-orange-200"
+            icon={Activity}
+            label="Pressão Arterial"
+            value={formData.pressaoArterial || ''}
+            unit="mmHg"
+            color="border-rose-200"
           >
-            <NumberField
+            <InputField
               label=""
-              value={formData.temperatura}
-              onChange={(v: string) => updateField('temperatura', v)}
-              step={0.1}
+              value={formData.pressaoArterial}
+              onChange={(v: string) => updateField('pressaoArterial', v)}
+              placeholder="120/80"
+              isSmall
             />
           </VitalSignCard>
-        </div>
 
-        {/* Secondary Vital Signs */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
           {/* Saturação O2 */}
           <VitalSignCard
             icon={Droplets}
@@ -715,6 +712,45 @@ function ObjectiveSection({ formData, updateField, expandedSections, toggleSecti
             />
           </VitalSignCard>
 
+          {/* Escala de Dor */}
+          <VitalSignCard
+            icon={Gauge}
+            label="Escala de Dor"
+            value={formData.escalaDor || ''}
+            unit="/10"
+            color="border-slate-200"
+          >
+            <NumberField
+              label=""
+              value={formData.escalaDor}
+              onChange={(v: string) => updateField('escalaDor', v)}
+              min={0}
+              max={10}
+            />
+          </VitalSignCard>
+
+          {/* Glicemia */}
+          <VitalSignCard
+            icon={Droplets}
+            label="Glicemia"
+            value={formData.glicemiaCapilar || ''}
+            unit="mg/dL"
+            color="border-amber-200"
+          >
+            <NumberField
+              label=""
+              value={formData.glicemiaCapilar}
+              onChange={(v: string) => updateField('glicemiaCapilar', v)}
+            />
+          </VitalSignCard>
+        </div>
+
+        {/* Antropometria Section */}
+        <div className="mb-4">
+           <h4 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+              <Ruler className="w-4 h-4" /> Antropometria
+           </h4>
+           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {/* Peso */}
           <VitalSignCard
             icon={Weight}
@@ -766,40 +802,7 @@ function ObjectiveSection({ formData, updateField, expandedSections, toggleSecti
               {!imc && 'Calculado automaticamente'}
             </div>
           </VitalSignCard>
-
-          {/* Glicemia */}
-          <VitalSignCard
-            icon={Droplets}
-            label="Glicemia"
-            value={formData.glicemiaCapilar || ''}
-            unit="mg/dL"
-            color="border-amber-200"
-          >
-            <NumberField
-              label=""
-              value={formData.glicemiaCapilar}
-              onChange={(v: string) => updateField('glicemiaCapilar', v)}
-            />
-          </VitalSignCard>
         </div>
-
-        {/* Escala de Dor */}
-        <div className="mt-4">
-          <VitalSignCard
-            icon={Gauge}
-            label="Escala de Dor"
-            value={formData.escalaDor || ''}
-            unit="/10"
-            color="border-slate-200"
-          >
-            <NumberField
-              label=""
-              value={formData.escalaDor}
-              onChange={(v: string) => updateField('escalaDor', v)}
-              min={0}
-              max={10}
-            />
-          </VitalSignCard>
         </div>
 
         <div className="mt-6 pt-6 border-t border-slate-300">
