@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Upload, File, X, FileText, Image, FileCheck, AlertCircle, Download, Eye } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 import type { MedicalRecordAttachment, AttachmentType } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -78,7 +79,7 @@ export function MedicalAttachments({
         fileData: base64,
         attachmentType: selectedType,
         description: description.trim() || undefined,
-        uploadedBy: user?.nome || 'Usuário Desconhecido'
+        uploadedBy: user?.nome || 'Usuário do Sistema'
       };
 
       onAdd(newAttachment);
