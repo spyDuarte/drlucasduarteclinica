@@ -149,29 +149,29 @@ export function MedicalRecordModal({ patientId, record, onClose, onSave }: Medic
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4 animate-fade-in">
-      <div className="bg-white w-full max-w-6xl h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-slate-200 font-sans">
+    <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-[60] p-4 animate-fade-in">
+      <div className="bg-white w-full max-w-[90rem] h-[95vh] rounded-xl shadow-2xl flex flex-col overflow-hidden border border-slate-200 font-sans">
 
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-white shrink-0">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center text-primary-600 shadow-sm border border-primary-100">
-              <Stethoscope className="w-6 h-6" />
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-white shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-primary-50 rounded-lg flex items-center justify-center text-primary-600 border border-primary-100">
+              <Stethoscope className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-slate-900 tracking-tight">
+              <h2 className="text-lg font-bold text-slate-800 tracking-tight leading-none">
                 {record ? 'Editar Prontuário' : 'Novo Atendimento'}
               </h2>
-              <div className="flex items-center gap-2 text-sm text-slate-500">
-                <span className="font-medium text-slate-700">Prontuário Eletrônico</span>
+              <div className="flex items-center gap-2 text-xs text-slate-500 mt-1">
+                <span className="font-medium text-slate-600">Prontuário Eletrônico v2.0</span>
                 <span>•</span>
-                <span>{record ? 'Edição de registro' : 'Consulta SOAP'}</span>
+                <span>{record ? 'Modo de Edição' : 'Consulta SOAP'}</span>
               </div>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2.5 bg-slate-50 hover:bg-slate-100 rounded-xl text-slate-400 hover:text-slate-600 transition-all duration-200"
+            className="p-2 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600 transition-all duration-200"
           >
             <X className="w-5 h-5" />
           </button>
@@ -182,17 +182,17 @@ export function MedicalRecordModal({ patientId, record, onClose, onSave }: Medic
           <PatientHeader patient={currentPatient} records={patientRecords} />
         )}
 
-        <div className="flex flex-1 overflow-hidden">
-          {/* Sidebar Navigation */}
-          <div className="w-64 bg-slate-50 border-r border-slate-200 flex flex-col shrink-0 overflow-y-auto py-4">
-            <nav className="space-y-1 px-3">
+        <div className="flex flex-1 overflow-hidden bg-slate-50">
+          {/* Sidebar Navigation - Redesigned */}
+          <div className="w-64 bg-white border-r border-slate-200 flex flex-col shrink-0 overflow-y-auto">
+            <nav className="flex-1 py-4 px-3 space-y-0.5">
               <SidebarItem
                 label="Resumo & Problemas"
                 icon={History}
                 active={activeTab === 'resumo'}
                 onClick={() => setActiveTab('resumo')}
               />
-              <div className="my-2 border-t border-slate-200 mx-2" />
+              <div className="my-3 border-t border-slate-100 mx-2" />
               <SidebarItem
                 label="Informações Gerais"
                 icon={Info}
@@ -226,7 +226,7 @@ export function MedicalRecordModal({ patientId, record, onClose, onSave }: Medic
                 onClick={() => setActiveTab('plano')}
                 hasError={!!formErrors.conduta}
               />
-              <div className="my-2 border-t border-slate-200 mx-2" />
+              <div className="my-3 border-t border-slate-100 mx-2" />
               <SidebarItem
                 label="Anexos"
                 icon={Paperclip}
@@ -235,22 +235,24 @@ export function MedicalRecordModal({ patientId, record, onClose, onSave }: Medic
               />
             </nav>
 
-            <div className="mt-auto px-4 pt-6 text-xs text-slate-400 text-center">
-              <p>Prontuário Eletrônico v2.0</p>
-              <p>Auditado & Verificado</p>
+            <div className="p-4 border-t border-slate-100 bg-slate-50/50">
+              <div className="flex items-center gap-2 text-xs text-slate-400 justify-center">
+                <CheckSquare className="w-3 h-3" />
+                <span>Auditado & Verificado</span>
+              </div>
             </div>
           </div>
 
           {/* Main Content Area */}
-          <div className="flex-1 overflow-y-auto bg-white p-6 md:p-8 scroll-smooth">
-            <form onSubmit={handleSubmit} id="medical-record-form">
+          <div className="flex-1 overflow-y-auto p-6 md:p-8 scroll-smooth">
+            <form onSubmit={handleSubmit} id="medical-record-form" className="max-w-5xl mx-auto">
 
               {activeTab === 'resumo' && (
                 <div className="space-y-6 animate-fade-in">
-                  <div className="bg-slate-50 rounded-xl p-5 border border-slate-200">
-                     <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                        <History className="w-5 h-5 text-indigo-500" />
-                        Linha do Tempo
+                  <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
+                     <h3 className="text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
+                        <History className="w-4 h-4 text-indigo-500" />
+                        Histórico Recente
                      </h3>
                      <PatientTimeline
                         medicalRecords={patientRecords}
@@ -259,10 +261,10 @@ export function MedicalRecordModal({ patientId, record, onClose, onSave }: Medic
                       />
                   </div>
 
-                  <div className="bg-slate-50 rounded-xl p-5 border border-slate-200">
-                    <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                       <AlertTriangle className="w-5 h-5 text-amber-500" />
-                       Lista de Problemas Ativos
+                  <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
+                    <h3 className="text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
+                       <AlertTriangle className="w-4 h-4 text-amber-500" />
+                       Problemas Ativos
                     </h3>
                     <ActiveProblemsManager
                       problems={currentPatient?.activeProblems || []}
@@ -276,28 +278,32 @@ export function MedicalRecordModal({ patientId, record, onClose, onSave }: Medic
               )}
 
               {activeTab === 'geral' && (
-                <div className="animate-fade-in">
-                   <SectionHeader title="Informações Gerais do Atendimento" icon={Info} color="bg-blue-500" />
-                   <GeneralInfoSection formData={formData} updateField={updateField} />
+                <div className="animate-fade-in space-y-6">
+                   <SectionHeader title="Informações Gerais" subtitle="Dados básicos do atendimento" icon={Info} />
+                   <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                      <GeneralInfoSection formData={formData} updateField={updateField} />
+                   </div>
                 </div>
               )}
 
               {activeTab === 'subjetivo' && (
-                <div className="animate-fade-in">
-                   <SectionHeader title="Subjetivo" subtitle="Anamnese e História Clínica" icon={User} color="bg-sky-500" />
-                   <SubjectiveSection
-                      formData={formData}
-                      updateField={updateField}
-                      expandedSections={expandedSections}
-                      toggleSection={toggleSection}
-                      formErrors={formErrors}
-                    />
+                <div className="animate-fade-in space-y-6">
+                   <SectionHeader title="Subjetivo" subtitle="Anamnese e História Clínica" icon={User} />
+                   <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                     <SubjectiveSection
+                        formData={formData}
+                        updateField={updateField}
+                        expandedSections={expandedSections}
+                        toggleSection={toggleSection}
+                        formErrors={formErrors}
+                      />
+                   </div>
                 </div>
               )}
 
               {activeTab === 'objetivo' && (
-                <div className="animate-fade-in">
-                   <SectionHeader title="Objetivo" subtitle="Exame Físico e Sinais Vitais" icon={Activity} color="bg-emerald-500" />
+                <div className="animate-fade-in space-y-6">
+                   <SectionHeader title="Objetivo" subtitle="Exame Físico e Sinais Vitais" icon={Activity} />
                    <ObjectiveSection
                       formData={formData}
                       updateField={updateField}
@@ -308,36 +314,42 @@ export function MedicalRecordModal({ patientId, record, onClose, onSave }: Medic
               )}
 
               {activeTab === 'avaliacao' && (
-                <div className="animate-fade-in">
-                   <SectionHeader title="Avaliação" subtitle="Diagnóstico e Raciocínio Clínico" icon={Clipboard} color="bg-amber-500" />
-                   <AssessmentSection formData={formData} updateField={updateField} formErrors={formErrors} />
+                <div className="animate-fade-in space-y-6">
+                   <SectionHeader title="Avaliação" subtitle="Diagnóstico e Raciocínio Clínico" icon={Clipboard} />
+                   <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                      <AssessmentSection formData={formData} updateField={updateField} formErrors={formErrors} />
+                   </div>
                 </div>
               )}
 
               {activeTab === 'plano' && (
-                <div className="animate-fade-in">
-                   <SectionHeader title="Plano Terapêutico" subtitle="Conduta, Prescrições e Orientações" icon={CheckSquare} color="bg-purple-500" />
-                   <PlanSection
-                      formData={formData}
-                      updateField={updateField}
-                      newPrescription={newPrescription}
-                      setNewPrescription={setNewPrescription}
-                      addPrescription={addPrescription}
-                      removePrescription={removePrescription}
-                      formErrors={formErrors}
-                      patient={currentPatient}
-                    />
+                <div className="animate-fade-in space-y-6">
+                   <SectionHeader title="Plano Terapêutico" subtitle="Conduta, Prescrições e Orientações" icon={CheckSquare} />
+                   <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                     <PlanSection
+                        formData={formData}
+                        updateField={updateField}
+                        newPrescription={newPrescription}
+                        setNewPrescription={setNewPrescription}
+                        addPrescription={addPrescription}
+                        removePrescription={removePrescription}
+                        formErrors={formErrors}
+                        patient={currentPatient}
+                      />
+                   </div>
                 </div>
               )}
 
               {activeTab === 'anexos' && (
-                <div className="animate-fade-in">
-                   <SectionHeader title="Anexos e Documentos" subtitle="Arquivos complementares ao prontuário" icon={Paperclip} color="bg-slate-500" />
-                   <AttachmentsSection
-                      attachments={attachments}
-                      onAdd={handleAddAttachment}
-                      onRemove={handleRemoveAttachment}
-                    />
+                <div className="animate-fade-in space-y-6">
+                   <SectionHeader title="Anexos" subtitle="Documentos complementares" icon={Paperclip} />
+                   <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                     <AttachmentsSection
+                        attachments={attachments}
+                        onAdd={handleAddAttachment}
+                        onRemove={handleRemoveAttachment}
+                      />
+                   </div>
                 </div>
               )}
             </form>
@@ -345,19 +357,19 @@ export function MedicalRecordModal({ patientId, record, onClose, onSave }: Medic
         </div>
 
         {/* Footer Actions */}
-        <div className="px-6 py-4 border-t border-slate-200 bg-white flex justify-end gap-3 shrink-0 rounded-b-2xl">
+        <div className="px-6 py-4 border-t border-slate-200 bg-white flex justify-end gap-3 shrink-0">
           <button
             type="button"
             onClick={onClose}
-            className="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-medium hover:bg-slate-50 hover:text-slate-800 transition-colors"
+            className="px-5 py-2.5 rounded-lg border border-slate-200 text-slate-600 font-medium hover:bg-slate-50 hover:text-slate-800 transition-colors text-sm"
           >
             Cancelar
           </button>
           <button
             onClick={handleSubmit}
-            className="px-5 py-2.5 rounded-xl bg-primary-600 text-white font-medium hover:bg-primary-700 shadow-lg shadow-primary-200 hover:shadow-primary-300 transition-all flex items-center gap-2"
+            className="px-5 py-2.5 rounded-lg bg-primary-600 text-white font-medium hover:bg-primary-700 shadow-sm transition-all flex items-center gap-2 text-sm"
           >
-            <FileCheck className="w-5 h-5" />
+            <FileCheck className="w-4 h-4" />
             {record ? 'Salvar Alterações' : 'Finalizar Atendimento'}
           </button>
         </div>
@@ -367,7 +379,7 @@ export function MedicalRecordModal({ patientId, record, onClose, onSave }: Medic
 }
 
 // ----------------------------------------------------------------------
-// Sub-components
+// Sub-components (Redesigned)
 // ----------------------------------------------------------------------
 
 function SidebarItem({ label, icon: Icon, active, onClick, hasError }: {
@@ -380,13 +392,14 @@ function SidebarItem({ label, icon: Icon, active, onClick, hasError }: {
   return (
     <button
       onClick={onClick}
-      className={`w-full flex items-center justify-between px-3 py-2.5 mb-1 rounded-xl text-sm font-medium transition-all duration-200 group
+      className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group relative
         ${active
-          ? 'bg-primary-50 text-primary-700 shadow-sm'
-          : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+          ? 'bg-primary-50 text-primary-700'
+          : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
         }`}
     >
-      <div className="flex items-center gap-3">
+      {active && <div className="absolute left-0 top-1.5 bottom-1.5 w-1 bg-primary-600 rounded-r-full" />}
+      <div className="flex items-center gap-3 ml-1">
         <Icon className={`w-4 h-4 ${active ? 'text-primary-600' : 'text-slate-400 group-hover:text-slate-600'}`} />
         <span>{label}</span>
       </div>
@@ -395,18 +408,15 @@ function SidebarItem({ label, icon: Icon, active, onClick, hasError }: {
   );
 }
 
-function SectionHeader({ title, subtitle, icon: Icon, color }: { title: string; subtitle?: string; icon: ElementType; color: string }) {
-  const colorClass = color.replace('bg-', 'text-').replace('-500', '-600');
-  const bgClass = color.replace('bg-', 'bg-').replace('-500', '-100');
-
+function SectionHeader({ title, subtitle, icon: Icon }: { title: string; subtitle?: string; icon: ElementType }) {
   return (
-    <div className="flex items-start gap-4 mb-8 pb-6 border-b border-slate-100">
-      <div className={`w-12 h-12 ${bgClass} rounded-2xl flex items-center justify-center shrink-0`}>
-        <Icon className={`w-6 h-6 ${colorClass}`} />
+    <div className="flex items-center gap-3 pb-2 border-b border-slate-200/60">
+      <div className="p-2 bg-slate-100 rounded-lg text-slate-600">
+        <Icon className="w-5 h-5" />
       </div>
       <div>
-        <h2 className="text-2xl font-bold text-slate-900">{title}</h2>
-        {subtitle && <p className="text-slate-500 mt-1">{subtitle}</p>}
+        <h2 className="text-xl font-bold text-slate-800">{title}</h2>
+        {subtitle && <p className="text-sm text-slate-500">{subtitle}</p>}
       </div>
     </div>
   );
@@ -425,26 +435,25 @@ interface SectionWithToggleProps extends SectionProps {
   toggleSection: (section: keyof ExpandedSections) => void;
 }
 
-// Reuse existing sections but cleaner
 function GeneralInfoSection({ formData, updateField }: SectionProps) {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-2">Data do atendimento</label>
+          <label className="block text-sm font-medium text-slate-700 mb-1.5">Data do atendimento</label>
           <input
             type="date"
             value={formData.data}
             onChange={e => updateField('data', e.target.value)}
-            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
+            className="input-field"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-2">Tipo de atendimento</label>
+          <label className="block text-sm font-medium text-slate-700 mb-1.5">Tipo de atendimento</label>
           <select
             value={formData.tipoAtendimento}
             onChange={e => updateField('tipoAtendimento', e.target.value)}
-            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all"
+            className="input-field"
           >
             <option value="consulta">Consulta</option>
             <option value="retorno">Retorno</option>
@@ -457,13 +466,13 @@ function GeneralInfoSection({ formData, updateField }: SectionProps) {
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-2">Local do atendimento</label>
+          <label className="block text-sm font-medium text-slate-700 mb-1.5">Local</label>
           <input
             type="text"
             value={formData.localAtendimento}
             onChange={e => updateField('localAtendimento', e.target.value)}
-            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all"
-            placeholder="Consultório, Hospital, etc."
+            className="input-field"
+            placeholder="Consultório, Hospital..."
           />
         </div>
       </div>
@@ -471,24 +480,23 @@ function GeneralInfoSection({ formData, updateField }: SectionProps) {
   );
 }
 
-// Subjective Section
 function SubjectiveSection({ formData, updateField, expandedSections, toggleSection, formErrors }: SectionWithToggleProps) {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 gap-6">
         <div className={formErrors?.queixaPrincipal ? 'animate-shake' : ''}>
-          <label className="block text-sm font-bold text-slate-700 mb-2">
+          <label className="block text-sm font-bold text-slate-800 mb-2">
             Queixa Principal <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
             value={formData.queixaPrincipal}
             onChange={e => updateField('queixaPrincipal', e.target.value)}
-            className={`w-full px-4 py-3 bg-white border rounded-xl focus:ring-2 outline-none transition-all text-lg
+            className={`w-full px-4 py-3 bg-slate-50 border rounded-lg focus:ring-2 outline-none transition-all text-base
               ${formErrors?.queixaPrincipal
                 ? 'border-red-300 focus:ring-red-200 bg-red-50 text-red-900 placeholder-red-400'
-                : 'border-slate-200 focus:ring-primary-500'}`}
-            placeholder="Ex: Dor abdominal há 3 dias"
+                : 'border-slate-200 focus:ring-primary-500/20 focus:border-primary-500'}`}
+            placeholder="Descreva o motivo principal do atendimento..."
           />
           {formErrors?.queixaPrincipal && (
             <div className="flex items-center gap-1 mt-2 text-red-600 text-xs font-medium">
@@ -500,7 +508,7 @@ function SubjectiveSection({ formData, updateField, expandedSections, toggleSect
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
            <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Início dos sintomas</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Início dos sintomas</label>
             <input
               type="date"
               value={formData.dataInicioSintomas}
@@ -509,7 +517,7 @@ function SubjectiveSection({ formData, updateField, expandedSections, toggleSect
             />
           </div>
            <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Duração</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Duração</label>
             <input
               type="text"
               value={formData.duracaoSintomas}
@@ -521,14 +529,14 @@ function SubjectiveSection({ formData, updateField, expandedSections, toggleSect
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-2">
+          <label className="block text-sm font-medium text-slate-700 mb-1.5">
             História da Doença Atual (HDA)
           </label>
           <textarea
             value={formData.historicoDoencaAtual}
             onChange={e => updateField('historicoDoencaAtual', e.target.value)}
-            className="input-field min-h-[120px]"
-            placeholder="Descreva a evolução cronológica dos sintomas, características, irradiação, intensidade..."
+            className="input-field min-h-[120px] leading-relaxed"
+            placeholder="Descreva a evolução cronológica dos sintomas..."
           />
         </div>
 
@@ -551,11 +559,11 @@ function SubjectiveSection({ formData, updateField, expandedSections, toggleSect
              </div>
 
              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Histórico Familiar</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Histórico Familiar</label>
                 <textarea
                   value={formData.historicoFamiliar}
                   onChange={e => updateField('historicoFamiliar', e.target.value)}
-                  className="input-field"
+                  className="input-field text-sm"
                   rows={2}
                   placeholder="Doenças na família..."
                 />
@@ -563,7 +571,7 @@ function SubjectiveSection({ formData, updateField, expandedSections, toggleSect
 
              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <InputField label="Cirurgias anteriores" value={formData.cirurgiasAnteriores} onChange={(v: string) => updateField('cirurgiasAnteriores', v)} isSmall />
-                <InputField label="Alergias (além das cadastradas)" value={formData.alergias} onChange={(v: string) => updateField('alergias', v)} isSmall />
+                <InputField label="Alergias (adicionais)" value={formData.alergias} onChange={(v: string) => updateField('alergias', v)} isSmall />
              </div>
           </div>
         </CollapsibleSection>
@@ -572,45 +580,41 @@ function SubjectiveSection({ formData, updateField, expandedSections, toggleSect
   );
 }
 
-// Helper component for vital sign cards
+// Redesigned Vital Sign Card
 interface VitalSignCardProps {
   icon: ElementType;
   label: string;
   value: string;
   unit: string;
-  color: string;
+  colorClass: string; // expects something like 'text-blue-600 bg-blue-50'
   children: ReactNode;
 }
 
-function VitalSignCard({ icon: Icon, label, value, unit, color, children }: VitalSignCardProps) {
+function VitalSignCard({ icon: Icon, label, value, unit, colorClass, children }: VitalSignCardProps) {
   return (
-    <div className={`bg-white rounded-xl p-4 border-2 ${color} shadow-sm hover:shadow-md transition-shadow`}>
+    <div className="bg-white rounded-lg p-4 border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-300 transition-all">
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2">
-          <div className={`p-2 rounded-lg ${color.replace('border', 'bg').replace('slate-200', 'slate-100')}`}>
-            <Icon className={`w-5 h-5 ${color.replace('border', 'text').replace('200', '600')}`} />
+          <div className={`p-1.5 rounded-md ${colorClass}`}>
+            <Icon className="w-4 h-4" />
           </div>
-          <span className="text-xs font-semibold text-slate-600 uppercase tracking-wide">{label}</span>
+          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">{label}</span>
         </div>
       </div>
-      <div className="mb-3">
+      <div className="mb-2">
         {children}
       </div>
       {value && (
-        <div className="mt-2 pt-2 border-t border-slate-100">
-          <div className="flex items-baseline gap-1">
-            <span className="text-2xl font-bold text-slate-800">{value}</span>
-            <span className="text-sm font-medium text-slate-500">{unit}</span>
-          </div>
+        <div className="mt-2 pt-2 border-t border-slate-50 flex items-baseline justify-end gap-1">
+          <span className="text-xl font-bold text-slate-800 tabular-nums tracking-tight">{value}</span>
+          <span className="text-xs font-medium text-slate-400">{unit}</span>
         </div>
       )}
     </div>
   );
 }
 
-// Objective Section
 function ObjectiveSection({ formData, updateField, expandedSections, toggleSection }: SectionWithToggleProps) {
-  // Calculate IMC
   const calculateIMC = () => {
     const peso = formData.peso ? Number(formData.peso) : 0;
     const altura = formData.altura ? Number(formData.altura) : 0;
@@ -625,22 +629,20 @@ function ObjectiveSection({ formData, updateField, expandedSections, toggleSecti
 
   return (
     <div className="space-y-8">
-      {/* Sinais Vitais em destaque */}
-      <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl p-6 border border-slate-200">
-        <h3 className="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2">
-           <Activity className="w-5 h-5 text-emerald-600" />
+      {/* Sinais Vitais Wrapper */}
+      <div className="bg-slate-50/50 rounded-xl p-6 border border-slate-200">
+        <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4 flex items-center gap-2">
+           <Activity className="w-4 h-4 text-slate-500" />
            Sinais Vitais
         </h3>
 
-        {/* Vital Signs Grid - Optimized flow */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
-          {/* Temperatura (Usually first or with PA) */}
           <VitalSignCard
             icon={Thermometer}
-            label="Temperatura"
+            label="Temp"
             value={formData.temperatura || ''}
             unit="°C"
-            color="border-orange-200"
+            colorClass="bg-orange-50 text-orange-600"
           >
             <NumberField
               label=""
@@ -650,13 +652,12 @@ function ObjectiveSection({ formData, updateField, expandedSections, toggleSecti
             />
           </VitalSignCard>
 
-          {/* Frequência Cardíaca */}
           <VitalSignCard
             icon={Heart}
-            label="Frequência Cardíaca"
+            label="F.C."
             value={formData.frequenciaCardiaca || ''}
             unit="bpm"
-            color="border-red-200"
+            colorClass="bg-red-50 text-red-600"
           >
             <NumberField
               label=""
@@ -665,13 +666,12 @@ function ObjectiveSection({ formData, updateField, expandedSections, toggleSecti
             />
           </VitalSignCard>
 
-          {/* Frequência Respiratória */}
           <VitalSignCard
             icon={Wind}
-            label="Frequência Respiratória"
+            label="F.R."
             value={formData.frequenciaRespiratoria || ''}
             unit="irpm"
-            color="border-sky-200"
+            colorClass="bg-sky-50 text-sky-600"
           >
             <NumberField
               label=""
@@ -680,13 +680,12 @@ function ObjectiveSection({ formData, updateField, expandedSections, toggleSecti
             />
           </VitalSignCard>
 
-          {/* Pressão Arterial */}
           <VitalSignCard
             icon={Activity}
-            label="Pressão Arterial"
+            label="P.A."
             value={formData.pressaoArterial || ''}
             unit="mmHg"
-            color="border-rose-200"
+            colorClass="bg-rose-50 text-rose-600"
           >
             <InputField
               label=""
@@ -697,13 +696,12 @@ function ObjectiveSection({ formData, updateField, expandedSections, toggleSecti
             />
           </VitalSignCard>
 
-          {/* Saturação O2 */}
           <VitalSignCard
             icon={Droplets}
             label="SpO₂"
             value={formData.saturacaoO2 || ''}
             unit="%"
-            color="border-blue-200"
+            colorClass="bg-blue-50 text-blue-600"
           >
             <NumberField
               label=""
@@ -712,13 +710,12 @@ function ObjectiveSection({ formData, updateField, expandedSections, toggleSecti
             />
           </VitalSignCard>
 
-          {/* Escala de Dor */}
           <VitalSignCard
             icon={Gauge}
-            label="Escala de Dor"
+            label="Dor"
             value={formData.escalaDor || ''}
             unit="/10"
-            color="border-slate-200"
+            colorClass="bg-slate-100 text-slate-600"
           >
             <NumberField
               label=""
@@ -729,13 +726,12 @@ function ObjectiveSection({ formData, updateField, expandedSections, toggleSecti
             />
           </VitalSignCard>
 
-          {/* Glicemia */}
           <VitalSignCard
             icon={Droplets}
-            label="Glicemia"
+            label="HGT"
             value={formData.glicemiaCapilar || ''}
             unit="mg/dL"
-            color="border-amber-200"
+            colorClass="bg-amber-50 text-amber-600"
           >
             <NumberField
               label=""
@@ -745,67 +741,62 @@ function ObjectiveSection({ formData, updateField, expandedSections, toggleSecti
           </VitalSignCard>
         </div>
 
-        {/* Antropometria Section */}
         <div className="mb-4">
-           <h4 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-2">
-              <Ruler className="w-4 h-4" /> Antropometria
+           <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+              <Ruler className="w-3 h-3" /> Antropometria
            </h4>
            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {/* Peso */}
-          <VitalSignCard
-            icon={Weight}
-            label="Peso"
-            value={formData.peso || ''}
-            unit="kg"
-            color="border-violet-200"
-          >
-            <NumberField
-              label=""
-              value={formData.peso}
-              onChange={(v: string) => updateField('peso', v)}
-              step={0.1}
-            />
-          </VitalSignCard>
+              <VitalSignCard
+                icon={Weight}
+                label="Peso"
+                value={formData.peso || ''}
+                unit="kg"
+                colorClass="bg-violet-50 text-violet-600"
+              >
+                <NumberField
+                  label=""
+                  value={formData.peso}
+                  onChange={(v: string) => updateField('peso', v)}
+                  step={0.1}
+                />
+              </VitalSignCard>
 
-          {/* Altura */}
-          <VitalSignCard
-            icon={Ruler}
-            label="Altura"
-            value={formData.altura || ''}
-            unit="cm"
-            color="border-indigo-200"
-          >
-            <NumberField
-              label=""
-              value={formData.altura}
-              onChange={(v: string) => updateField('altura', v)}
-            />
-          </VitalSignCard>
+              <VitalSignCard
+                icon={Ruler}
+                label="Altura"
+                value={formData.altura || ''}
+                unit="cm"
+                colorClass="bg-indigo-50 text-indigo-600"
+              >
+                <NumberField
+                  label=""
+                  value={formData.altura}
+                  onChange={(v: string) => updateField('altura', v)}
+                />
+              </VitalSignCard>
 
-          {/* IMC Calculado */}
-          <VitalSignCard
-            icon={Calculator}
-            label="IMC"
-            value={imc}
-            unit="kg/m²"
-            color="border-purple-200"
-          >
-            <div className="text-xs text-slate-600 italic">
-              {imc && (
-                <span>
-                  {Number(imc) < 18.5 && 'Abaixo do peso'}
-                  {Number(imc) >= 18.5 && Number(imc) < 25 && 'Peso normal'}
-                  {Number(imc) >= 25 && Number(imc) < 30 && 'Sobrepeso'}
-                  {Number(imc) >= 30 && 'Obesidade'}
-                </span>
-              )}
-              {!imc && 'Calculado automaticamente'}
-            </div>
-          </VitalSignCard>
-        </div>
+              <VitalSignCard
+                icon={Calculator}
+                label="IMC"
+                value={imc}
+                unit="kg/m²"
+                colorClass="bg-purple-50 text-purple-600"
+              >
+                <div className="text-xs text-slate-600 italic py-2">
+                  {imc ? (
+                    <span>
+                      {Number(imc) < 18.5 && 'Abaixo do peso'}
+                      {Number(imc) >= 18.5 && Number(imc) < 25 && 'Peso normal'}
+                      {Number(imc) >= 25 && Number(imc) < 30 && 'Sobrepeso'}
+                      {Number(imc) >= 30 && 'Obesidade'}
+                    </span>
+                  ) : 'Calculado auto.'}
+                </div>
+              </VitalSignCard>
+          </div>
         </div>
 
-        <div className="mt-6 pt-6 border-t border-slate-300">
+        <div className="mt-6 pt-6 border-t border-slate-200/60">
            <VitalSignsValidator
             vitalSigns={{
               pressaoArterial: formData.pressaoArterial,
@@ -822,8 +813,8 @@ function ObjectiveSection({ formData, updateField, expandedSections, toggleSecti
         </div>
       </div>
 
-      <div>
-        <h3 className="text-base font-bold text-slate-800 mb-4">Exame Físico</h3>
+      <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
+        <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4">Exame Físico</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           <SelectField
             label="Estado Geral"
@@ -852,17 +843,17 @@ function ObjectiveSection({ formData, updateField, expandedSections, toggleSecti
           <NumberField label="Glasgow" value={formData.escalaGlasgow} onChange={(v: string) => updateField('escalaGlasgow', v)} min={3} max={15} />
         </div>
 
-        <label className="block text-sm font-medium text-slate-700 mb-2">Descrição do Exame Físico</label>
+        <label className="block text-sm font-medium text-slate-700 mb-2">Descrição Detalhada</label>
         <textarea
             value={formData.exameFisico}
             onChange={e => updateField('exameFisico', e.target.value)}
-            className="input-field min-h-[100px]"
-            placeholder="Descreva os achados positivos do exame físico..."
+            className="input-field min-h-[100px] leading-relaxed"
+            placeholder="Descreva os achados..."
           />
       </div>
 
       <CollapsibleSection
-          title="Exame Segmentar Detalhado"
+          title="Exame Segmentar"
           icon={<Stethoscope className="w-4 h-4 text-emerald-500" />}
           isExpanded={expandedSections.exameFisicoDetalhado}
           onToggle={() => toggleSection('exameFisicoDetalhado')}
@@ -880,11 +871,10 @@ function ObjectiveSection({ formData, updateField, expandedSections, toggleSecti
   );
 }
 
-// Assessment Section
 function AssessmentSection({ formData, updateField, formErrors }: SectionProps) {
   return (
     <div className="space-y-6">
-      <div className="bg-amber-50 rounded-xl p-6 border border-amber-100">
+      <div className="bg-amber-50/50 rounded-lg p-5 border border-amber-100/60">
          <label className="block text-sm font-bold text-amber-900 mb-2">Diagnóstico Principal (CID-10) <span className="text-red-500">*</span></label>
          <CID10Selector
             selectedCodes={formData.cid10 ? formData.cid10.split(',').map((c: string) => c.trim()).filter(Boolean) : []}
@@ -905,7 +895,6 @@ function AssessmentSection({ formData, updateField, formErrors }: SectionProps) 
   );
 }
 
-// Plan Section
 interface PlanSectionProps extends SectionProps {
   newPrescription: PrescriptionData;
   setNewPrescription: (data: PrescriptionData) => void;
@@ -918,24 +907,23 @@ function PlanSection({ formData, updateField, newPrescription, setNewPrescriptio
   return (
     <div className="space-y-8">
        <div>
-          <label className="block text-sm font-bold text-slate-700 mb-2">Conduta Clínica <span className="text-red-500">*</span></label>
+          <label className="block text-sm font-bold text-slate-800 mb-2">Conduta Clínica <span className="text-red-500">*</span></label>
           <textarea
             value={formData.conduta}
             onChange={e => updateField('conduta', e.target.value)}
-            className={`input-field min-h-[120px] ${formErrors?.conduta ? 'border-red-500 focus:ring-red-200' : ''}`}
-            placeholder="Descreva o plano de tratamento, conduta tomada..."
+            className={`input-field min-h-[120px] leading-relaxed ${formErrors?.conduta ? 'border-red-500 focus:ring-red-200' : ''}`}
+            placeholder="Descreva o plano de tratamento..."
           />
           {formErrors?.conduta && <p className="text-red-500 text-xs mt-1">{formErrors.conduta}</p>}
        </div>
 
-       {/* Prescriptions */}
-        <div className="border border-slate-200 rounded-xl">
-          <div className="bg-slate-50 px-4 py-3 border-b border-slate-200 rounded-t-xl">
-             <h4 className="font-bold text-slate-700 flex items-center gap-2">
+        <div className="border border-slate-200 rounded-lg overflow-hidden">
+          <div className="bg-slate-50 px-4 py-3 border-b border-slate-200 flex justify-between items-center">
+             <h4 className="font-bold text-slate-700 flex items-center gap-2 text-sm">
                 <ClipboardList className="w-4 h-4" /> Prescrição Medicamentosa
              </h4>
           </div>
-          <div className="p-4">
+          <div className="p-4 bg-white">
              <PrescriptionSection
               prescricoes={formData.prescricoes}
               newPrescription={newPrescription}
@@ -944,9 +932,8 @@ function PlanSection({ formData, updateField, newPrescription, setNewPrescriptio
               removePrescription={removePrescription}
             />
 
-            {/* Drug Interactions */}
             {formData.prescricoes.length > 0 && (
-              <div className="mt-4">
+              <div className="mt-4 pt-4 border-t border-slate-100">
                 <DrugInteractionChecker
                   prescriptions={formData.prescricoes.map((p: PrescriptionData) => ({
                     id: generateId(),
@@ -961,7 +948,7 @@ function PlanSection({ formData, updateField, newPrescription, setNewPrescriptio
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Solicitação de Exames</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">Solicitação de Exames</label>
               <textarea
                 value={formData.solicitacaoExames}
                 onChange={e => updateField('solicitacaoExames', e.target.value)}
@@ -971,7 +958,7 @@ function PlanSection({ formData, updateField, newPrescription, setNewPrescriptio
               />
            </div>
            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Encaminhamentos</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">Encaminhamentos</label>
               <textarea
                 value={formData.encaminhamentos}
                 onChange={e => updateField('encaminhamentos', e.target.value)}
@@ -982,9 +969,8 @@ function PlanSection({ formData, updateField, newPrescription, setNewPrescriptio
            </div>
         </div>
 
-        {/* Orientações */}
-        <div className="bg-blue-50 p-5 rounded-xl border border-blue-100">
-           <div className="flex justify-between items-center mb-2">
+        <div className="bg-blue-50/50 p-5 rounded-lg border border-blue-100/60">
+           <div className="flex justify-between items-center mb-3">
               <label className="text-sm font-bold text-blue-900">Orientações ao Paciente</label>
               <OrientationTemplateSelector
                 currentCIDs={formData.cid10 ? formData.cid10.split(',').map((c: string) => c.trim()).filter(Boolean) : []}
@@ -996,16 +982,15 @@ function PlanSection({ formData, updateField, newPrescription, setNewPrescriptio
            <textarea
             value={formData.orientacoes}
             onChange={e => updateField('orientacoes', e.target.value)}
-            className="w-full bg-white border border-blue-200 rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+            className="w-full bg-white border border-blue-200 rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500/20 outline-none leading-relaxed"
             rows={4}
             placeholder="Instruções, cuidados, sinais de alerta..."
           />
         </div>
 
-        {/* Retorno e Atestado */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-           <div className="p-4 border border-slate-200 rounded-xl bg-slate-50">
-              <h4 className="font-semibold text-slate-700 mb-3">Retorno</h4>
+           <div className="p-4 border border-slate-200 rounded-lg bg-slate-50">
+              <h4 className="font-semibold text-slate-700 mb-3 text-sm">Retorno</h4>
               <div className="space-y-3">
                  <InputField label="Previsão" value={formData.retorno} onChange={(v: string) => updateField('retorno', v)} placeholder="Ex: 30 dias" isSmall />
                  <div>
@@ -1015,14 +1000,14 @@ function PlanSection({ formData, updateField, newPrescription, setNewPrescriptio
               </div>
            </div>
 
-           <div className="p-4 border border-slate-200 rounded-xl bg-slate-50">
+           <div className="p-4 border border-slate-200 rounded-lg bg-slate-50">
                <div className="flex justify-between items-center mb-3">
-                  <h4 className="font-semibold text-slate-700">Atestado Médico</h4>
+                  <h4 className="font-semibold text-slate-700 text-sm">Atestado Médico</h4>
                   <input
                     type="checkbox"
                     checked={formData.atestadoEmitido}
                     onChange={e => updateField('atestadoEmitido', e.target.checked)}
-                    className="w-5 h-5 text-primary-600 rounded"
+                    className="w-4 h-4 text-primary-600 rounded border-gray-300 focus:ring-primary-500"
                   />
                </div>
 
@@ -1052,65 +1037,49 @@ function PatientHeader({ patient, records }: { patient: Patient; records: Medica
   const age = calculateAge(patient.dataNascimento);
 
   return (
-    <div className="bg-slate-50 border-b border-slate-200 px-6 py-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 shrink-0">
-      {/* Nome e CPF */}
+    <div className="bg-white border-b border-slate-200 px-6 py-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 shrink-0">
       <div className="flex flex-col justify-center">
-        <h2 className="text-lg font-bold text-slate-900 leading-tight">{patient.nome}</h2>
-        <p className="text-sm text-slate-500 mt-1">{formatCPF(patient.cpf)}</p>
+        <h2 className="text-base font-bold text-slate-900 leading-tight">{patient.nome}</h2>
+        <p className="text-xs text-slate-500 mt-1 font-mono">{formatCPF(patient.cpf)}</p>
       </div>
 
-      {/* Idade e Nascimento */}
-      <div className="flex flex-col justify-center border-l border-slate-200 pl-6 md:border-l-0 lg:border-l">
-        <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Idade / Nascimento</span>
+      <div className="flex flex-col justify-center border-l border-slate-100 pl-6 md:border-l-0 lg:border-l">
+        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Idade</span>
         <div className="flex items-baseline gap-2">
-           <span className="text-base font-medium text-slate-700">{age} anos</span>
-           <span className="text-slate-400">|</span>
-           <span className="text-sm text-slate-600">{formatDate(patient.dataNascimento)}</span>
+           <span className="text-sm font-semibold text-slate-700">{age} anos</span>
+           <span className="text-[11px] text-slate-400">{formatDate(patient.dataNascimento)}</span>
         </div>
       </div>
 
-      {/* Contato */}
-      <div className="flex flex-col justify-center lg:border-l border-slate-200 lg:pl-6">
-         <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Contato</span>
+      <div className="flex flex-col justify-center lg:border-l border-slate-100 lg:pl-6">
+         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Contato</span>
          <div className="text-sm text-slate-700 font-medium">{formatPhone(patient.telefone)}</div>
-         <div className="text-xs text-slate-500 truncate max-w-[200px]" title={patient.email}>{patient.email}</div>
       </div>
 
-      {/* Alergias e Medicamentos */}
-      <div className="flex flex-col justify-center lg:border-l border-slate-200 lg:pl-6">
-         <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Alergias / Medicamentos</span>
+      <div className="flex flex-col justify-center lg:border-l border-slate-100 lg:pl-6">
+         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Alergias</span>
          <div className="text-sm font-medium truncate">
             {patient.alergias && patient.alergias.length > 0 ? (
-               <span className="text-red-600" title={Array.isArray(patient.alergias) ? patient.alergias.join(', ') : patient.alergias}>
+               <span className="text-red-600 bg-red-50 px-2 py-0.5 rounded-full text-xs" title={Array.isArray(patient.alergias) ? patient.alergias.join(', ') : patient.alergias}>
                  {Array.isArray(patient.alergias) ? patient.alergias[0] + (patient.alergias.length > 1 ? '...' : '') : patient.alergias}
                </span>
             ) : (
-               <span className="text-slate-400">Nenhuma</span>
-            )}
-         </div>
-         <div className="text-xs text-slate-500 truncate mt-0.5">
-            {patient.medicamentosEmUso && patient.medicamentosEmUso.length > 0 ? (
-               <span title={Array.isArray(patient.medicamentosEmUso) ? patient.medicamentosEmUso.join(', ') : patient.medicamentosEmUso}>
-                 {Array.isArray(patient.medicamentosEmUso) ? patient.medicamentosEmUso[0] + (patient.medicamentosEmUso.length > 1 ? '...' : '') : patient.medicamentosEmUso}
-               </span>
-            ) : (
-               <span className="text-slate-400">Sem medicamentos</span>
+               <span className="text-slate-400 text-xs">Nenhuma registrada</span>
             )}
          </div>
       </div>
 
-      {/* Resumo */}
-      <div className="flex flex-col justify-center lg:border-l border-slate-200 lg:pl-6">
-         <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Resumo</span>
+      <div className="flex flex-col justify-center lg:border-l border-slate-100 lg:pl-6">
+         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Histórico</span>
          <div className="flex items-center gap-4">
             <div>
-               <span className="text-xl font-bold text-primary-600">{records.length}</span>
-               <span className="text-xs text-slate-500 ml-1">Atendimentos</span>
+               <span className="text-lg font-bold text-primary-600">{records.length}</span>
+               <span className="text-[10px] text-slate-500 ml-1">Visitas</span>
             </div>
             {lastVisit && (
-               <div className="pl-4 border-l border-slate-200">
-                  <div className="text-[10px] text-slate-400 uppercase">Último</div>
-                  <div className="text-sm font-medium text-slate-700">{formatDate(lastVisit.data, 'dd/MM')}</div>
+               <div className="pl-4 border-l border-slate-100">
+                  <div className="text-[10px] text-slate-400 uppercase">Última</div>
+                  <div className="text-xs font-medium text-slate-700">{formatDate(lastVisit.data, 'dd/MM')}</div>
                </div>
             )}
          </div>
@@ -1119,7 +1088,6 @@ function PatientHeader({ patient, records }: { patient: Patient; records: Medica
   );
 }
 
-// Attachments Section
 interface AttachmentsSectionProps {
   attachments: MedicalRecordAttachment[];
   onAdd: (attachment: Omit<MedicalRecordAttachment, 'id' | 'medicalRecordId' | 'uploadedAt'>) => void;
@@ -1129,15 +1097,14 @@ interface AttachmentsSectionProps {
 function AttachmentsSection({ attachments, onAdd, onRemove }: AttachmentsSectionProps) {
   return (
     <div className="space-y-4">
-      <div className="bg-slate-50 p-6 rounded-xl border border-dashed border-slate-300 text-center">
-         <p className="text-slate-500 mb-4">Adicione resultados de exames, imagens ou documentos externos.</p>
+      <div className="bg-slate-50 p-8 rounded-xl border border-dashed border-slate-300 text-center hover:bg-slate-50/80 transition-colors">
+         <p className="text-slate-500 mb-4 text-sm">Arraste arquivos ou clique para adicionar resultados de exames.</p>
          <MedicalAttachments attachments={attachments} onAdd={onAdd} onRemove={onRemove} />
       </div>
     </div>
   );
 }
 
-// Prescription Section Logic (Reused)
 interface PrescriptionSectionProps {
   prescricoes: PrescriptionData[];
   newPrescription: PrescriptionData;
@@ -1152,12 +1119,14 @@ function PrescriptionSection({ prescricoes, newPrescription, setNewPrescription,
       {prescricoes.length > 0 && (
         <div className="space-y-2 mb-4">
           {prescricoes.map((rx: PrescriptionData, idx: number) => (
-            <div key={idx} className="flex items-center gap-2 p-3 bg-white rounded-lg border border-slate-200 shadow-sm">
-              <span className="flex-1 text-sm">
-                <strong>{rx.medicamento}</strong> {rx.concentracao} - {rx.posologia}
-                {rx.viaAdministracao && <span className="text-slate-500"> | Via: {rx.viaAdministracao}</span>}
+            <div key={idx} className="flex items-center gap-2 p-3 bg-white rounded-lg border border-slate-100 shadow-sm group">
+              <span className="flex-1 text-sm text-slate-700">
+                <strong className="text-slate-900">{rx.medicamento}</strong> {rx.concentracao} <span className="text-slate-400 mx-1">•</span> {rx.posologia}
+                {rx.viaAdministracao && <span className="text-slate-500"> ({rx.viaAdministracao})</span>}
               </span>
-              <button type="button" onClick={() => removePrescription(idx)} className="text-red-500 hover:text-red-700 p-1">×</button>
+              <button type="button" onClick={() => removePrescription(idx)} className="text-slate-400 hover:text-red-500 p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <X className="w-4 h-4" />
+              </button>
             </div>
           ))}
         </div>
@@ -1168,7 +1137,7 @@ function PrescriptionSection({ prescricoes, newPrescription, setNewPrescription,
           onChange={(value: string) => setNewPrescription({ ...newPrescription, medicamento: value })}
           className="input-field text-sm w-full"
         />
-        <input type="text" value={newPrescription.concentracao} onChange={e => setNewPrescription({ ...newPrescription, concentracao: e.target.value })} className="input-field text-sm" placeholder="Concentração" />
+        <input type="text" value={newPrescription.concentracao} onChange={e => setNewPrescription({ ...newPrescription, concentracao: e.target.value })} className="input-field text-sm" placeholder="Concentração (ex: 500mg)" />
         <select value={newPrescription.formaFarmaceutica} onChange={e => setNewPrescription({ ...newPrescription, formaFarmaceutica: e.target.value })} className="input-field text-sm">
           <option>Comprimido</option>
           <option>Cápsula</option>
@@ -1181,18 +1150,19 @@ function PrescriptionSection({ prescricoes, newPrescription, setNewPrescription,
           <option>Gel</option>
           <option>Injetável</option>
         </select>
-        <input type="text" value={newPrescription.posologia} onChange={e => setNewPrescription({ ...newPrescription, posologia: e.target.value })} className="input-field text-sm" placeholder="Posologia" />
+        <input type="text" value={newPrescription.posologia} onChange={e => setNewPrescription({ ...newPrescription, posologia: e.target.value })} className="input-field text-sm" placeholder="Posologia (ex: 1cp 8/8h)" />
       </div>
       <div className="flex justify-end">
-         <button type="button" onClick={addPrescription} className="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm font-medium hover:bg-slate-900 transition-colors">
-            Adicionar Prescrição
+         <button type="button" onClick={addPrescription} className="px-4 py-2 bg-slate-800 text-white rounded-lg text-xs font-medium hover:bg-slate-900 transition-colors flex items-center gap-2">
+            <ClipboardList className="w-3 h-3" />
+            Adicionar à Receita
          </button>
       </div>
     </div>
   );
 }
 
-// Helpers
+// Helpers (Styled)
 interface InputFieldProps {
   label: string;
   value: string | number;
@@ -1205,12 +1175,12 @@ interface InputFieldProps {
 function InputField({ label, value, onChange, placeholder, required, isSmall = true }: InputFieldProps) {
   return (
     <div>
-      <label className={`block ${isSmall ? 'text-xs font-medium text-slate-500' : 'text-sm font-medium text-slate-700'} mb-1`}>{label}</label>
+      <label className={`block ${isSmall ? 'text-xs font-bold text-slate-500 uppercase tracking-wide' : 'text-sm font-medium text-slate-700'} mb-1.5`}>{label}</label>
       <input
         type="text"
         value={value}
         onChange={e => onChange(e.target.value)}
-        className="input-field w-full"
+        className="input-field w-full text-sm"
         placeholder={placeholder}
         required={required}
       />
@@ -1231,12 +1201,12 @@ interface NumberFieldProps {
 function NumberField({ label, value, onChange, min, max, step, placeholder }: NumberFieldProps) {
   return (
     <div>
-      <label className="block text-xs font-medium text-slate-500 mb-1">{label}</label>
+      {label && <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">{label}</label>}
       <input
         type="number"
         value={value}
         onChange={e => onChange(e.target.value)}
-        className="input-field w-full"
+        className="input-field w-full text-sm"
         min={min}
         max={max}
         step={step}
@@ -1257,11 +1227,11 @@ interface SelectFieldProps {
 function SelectField({ label, value, onChange, options, isSmall = true }: SelectFieldProps) {
   return (
     <div>
-      <label className={`block ${isSmall ? 'text-xs font-medium text-slate-500' : 'text-sm font-medium text-slate-700'} mb-1`}>{label}</label>
+      <label className={`block ${isSmall ? 'text-xs font-bold text-slate-500 uppercase tracking-wide' : 'text-sm font-medium text-slate-700'} mb-1.5`}>{label}</label>
       <select
         value={value}
         onChange={e => onChange(e.target.value)}
-        className="input-field w-full"
+        className="input-field w-full text-sm"
       >
         {options.map((opt: { value: string; label: string }) => (
           <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -1281,8 +1251,8 @@ interface CollapsibleSectionProps {
 
 function CollapsibleSection({ title, icon, isExpanded, onToggle, children }: CollapsibleSectionProps) {
   return (
-    <div className="border border-slate-200 rounded-xl overflow-hidden bg-white">
-      <button type="button" onClick={onToggle} className="w-full px-4 py-3 bg-slate-50 hover:bg-slate-100 flex items-center justify-between transition-colors">
+    <div className="border border-slate-200 rounded-lg overflow-hidden bg-white">
+      <button type="button" onClick={onToggle} className="w-full px-4 py-3 bg-slate-50/50 hover:bg-slate-50 flex items-center justify-between transition-colors">
         <div className="flex items-center gap-2">
           {icon}
           <span className="text-sm font-semibold text-slate-700">{title}</span>
