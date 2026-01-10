@@ -2,7 +2,7 @@
 // Seguindo padrões CFM e boas práticas de documentação médica
 import type { MedicalDocument, Patient, Prescription } from '../types';
 import { CLINIC_INFO, DOCUMENT_TYPES } from '../constants/clinic';
-import { formatDate, formatCPF, calculateAge } from './helpers';
+import { formatDate, formatCPF, calculateAge, escapeHtml } from './helpers';
 
 interface DocumentData {
   document: MedicalDocument;
@@ -53,11 +53,11 @@ function generateHeader(protocol: string): string {
         </svg>
       </div>
       <div class="clinic-details">
-        <h1>${CLINIC_INFO.nome}</h1>
+        <h1>${escapeHtml(CLINIC_INFO.nome)}</h1>
         <div class="divider-small"></div>
-        <p class="address">${CLINIC_INFO.endereco} • ${CLINIC_INFO.cidade} • CEP ${CLINIC_INFO.cep}</p>
-        <p class="contact">Tel: ${CLINIC_INFO.telefone} • ${CLINIC_INFO.email}</p>
-        <p class="meta">CNPJ: ${CLINIC_INFO.cnpj} • <span class="protocol-tag">Protocolo: ${protocol}</span></p>
+        <p class="address">${escapeHtml(CLINIC_INFO.endereco)} • ${escapeHtml(CLINIC_INFO.cidade)} • CEP ${escapeHtml(CLINIC_INFO.cep)}</p>
+        <p class="contact">Tel: ${escapeHtml(CLINIC_INFO.telefone)} • ${escapeHtml(CLINIC_INFO.email)}</p>
+        <p class="meta">CNPJ: ${escapeHtml(CLINIC_INFO.cnpj)} • <span class="protocol-tag">Protocolo: ${escapeHtml(protocol)}</span></p>
       </div>
     </header>
   `;
@@ -72,14 +72,14 @@ function generateFooter(document: MedicalDocument, validationCode: string): stri
   return `
     <footer class="doc-footer">
       <div class="date-location">
-        <p>${CLINIC_INFO.cidade.split(' - ')[0]}, ${formattedDate}.</p>
+        <p>${escapeHtml(CLINIC_INFO.cidade.split(' - ')[0])}, ${escapeHtml(formattedDate)}.</p>
       </div>
 
       <div class="signature-block">
         <div class="signature-line"></div>
-        <p class="doctor-name">${document.medicoNome || 'Dr. Lucas Duarte'}</p>
-        <p class="doctor-crm">CRM/SP ${document.medicoCRM || '123.456'}</p>
-        ${document.medicoEspecialidade ? `<p class="doctor-specialty">${document.medicoEspecialidade}</p>` : ''}
+        <p class="doctor-name">${escapeHtml(document.medicoNome || 'Dr. Lucas Duarte')}</p>
+        <p class="doctor-crm">CRM/SP ${escapeHtml(document.medicoCRM || '123.456')}</p>
+        ${document.medicoEspecialidade ? `<p class="doctor-specialty">${escapeHtml(document.medicoEspecialidade)}</p>` : ''}
       </div>
 
       <div class="validation-strip">
@@ -88,7 +88,7 @@ function generateFooter(document: MedicalDocument, validationCode: string): stri
           <div class="validation-text">
             <p><strong>Autenticidade:</strong> Este documento possui assinatura digital.</p>
             <p>Verifique em: <strong>drlucasduarte.com.br/validar</strong> com o código:</p>
-            <p class="validation-code">${validationCode}</p>
+            <p class="validation-code">${escapeHtml(validationCode)}</p>
           </div>
         </div>
         ${!isEmitted ? '<div class="draft-watermark-footer">DOCUMENTO NÃO EMITIDO (RASCUNHO)</div>' : ''}
@@ -107,20 +107,20 @@ function generatePatientInfo(patient: Patient, showFullAddress: boolean = true):
       <div class="patient-grid">
         <div class="field-group full-width">
           <span class="label">Nome Completo</span>
-          <span class="value strong">${patient.nome}</span>
+          <span class="value strong">${escapeHtml(patient.nome)}</span>
         </div>
         <div class="field-group">
           <span class="label">CPF</span>
-          <span class="value">${formatCPF(patient.cpf)}</span>
+          <span class="value">${escapeHtml(formatCPF(patient.cpf))}</span>
         </div>
         <div class="field-group">
           <span class="label">Idade</span>
-          <span class="value">${age} anos (${formatDate(patient.dataNascimento)})</span>
+          <span class="value">${age} anos (${escapeHtml(formatDate(patient.dataNascimento))})</span>
         </div>
         ${showFullAddress && patient.endereco ? `
         <div class="field-group full-width">
           <span class="label">Endereço</span>
-          <span class="value">${patient.endereco.logradouro}, ${patient.endereco.numero} - ${patient.endereco.bairro}</span>
+          <span class="value">${escapeHtml(patient.endereco.logradouro)}, ${escapeHtml(patient.endereco.numero)} - ${escapeHtml(patient.endereco.bairro)}</span>
         </div>
         ` : ''}
       </div>
@@ -144,14 +144,14 @@ function generateAtestadoMedico({ document, patient }: DocumentData): string {
         <p class="text-justify">
           Atesto para os devidos fins que o(a) paciente acima identificado(a) esteve sob meus cuidados profissionais nesta data,
           necessitando de afastamento de suas atividades laborais e/ou escolares por um período de
-          <strong>${diasTexto}</strong>${dataInicio ? `, a partir de ${dataInicio}` : ''}${dataFim ? ` até ${dataFim}` : ''}.
+          <strong>${escapeHtml(diasTexto)}</strong>${dataInicio ? `, a partir de ${escapeHtml(dataInicio)}` : ''}${dataFim ? ` até ${escapeHtml(dataFim)}` : ''}.
         </p>
-        ${document.content ? `<p class="text-justify additional-note">${document.content}</p>` : ''}
+        ${document.content ? `<p class="text-justify additional-note">${escapeHtml(document.content)}</p>` : ''}
       </div>
       ${document.exibirCid && document.cid10 && document.cid10.length > 0 ? `
         <div class="cid-box">
           <span class="cid-label">CID-10:</span>
-          <span class="cid-value">${document.cid10.join(', ')}</span>
+          <span class="cid-value">${document.cid10.map(escapeHtml).join(', ')}</span>
           <p class="cid-consent">(Autorizado pelo paciente)</p>
         </div>
       ` : ''}
@@ -169,19 +169,19 @@ function generateReceita({ document, patient }: DocumentData): string {
       <div class="rx-index">${idx + 1}</div>
       <div class="rx-details">
         <div class="rx-name-row">
-          <span class="rx-name">${rx.medicamento}</span>
-          <span class="rx-concentration">${rx.concentracao || ''}</span>
-          <span class="rx-form">${rx.formaFarmaceutica}</span>
+          <span class="rx-name">${escapeHtml(rx.medicamento)}</span>
+          <span class="rx-concentration">${escapeHtml(rx.concentracao || '')}</span>
+          <span class="rx-form">${escapeHtml(rx.formaFarmaceutica)}</span>
         </div>
         <div class="rx-instruction">
-          <span class="rx-label">Uso:</span> ${rx.posologia}
+          <span class="rx-label">Uso:</span> ${escapeHtml(rx.posologia)}
         </div>
         <div class="rx-meta">
-          ${rx.quantidade ? `<span>Qtd: <strong>${rx.quantidade}</strong></span>` : ''}
-          ${rx.viaAdministracao ? `<span>Via: ${rx.viaAdministracao}</span>` : ''}
-          ${rx.duracao ? `<span>Duração: ${rx.duracao}</span>` : ''}
+          ${rx.quantidade ? `<span>Qtd: <strong>${escapeHtml(rx.quantidade)}</strong></span>` : ''}
+          ${rx.viaAdministracao ? `<span>Via: ${escapeHtml(rx.viaAdministracao)}</span>` : ''}
+          ${rx.duracao ? `<span>Duração: ${escapeHtml(rx.duracao)}</span>` : ''}
         </div>
-        ${rx.observacoes ? `<div class="rx-obs">Obs: ${rx.observacoes}</div>` : ''}
+        ${rx.observacoes ? `<div class="rx-obs">Obs: ${escapeHtml(rx.observacoes)}</div>` : ''}
       </div>
     </div>
   `;
@@ -220,12 +220,12 @@ function generateSolicitacaoExames({ document, patient }: DocumentData): string 
       ${document.indicacaoClinica ? `
         <div class="clinical-indication">
           <h4>Indicação Clínica:</h4>
-          <p>${document.indicacaoClinica}</p>
+          <p>${escapeHtml(document.indicacaoClinica)}</p>
         </div>
       ` : ''}
       <div class="exams-list-container">
         <ul class="exams-list">
-          ${exames.map(ex => `<li>${ex}</li>`).join('')}
+          ${exames.map(ex => `<li>${escapeHtml(ex)}</li>`).join('')}
         </ul>
       </div>
     </main>
@@ -240,7 +240,7 @@ function generateEncaminhamento({ document, patient }: DocumentData): string {
       <div class="referral-box">
         <div class="referral-to">
           <span class="label">Para Especialidade:</span>
-          <span class="value">${document.especialidade || 'A quem interessar'}</span>
+          <span class="value">${escapeHtml(document.especialidade || 'A quem interessar')}</span>
         </div>
         <div class="referral-urgency ${document.urgencia === 'urgente' ? 'urgente' : ''}">
           Caráter: ${document.urgencia ? document.urgencia.toUpperCase() : 'ELETIVO'}
@@ -248,12 +248,12 @@ function generateEncaminhamento({ document, patient }: DocumentData): string {
       </div>
       <div class="content-block">
         <h4>Motivo do Encaminhamento:</h4>
-        <p class="text-justify">${document.motivoEncaminhamento || document.content || ''}</p>
+        <p class="text-justify">${escapeHtml(document.motivoEncaminhamento || document.content || '')}</p>
       </div>
       ${document.cid10 && document.cid10.length > 0 ? `
          <div class="content-block">
             <h4>Hipótese Diagnóstica (CID-10):</h4>
-            <p>${document.cid10.join(', ')}</p>
+            <p>${document.cid10.map(escapeHtml).join(', ')}</p>
          </div>
       ` : ''}
     </main>
@@ -269,7 +269,7 @@ function generateDeclaracaoComparecimento({ document, patient }: DocumentData): 
       <div class="content-block">
         <p class="text-justify">
           Declaro para os devidos fins que o(a) paciente acima identificado(a) compareceu a esta unidade de saúde
-          no dia <strong>${dataAtendimento}</strong>${document.horaChegada ? `, das ${document.horaChegada}` : ''}${document.horaSaida ? ` às ${document.horaSaida}` : ''},
+          no dia <strong>${escapeHtml(dataAtendimento)}</strong>${document.horaChegada ? `, das ${escapeHtml(document.horaChegada)}` : ''}${document.horaSaida ? ` às ${escapeHtml(document.horaSaida)}` : ''},
           para atendimento médico.
         </p>
       </div>
@@ -284,11 +284,11 @@ function generateDeclaracaoAcompanhante({ document, patient }: DocumentData): st
       ${generatePatientInfo(patient, false)}
       <div class="content-block">
         <p class="text-justify">
-          Declaro para os devidos fins que o(a) Sr(a). <strong>${document.nomeAcompanhante || '_______________________'}</strong>,
-          ${document.cpfAcompanhante ? `portador(a) do CPF nº ${document.cpfAcompanhante},` : ''}
+          Declaro para os devidos fins que o(a) Sr(a). <strong>${escapeHtml(document.nomeAcompanhante || '_______________________')}</strong>,
+          ${document.cpfAcompanhante ? `portador(a) do CPF nº ${escapeHtml(document.cpfAcompanhante)},` : ''}
           esteve presente nesta unidade acompanhando o(a) paciente durante seu atendimento médico
-          ${document.horaChegadaAcompanhante ? `no dia de hoje, das ${document.horaChegadaAcompanhante}` : 'nesta data'}
-          ${document.horaSaidaAcompanhante ? ` às ${document.horaSaidaAcompanhante}` : ''}.
+          ${document.horaChegadaAcompanhante ? `no dia de hoje, das ${escapeHtml(document.horaChegadaAcompanhante)}` : 'nesta data'}
+          ${document.horaSaidaAcompanhante ? ` às ${escapeHtml(document.horaSaidaAcompanhante)}` : ''}.
         </p>
       </div>
     </main>
@@ -299,22 +299,22 @@ function generateLaudoMedico({ document, patient }: DocumentData): string {
   return `
     <main class="doc-body">
       <h2 class="doc-title">LAUDO MÉDICO</h2>
-      ${document.finalidade ? `<p class="subtitle" style="text-align:center;color:#666;margin-bottom:20px">Finalidade: ${document.finalidade}</p>` : ''}
+      ${document.finalidade ? `<p class="subtitle" style="text-align:center;color:#666;margin-bottom:20px">Finalidade: ${escapeHtml(document.finalidade)}</p>` : ''}
       ${generatePatientInfo(patient, true)}
       <div class="content-block">
         <h4>Histórico e Exame Clínico</h4>
-        <p class="text-justify">${document.content || 'Não informado.'}</p>
+        <p class="text-justify">${escapeHtml(document.content || 'Não informado.')}</p>
       </div>
       ${document.cid10 && document.cid10.length > 0 ? `
         <div class="content-block">
           <h4>Diagnóstico (CID-10)</h4>
-          <p><strong>${document.cid10.join(', ')}</strong></p>
+          <p><strong>${document.cid10.map(escapeHtml).join(', ')}</strong></p>
         </div>
       ` : ''}
       ${document.conclusao ? `
         <div class="content-block">
           <h4>Conclusão e Parecer</h4>
-          <p class="text-justify">${document.conclusao}</p>
+          <p class="text-justify">${escapeHtml(document.conclusao)}</p>
         </div>
       ` : ''}
     </main>
@@ -329,7 +329,7 @@ function generateGuiaInternacao({ document, patient }: DocumentData): string {
       <div class="grid-2">
         <div class="box-item">
           <span class="box-label">Hospital de Destino</span>
-          <span class="box-value">${document.hospitalDestino || 'A definir'}</span>
+          <span class="box-value">${escapeHtml(document.hospitalDestino || 'A definir')}</span>
         </div>
         <div class="box-item">
           <span class="box-label">Caráter da Internação</span>
@@ -343,23 +343,23 @@ function generateGuiaInternacao({ document, patient }: DocumentData): string {
         </div>
         <div class="box-item">
           <span class="box-label">Previsão de Permanência</span>
-          <span class="box-value">${document.previsaoPermanencia || 'A critério médico'}</span>
+          <span class="box-value">${escapeHtml(document.previsaoPermanencia || 'A critério médico')}</span>
         </div>
       </div>
       ${document.cid10 && document.cid10.length > 0 ? `
         <div class="content-block">
           <h4>Hipótese Diagnóstica (CID-10)</h4>
-          <p>${document.cid10.join(', ')}</p>
+          <p>${document.cid10.map(escapeHtml).join(', ')}</p>
         </div>
       ` : ''}
       <div class="content-block">
         <h4>Justificativa Clínica</h4>
-        <p class="text-justify">${document.justificativaInternacao || document.content || ''}</p>
+        <p class="text-justify">${escapeHtml(document.justificativaInternacao || document.content || '')}</p>
       </div>
       ${document.procedimentoProposto ? `
         <div class="content-block">
           <h4>Procedimento Proposto</h4>
-          <p>${document.procedimentoProposto}</p>
+          <p>${escapeHtml(document.procedimentoProposto)}</p>
         </div>
       ` : ''}
     </main>
@@ -389,13 +389,13 @@ function generateAtestadoAptidao({ document, patient }: DocumentData): string {
         <h4>Finalidade / Atividade</h4>
         <p class="text-justify">
           ${document.tipoAptidao ? document.tipoAptidao.replace(/_/g, ' ').toUpperCase() : 'ATIVIDADE FÍSICA'}
-          ${document.modalidadeEsportiva ? ` - ${document.modalidadeEsportiva}` : ''}
+          ${document.modalidadeEsportiva ? ` - ${escapeHtml(document.modalidadeEsportiva)}` : ''}
         </p>
       </div>
       ${document.restricoesAtividade && document.restricoesAtividade.length > 0 ? `
         <div class="content-block">
           <h4>Restrições</h4>
-          <ul>${document.restricoesAtividade.map(r => `<li>${r}</li>`).join('')}</ul>
+          <ul>${document.restricoesAtividade.map(r => `<li>${escapeHtml(r)}</li>`).join('')}</ul>
         </div>
       ` : ''}
     </main>
@@ -406,30 +406,30 @@ function generateRelatorioMedico({ document, patient }: DocumentData): string {
   return `
     <main class="doc-body">
       <h2 class="doc-title">RELATÓRIO MÉDICO</h2>
-      ${document.destinatario ? `<p class="subtitle" style="margin-bottom:20px">Ao Sr(a).: ${document.destinatario}</p>` : ''}
+      ${document.destinatario ? `<p class="subtitle" style="margin-bottom:20px">Ao Sr(a).: ${escapeHtml(document.destinatario)}</p>` : ''}
       ${generatePatientInfo(patient, true)}
       ${document.evolucaoClinica ? `
         <div class="content-block">
           <h4>Evolução Clínica</h4>
-          <p class="text-justify">${document.evolucaoClinica}</p>
+          <p class="text-justify">${escapeHtml(document.evolucaoClinica)}</p>
         </div>
       ` : ''}
       ${document.tratamentoAtual ? `
         <div class="content-block">
           <h4>Tratamento Atual</h4>
-          <p class="text-justify">${document.tratamentoAtual}</p>
+          <p class="text-justify">${escapeHtml(document.tratamentoAtual)}</p>
         </div>
       ` : ''}
       ${document.prognostico ? `
         <div class="content-block">
           <h4>Prognóstico</h4>
-          <p class="text-justify">${document.prognostico}</p>
+          <p class="text-justify">${escapeHtml(document.prognostico)}</p>
         </div>
       ` : ''}
       ${document.content ? `
         <div class="content-block">
           <h4>Observações</h4>
-          <p class="text-justify">${document.content}</p>
+          <p class="text-justify">${escapeHtml(document.content)}</p>
         </div>
       ` : ''}
     </main>
@@ -444,18 +444,18 @@ function generateOrientacoesMedicas({ document, patient }: DocumentData): string
       ${document.orientacoesEspecificas && document.orientacoesEspecificas.length > 0 ? `
         <div class="content-block">
           <h4>Orientações Gerais</h4>
-          <ol>${document.orientacoesEspecificas.map(o => `<li>${o}</li>`).join('')}</ol>
+          <ol>${document.orientacoesEspecificas.map(o => `<li>${escapeHtml(o)}</li>`).join('')}</ol>
         </div>
       ` : ''}
       ${document.content ? `
         <div class="content-block">
-          <p class="text-justify">${document.content}</p>
+          <p class="text-justify">${escapeHtml(document.content)}</p>
         </div>
       ` : ''}
       ${document.sinaisAlerta && document.sinaisAlerta.length > 0 ? `
         <div class="content-block highlight-box" style="background:#fff1f2;border:1px solid #fda4af;">
           <h4 style="color:#be123c;border-color:#fda4af">Sinais de Alerta</h4>
-          <ul style="color:#be123c">${document.sinaisAlerta.map(s => `<li>${s}</li>`).join('')}</ul>
+          <ul style="color:#be123c">${document.sinaisAlerta.map(s => `<li>${escapeHtml(s)}</li>`).join('')}</ul>
         </div>
       ` : ''}
     </main>
@@ -469,13 +469,13 @@ function generateTermoConsentimento({ document, patient }: DocumentData): string
       ${generatePatientInfo(patient, true)}
       <div class="content-block">
         <h4>Procedimento Proposto</h4>
-        <p><strong>${document.nomeProcedimento || 'Não especificado'}</strong></p>
-        <p class="text-justify">${document.descricaoProcedimento || ''}</p>
+        <p><strong>${escapeHtml(document.nomeProcedimento || 'Não especificado')}</strong></p>
+        <p class="text-justify">${escapeHtml(document.descricaoProcedimento || '')}</p>
       </div>
       ${document.riscosProcedimento && document.riscosProcedimento.length > 0 ? `
         <div class="content-block">
           <h4>Riscos</h4>
-          <ul>${document.riscosProcedimento.map(r => `<li>${r}</li>`).join('')}</ul>
+          <ul>${document.riscosProcedimento.map(r => `<li>${escapeHtml(r)}</li>`).join('')}</ul>
         </div>
       ` : ''}
       <div class="content-block highlight-box" style="margin-top:30px;background:#f8fafc;border:1px solid #cbd5e1">
@@ -499,10 +499,10 @@ function generateTermoConsentimento({ document, patient }: DocumentData): string
 function generateGenericDocument({ document, patient, title }: DocumentData & { title: string }): string {
   return `
     <main class="doc-body">
-      <h2 class="doc-title">${title}</h2>
+      <h2 class="doc-title">${escapeHtml(title)}</h2>
       ${generatePatientInfo(patient, true)}
       <div class="content-block">
-        <p class="text-justify">${document.content || ''}</p>
+        <p class="text-justify">${escapeHtml(document.content || '')}</p>
       </div>
     </main>
   `;
@@ -774,7 +774,7 @@ export function generateDocumentHTML(document: MedicalDocument, patient: Patient
     <html lang="pt-BR">
     <head>
       <meta charset="UTF-8">
-      <title>${DOCUMENT_TYPES[document.type]} - ${patient.nome}</title>
+      <title>${escapeHtml(DOCUMENT_TYPES[document.type])} - ${escapeHtml(patient.nome)}</title>
       ${getDocumentStyles(isEmitted)}
     </head>
     <body>
