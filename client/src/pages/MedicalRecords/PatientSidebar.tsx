@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import {
   User,
   Calendar,
@@ -17,7 +18,7 @@ interface PatientSidebarProps {
   records: MedicalRecord[];
 }
 
-export function PatientSidebar({ patient, records }: PatientSidebarProps) {
+export const PatientSidebar = memo(function PatientSidebar({ patient, records }: PatientSidebarProps) {
   return (
     <div className="space-y-4 lg:sticky lg:top-4 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto lg:pr-2">
       {/* Profile Card Premium */}
@@ -137,7 +138,7 @@ export function PatientSidebar({ patient, records }: PatientSidebarProps) {
       </div>
     </div>
   );
-}
+});
 
 interface InfoRowProps {
   icon: React.ComponentType<{ className?: string }>;
