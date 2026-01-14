@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, memo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useData } from '../../contexts/DataContext';
 import {
@@ -481,8 +481,8 @@ function EmptyRecordsState({ onCreateNew }: { onCreateNew: () => void }) {
   );
 }
 
-// Tab de Documentos
-function DocumentsTab({ documents, patientId }: { documents: MedicalDocument[], patientId: string }) {
+// Tab de Documentos - Memoized to prevent re-renders when parent state changes (e.g. search term)
+const DocumentsTab = memo(function DocumentsTab({ documents, patientId }: { documents: MedicalDocument[], patientId: string }) {
   const navigate = useNavigate();
 
   const getDocumentTypeInfo = (type: string) => {
@@ -584,10 +584,10 @@ function DocumentsTab({ documents, patientId }: { documents: MedicalDocument[], 
       </div>
     </div>
   );
-}
+});
 
-// Tab de Resumo Clínico
-function ClinicalSummaryTab({
+// Tab de Resumo Clínico - Memoized to prevent expensive calculations on every render
+const ClinicalSummaryTab = memo(function ClinicalSummaryTab({
   patient,
   records,
   lastVitals
@@ -764,4 +764,4 @@ function ClinicalSummaryTab({
       )}
     </div>
   );
-}
+});
