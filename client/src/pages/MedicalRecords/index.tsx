@@ -481,7 +481,7 @@ function EmptyRecordsState({ onCreateNew }: { onCreateNew: () => void }) {
   );
 }
 
-// Tab de Documentos - Memoized to prevent re-renders when parent state changes (e.g. search term)
+// Tab de Documentos
 const DocumentsTab = memo(function DocumentsTab({ documents, patientId }: { documents: MedicalDocument[], patientId: string }) {
   const navigate = useNavigate();
 
@@ -586,7 +586,7 @@ const DocumentsTab = memo(function DocumentsTab({ documents, patientId }: { docu
   );
 });
 
-// Tab de Resumo Clínico - Memoized to prevent expensive calculations on every render
+// Tab de Resumo Clínico
 const ClinicalSummaryTab = memo(function ClinicalSummaryTab({
   patient,
   records,
