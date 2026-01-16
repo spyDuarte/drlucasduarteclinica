@@ -80,6 +80,10 @@ export default function Patients() {
     }
   };
 
+  const confirmDelete = useCallback((patient: Patient) => {
+    setPatientToDelete(patient);
+  }, []);
+
   const handleDelete = () => {
     if (patientToDelete) {
       deletePatient(patientToDelete.id);
