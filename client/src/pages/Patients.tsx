@@ -80,10 +80,6 @@ export default function Patients() {
     }
   };
 
-  const confirmDelete = useCallback((patient: Patient) => {
-    setPatientToDelete(patient);
-  }, []);
-
   const handleDelete = () => {
     if (patientToDelete) {
       deletePatient(patientToDelete.id);
@@ -122,13 +118,13 @@ export default function Patients() {
 
       {/* Search */}
       <div className="relative max-w-md">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
         <input
           type="text"
           value={searchTerm}
           onChange={e => setSearchTerm(e.target.value)}
           placeholder="Buscar por nome, CPF ou telefone..."
-          className="input-field pl-10 shadow-sm focus:shadow-md transition-shadow"
+          className="input-field pl-12 shadow-sm focus:shadow-md transition-shadow"
         />
       </div>
 

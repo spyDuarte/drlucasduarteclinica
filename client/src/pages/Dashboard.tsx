@@ -68,77 +68,81 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-8 animate-fade-in">
       {/* Header */}
-      <div className="relative overflow-hidden rounded-3xl border border-primary-100/80 bg-gradient-to-br from-white via-primary-50/80 to-white p-6 sm:p-8 shadow-sm shadow-primary-100/40">
-        <div className="absolute -top-10 -right-12 h-44 w-44 rounded-full bg-primary-200/40 blur-3xl" />
-        <div className="absolute -bottom-16 left-8 h-40 w-40 rounded-full bg-emerald-200/30 blur-3xl" />
-        <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-white/70 to-transparent" />
-        <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+      <div className="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-white p-8 sm:p-10 shadow-lg shadow-slate-200/50">
+        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-gradient-to-br from-primary-50/50 via-primary-50/30 to-transparent rounded-full blur-3xl -translate-y-1/2 translate-x-1/3" />
+        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-gradient-to-tr from-blue-50/50 via-slate-50/30 to-transparent rounded-full blur-3xl translate-y-1/3 -translate-x-1/4" />
+
+        <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+          <div className="space-y-2">
+            <h1 className="text-3xl font-bold text-slate-900 tracking-tight">
               {getGreeting()}, {user?.nome?.startsWith('Dr.') ? user.nome : `Dr. ${user?.nome?.split(' ')[0]}`}
             </h1>
-            <p className="text-slate-600">
-              Resumo das atividades do consultório.
+            <p className="text-slate-500 text-lg max-w-2xl">
+              Bem-vindo ao seu painel de controle. Aqui está o resumo das atividades da clínica hoje.
             </p>
           </div>
-          <Link
-            to="/agenda"
-            className="btn-primary shadow-lg shadow-primary-500/20 hover:shadow-primary-500/30 transition-all"
-          >
-            <Calendar className="w-4 h-4" />
-            <span>Ver Agenda</span>
-          </Link>
+          <div className="flex gap-3">
+             <Link
+              to="/agenda"
+              className="btn-primary py-3 px-6 text-base shadow-xl shadow-primary-500/20 hover:shadow-primary-500/30 hover:-translate-y-0.5"
+            >
+              <Calendar className="w-5 h-5" />
+              <span>Ver Agenda</span>
+            </Link>
+          </div>
         </div>
       </div>
 
       {/* Quick Actions */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-slate-600 uppercase tracking-wide">Ações rápidas</h2>
-          <span className="text-xs text-slate-400">Atalhos do dia</span>
+      <div className="space-y-4">
+        <div className="flex items-center justify-between px-1">
+          <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">Ações rápidas</h2>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
           <Link
             to="/pacientes?action=new"
-            className="relative bg-white/95 backdrop-blur p-5 rounded-2xl border border-slate-200/80 shadow-sm hover:border-primary-300 hover:shadow-lg hover:shadow-primary-500/10 hover:-translate-y-1 transition-all flex items-center gap-4 group overflow-hidden"
+            className="group relative bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:border-primary-200 hover:shadow-xl hover:shadow-slate-200/50 hover:-translate-y-1 transition-all duration-300"
           >
-            <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-primary-200/0 via-primary-200/70 to-primary-200/0 opacity-0 group-hover:opacity-100 transition-opacity" />
-            <div className="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center group-hover:bg-primary-600 group-hover:text-white transition-all duration-300">
-              <UserPlus className="w-6 h-6 text-primary-600 group-hover:text-white" />
-            </div>
-            <div>
-              <h3 className="font-bold text-slate-900 group-hover:text-primary-700 transition-colors">Novo Paciente</h3>
-              <p className="text-sm text-slate-500">Cadastrar paciente</p>
+            <div className="flex items-center gap-5">
+              <div className="w-14 h-14 bg-primary-50 rounded-2xl flex items-center justify-center group-hover:bg-primary-600 group-hover:text-white transition-all duration-300 shadow-inner">
+                <UserPlus className="w-7 h-7 text-primary-600 group-hover:text-white" />
+              </div>
+              <div>
+                <h3 className="font-bold text-slate-900 text-lg group-hover:text-primary-700 transition-colors">Novo Paciente</h3>
+                <p className="text-sm text-slate-500">Cadastrar ficha</p>
+              </div>
             </div>
           </Link>
 
           <Link
             to="/agenda?action=new"
-            className="relative bg-white/95 backdrop-blur p-5 rounded-2xl border border-slate-200/80 shadow-sm hover:border-primary-300 hover:shadow-lg hover:shadow-primary-500/10 hover:-translate-y-1 transition-all flex items-center gap-4 group overflow-hidden"
+             className="group relative bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:border-primary-200 hover:shadow-xl hover:shadow-slate-200/50 hover:-translate-y-1 transition-all duration-300"
           >
-            <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-primary-200/0 via-primary-200/70 to-primary-200/0 opacity-0 group-hover:opacity-100 transition-opacity" />
-            <div className="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center group-hover:bg-primary-600 group-hover:text-white transition-all duration-300">
-              <CalendarPlus className="w-6 h-6 text-primary-600 group-hover:text-white" />
-            </div>
-            <div>
-              <h3 className="font-bold text-slate-900 group-hover:text-primary-700 transition-colors">Agendar Consulta</h3>
-              <p className="text-sm text-slate-500">Novo agendamento</p>
+            <div className="flex items-center gap-5">
+              <div className="w-14 h-14 bg-primary-50 rounded-2xl flex items-center justify-center group-hover:bg-primary-600 group-hover:text-white transition-all duration-300 shadow-inner">
+                <CalendarPlus className="w-7 h-7 text-primary-600 group-hover:text-white" />
+              </div>
+              <div>
+                <h3 className="font-bold text-slate-900 text-lg group-hover:text-primary-700 transition-colors">Agendar</h3>
+                <p className="text-sm text-slate-500">Nova consulta</p>
+              </div>
             </div>
           </Link>
 
           <Link
             to="/pacientes"
-            className="relative bg-white/95 backdrop-blur p-5 rounded-2xl border border-slate-200/80 shadow-sm hover:border-primary-300 hover:shadow-lg hover:shadow-primary-500/10 hover:-translate-y-1 transition-all flex items-center gap-4 group overflow-hidden"
+             className="group relative bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:border-primary-200 hover:shadow-xl hover:shadow-slate-200/50 hover:-translate-y-1 transition-all duration-300"
           >
-            <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-primary-200/0 via-primary-200/70 to-primary-200/0 opacity-0 group-hover:opacity-100 transition-opacity" />
-            <div className="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center group-hover:bg-primary-600 group-hover:text-white transition-all duration-300">
-              <FileText className="w-6 h-6 text-primary-600 group-hover:text-white" />
-            </div>
-            <div>
-              <h3 className="font-bold text-slate-900 group-hover:text-primary-700 transition-colors">Prontuários</h3>
-              <p className="text-sm text-slate-500">Buscar registros</p>
+            <div className="flex items-center gap-5">
+              <div className="w-14 h-14 bg-primary-50 rounded-2xl flex items-center justify-center group-hover:bg-primary-600 group-hover:text-white transition-all duration-300 shadow-inner">
+                <FileText className="w-7 h-7 text-primary-600 group-hover:text-white" />
+              </div>
+              <div>
+                <h3 className="font-bold text-slate-900 text-lg group-hover:text-primary-700 transition-colors">Prontuários</h3>
+                <p className="text-sm text-slate-500">Acessar registros</p>
+              </div>
             </div>
           </Link>
         </div>
