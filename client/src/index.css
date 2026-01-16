@@ -414,6 +414,24 @@ body {
    UTILITIES
    ======================================== */
 
+/* Sinais vitais em linha */
+.vitals-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.vital-sign-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-slate-200, #e2e8f0);
+  background-color: white;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
 /* Removendo decorações excessivas */
 .nav-icon-wrapper, .stat-icon-container, .brand-icon-animated, .card-gradient, .glass-card {
   /* Resetando comportamentos complexos */
