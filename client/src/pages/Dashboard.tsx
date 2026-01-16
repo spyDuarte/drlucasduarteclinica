@@ -70,29 +70,33 @@ export default function Dashboard() {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-            {getGreeting()}, {user?.nome?.startsWith('Dr.') ? user.nome : `Dr. ${user?.nome?.split(' ')[0]}`}
-          </h1>
-          <p className="text-slate-500">
-            Resumo das atividades do consultório.
-          </p>
+      <div className="relative overflow-hidden rounded-3xl border border-primary-100 bg-gradient-to-br from-white via-primary-50/60 to-white p-6 sm:p-8">
+        <div className="absolute -top-10 -right-12 h-44 w-44 rounded-full bg-primary-100/50 blur-3xl" />
+        <div className="absolute -bottom-16 left-8 h-40 w-40 rounded-full bg-emerald-100/50 blur-3xl" />
+        <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+              {getGreeting()}, {user?.nome?.startsWith('Dr.') ? user.nome : `Dr. ${user?.nome?.split(' ')[0]}`}
+            </h1>
+            <p className="text-slate-600">
+              Resumo das atividades do consultório.
+            </p>
+          </div>
+          <Link
+            to="/agenda"
+            className="btn-primary shadow-lg shadow-primary-500/20 hover:shadow-primary-500/30 transition-all"
+          >
+            <Calendar className="w-4 h-4" />
+            <span>Ver Agenda</span>
+          </Link>
         </div>
-        <Link
-          to="/agenda"
-          className="btn-primary shadow-lg shadow-primary-500/20 hover:shadow-primary-500/30 transition-all"
-        >
-          <Calendar className="w-4 h-4" />
-          <span>Ver Agenda</span>
-        </Link>
       </div>
 
       {/* Quick Actions */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Link
           to="/pacientes?action=new"
-          className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:border-primary-300 hover:shadow-lg hover:shadow-primary-500/10 hover:-translate-y-1 transition-all flex items-center gap-4 group"
+          className="bg-white/90 backdrop-blur p-5 rounded-2xl border border-slate-200/80 shadow-sm hover:border-primary-300 hover:shadow-lg hover:shadow-primary-500/10 hover:-translate-y-1 transition-all flex items-center gap-4 group"
         >
           <div className="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center group-hover:bg-primary-600 group-hover:text-white transition-all duration-300">
             <UserPlus className="w-6 h-6 text-primary-600 group-hover:text-white" />
@@ -105,7 +109,7 @@ export default function Dashboard() {
 
         <Link
           to="/agenda?action=new"
-          className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:border-primary-300 hover:shadow-lg hover:shadow-primary-500/10 hover:-translate-y-1 transition-all flex items-center gap-4 group"
+          className="bg-white/90 backdrop-blur p-5 rounded-2xl border border-slate-200/80 shadow-sm hover:border-primary-300 hover:shadow-lg hover:shadow-primary-500/10 hover:-translate-y-1 transition-all flex items-center gap-4 group"
         >
           <div className="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center group-hover:bg-primary-600 group-hover:text-white transition-all duration-300">
             <CalendarPlus className="w-6 h-6 text-primary-600 group-hover:text-white" />
@@ -118,7 +122,7 @@ export default function Dashboard() {
 
         <Link
           to="/pacientes"
-          className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:border-primary-300 hover:shadow-lg hover:shadow-primary-500/10 hover:-translate-y-1 transition-all flex items-center gap-4 group"
+          className="bg-white/90 backdrop-blur p-5 rounded-2xl border border-slate-200/80 shadow-sm hover:border-primary-300 hover:shadow-lg hover:shadow-primary-500/10 hover:-translate-y-1 transition-all flex items-center gap-4 group"
         >
           <div className="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center group-hover:bg-primary-600 group-hover:text-white transition-all duration-300">
             <FileText className="w-6 h-6 text-primary-600 group-hover:text-white" />
@@ -133,7 +137,7 @@ export default function Dashboard() {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {statCards.map((stat) => (
-          <div key={stat.label} className="card p-5 flex flex-col justify-between h-full hover:border-primary-200 hover:shadow-md transition-all">
+          <div key={stat.label} className="card bg-white/90 backdrop-blur p-5 flex flex-col justify-between h-full hover:border-primary-200 hover:shadow-md transition-all">
             <div className="flex justify-between items-start mb-4">
               <div className={`p-3 rounded-xl ${stat.colorClass} transition-colors`}>
                 <stat.icon className="w-5 h-5" />
