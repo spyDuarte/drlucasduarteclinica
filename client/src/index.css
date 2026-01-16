@@ -425,3 +425,144 @@ h1, h2, h3, h4, h5, h6 {
 .animate-scale-in {
   animation: scaleIn 0.3s ease-out forwards;
 }
+
+/* ========================================
+   PROFESSIONAL LAYOUT ADDITIONS
+   ======================================== */
+
+.patient-profile-card {
+  background-color: white;
+  border: 1px solid var(--color-slate-200);
+  border-radius: 1rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.02);
+  transition: all 0.2s ease-in-out;
+}
+
+.patient-profile-card:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  border-color: var(--color-slate-300);
+}
+
+.patient-avatar {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.75rem;
+  background-color: var(--color-primary-500);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 6px -1px rgba(12, 135, 235, 0.2);
+}
+
+.alert-card-danger {
+  background-color: var(--color-danger-50);
+  border: 1px solid var(--color-danger-200);
+  border-radius: 0.75rem;
+}
+
+.alert-card-warning {
+  background-color: var(--color-warning-50);
+  border: 1px solid var(--color-warning-200);
+  border-radius: 0.75rem;
+}
+
+.prescription-card {
+  background-color: var(--color-slate-50);
+  border: 1px solid var(--color-slate-200);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+}
+
+.cid-chip {
+  display: inline-flex;
+  padding: 0.125rem 0.5rem;
+  background-color: var(--color-slate-100);
+  color: var(--color-slate-700);
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  font-family: monospace;
+  font-weight: 500;
+}
+
+.card-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.5rem;
+  color: var(--color-slate-400);
+  transition: all 0.2s;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.card-action-btn:hover {
+  background-color: var(--color-slate-100);
+  color: var(--color-primary-600);
+}
+
+.appointment-type-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.record-card-enter {
+  animation: fadeInUp 0.5s ease-out forwards;
+  opacity: 0;
+}
+
+/* Appointment Types */
+.type-consulta {
+  background-color: var(--color-primary-50);
+  color: var(--color-primary-700);
+  border: 1px solid var(--color-primary-100);
+}
+
+.type-retorno {
+  background-color: var(--color-success-50);
+  color: var(--color-success-700);
+  border: 1px solid var(--color-success-100);
+}
+
+.type-urgencia {
+  background-color: var(--color-danger-50);
+  color: var(--color-danger-700);
+  border: 1px solid var(--color-danger-100);
+}
+
+.type-emergencia {
+  background-color: var(--color-danger-100);
+  color: var(--color-danger-800);
+  border: 1px solid var(--color-danger-200);
+}
+
+.type-teleconsulta {
+  background-color: var(--color-info-50);
+  color: var(--color-info-700);
+  border: 1px solid var(--color-info-100);
+}
+
+.type-procedimento {
+  background-color: var(--color-warning-50);
+  color: var(--color-warning-700);
+  border: 1px solid var(--color-warning-100);
+}
+
+.type-pre-op {
+  background-color: var(--color-slate-100);
+  color: var(--color-slate-700);
+  border: 1px solid var(--color-slate-200);
+}
+
+.type-pos-op {
+  background-color: var(--color-slate-100);
+  color: var(--color-slate-700);
+  border: 1px solid var(--color-slate-200);
+}
