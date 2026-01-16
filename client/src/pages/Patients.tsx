@@ -6,7 +6,8 @@ import {
   User,
   UserPlus
 } from 'lucide-react';
-import { PatientModal, ConfirmDialog, Pagination, PatientRow } from '../components';
+import { PatientModal, ConfirmDialog, Pagination } from '../components';
+import { PatientRow } from '../components/PatientRow';
 import { useToast } from '../components/Toast';
 import { useDebounce, usePagination } from '../hooks';
 import type { Patient } from '../types';
@@ -91,6 +92,15 @@ export default function Patients() {
     }
   };
 
+  const handleDeleteClick = useCallback((patient: Patient) => {
+    setPatientToDelete(patient);
+  }, []);
+
+  const handleEditClick = useCallback((patient: Patient) => {
+    setEditingPatient(patient);
+    setShowModal(true);
+  }, []);
+
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
@@ -152,8 +162,8 @@ export default function Patients() {
                 <PatientRow
                   key={patient.id}
                   patient={patient}
-                  onEdit={handleOpenModal}
-                  onDelete={confirmDelete}
+                  onEdit={handleEditClick}
+                  onDelete={handleDeleteClick}
                 />
               ))
             )}

@@ -10,7 +10,7 @@ interface PatientRowProps {
   onDelete: (patient: Patient) => void;
 }
 
-const PatientRow = React.memo(({ patient, onEdit, onDelete }: PatientRowProps) => {
+export const PatientRow = React.memo(({ patient, onEdit, onDelete }: PatientRowProps) => {
   return (
     <tr className="hover:bg-slate-50 transition-colors group">
       <td className="table-cell">
@@ -39,10 +39,10 @@ const PatientRow = React.memo(({ patient, onEdit, onDelete }: PatientRowProps) =
         </div>
       </td>
       <td className="table-cell">
-        <span className="text-slate-700 font-medium">{formatDate(patient.dataNascimento)}</span>
-        <span className="text-slate-400 text-xs ml-1">
-          ({calculateAge(patient.dataNascimento)} anos)
-        </span>
+         <span className="text-slate-700 font-medium">{formatDate(patient.dataNascimento)}</span>
+         <span className="text-slate-400 text-xs ml-1">
+              ({calculateAge(patient.dataNascimento)} anos)
+         </span>
       </td>
       <td className="table-cell">
         {patient.convenio ? (
@@ -68,7 +68,6 @@ const PatientRow = React.memo(({ patient, onEdit, onDelete }: PatientRowProps) =
             onClick={() => onEdit(patient)}
             className="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
             title="Editar"
-            aria-label="Editar paciente"
           >
             <Edit2 className="w-4 h-4" />
           </button>
@@ -76,7 +75,6 @@ const PatientRow = React.memo(({ patient, onEdit, onDelete }: PatientRowProps) =
             onClick={() => onDelete(patient)}
             className="p-2 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
             title="Excluir"
-            aria-label="Excluir paciente"
           >
             <Trash2 className="w-4 h-4" />
           </button>
@@ -86,4 +84,4 @@ const PatientRow = React.memo(({ patient, onEdit, onDelete }: PatientRowProps) =
   );
 });
 
-export default PatientRow;
+PatientRow.displayName = 'PatientRow';
