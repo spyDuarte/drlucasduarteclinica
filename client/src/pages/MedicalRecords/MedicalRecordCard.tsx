@@ -171,7 +171,7 @@ function VitalsGrid({ vitals }: { vitals: MedicalRecord['objetivo']['sinaisVitai
   if (!vitals) return null;
 
   return (
-    <div className="vitals-grid">
+    <div className="flex flex-wrap items-center gap-3">
       {vitals.pressaoArterial && (
         <VitalBadge icon={Heart} label="PA" value={vitals.pressaoArterial} color="rose" />
       )}
@@ -197,10 +197,15 @@ function VitalsGrid({ vitals }: { vitals: MedicalRecord['objetivo']['sinaisVitai
         <VitalBadge icon={Droplets} label="Glicemia" value={`${vitals.glicemiaCapilar}`} unit="mg/dL" color="amber" />
       )}
       {vitals.escalaDor !== undefined && vitals.escalaDor !== null && (
-        <div className={`vital-sign-badge ${
-          vitals.escalaDor >= 7 ? 'vital-danger' :
-          vitals.escalaDor >= 4 ? 'vital-warning' : 'vital-normal'
-        }`}>
+        <div
+          className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold ${
+            vitals.escalaDor >= 7
+              ? 'border-red-200 bg-red-50 text-red-700'
+              : vitals.escalaDor >= 4
+                ? 'border-amber-200 bg-amber-50 text-amber-700'
+                : 'border-emerald-200 bg-emerald-50 text-emerald-700'
+          }`}
+        >
           <AlertCircle className="w-4 h-4" />
           <div>
             <p className="text-[10px] uppercase font-semibold opacity-70">Dor</p>
@@ -222,7 +227,7 @@ interface VitalBadgeProps {
 
 function VitalBadge({ icon: Icon, label, value, unit, color }: VitalBadgeProps) {
   return (
-    <div className="vital-sign-badge">
+    <div className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-700">
       <Icon className={`w-4 h-4 text-${color}-500`} />
       <div>
         <p className="text-[10px] text-slate-400 uppercase font-semibold">{label}</p>
