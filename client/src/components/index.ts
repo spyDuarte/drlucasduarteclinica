@@ -7,3 +7,4 @@ export { default as PatientModal } from './PatientModal';
 export { default as ConfirmDialog } from './ConfirmDialog';
 export { default as Pagination } from './Pagination';
 export { ToastProvider, useToast } from './Toast';
+export { default as PatientRow } from './PatientRow';
