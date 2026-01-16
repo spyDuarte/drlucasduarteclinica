@@ -79,7 +79,7 @@ export function MedicationSelector({ value, onChange, placeholder = "Buscar medi
       </div>
 
       {isOpen && (
-        <div className="absolute z-50 w-full mt-1 bg-white rounded-xl shadow-xl border border-gray-100 max-h-60 overflow-y-auto animate-scale-in">
+        <div className="absolute z-[100] w-full mt-1 bg-white rounded-xl shadow-xl border border-gray-100 max-h-60 overflow-y-auto animate-scale-in">
           {results.length > 0 ? (
             results.map((item, index) => (
               <button
