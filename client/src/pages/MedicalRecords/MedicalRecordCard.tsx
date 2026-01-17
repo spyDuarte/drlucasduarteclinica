@@ -88,7 +88,7 @@ export const MedicalRecordCard = memo(function MedicalRecordCard({ record, index
   );
 });
 
-function SOAPSubjectiveSection({ record }: { record: MedicalRecord }) {
+const SOAPSubjectiveSection = memo(function SOAPSubjectiveSection({ record }: { record: MedicalRecord }) {
   return (
     <div className="soap-section-s rounded-lg p-4">
       <div className="flex items-center gap-2 mb-3">
@@ -125,9 +125,9 @@ function SOAPSubjectiveSection({ record }: { record: MedicalRecord }) {
       </div>
     </div>
   );
-}
+});
 
-function SOAPObjectiveSection({ record }: { record: MedicalRecord }) {
+const SOAPObjectiveSection = memo(function SOAPObjectiveSection({ record }: { record: MedicalRecord }) {
   return (
     <div className="soap-section-o rounded-lg p-4">
       <div className="flex items-center gap-2 mb-3">
@@ -165,7 +165,7 @@ function SOAPObjectiveSection({ record }: { record: MedicalRecord }) {
       </div>
     </div>
   );
-}
+});
 
 function VitalsGrid({ vitals }: { vitals: MedicalRecord['objetivo']['sinaisVitais'] }) {
   if (!vitals) return null;
@@ -239,7 +239,7 @@ function VitalBadge({ icon: Icon, label, value, unit, color }: VitalBadgeProps) 
   );
 }
 
-function SOAPAssessmentSection({ record }: { record: MedicalRecord }) {
+const SOAPAssessmentSection = memo(function SOAPAssessmentSection({ record }: { record: MedicalRecord }) {
   return (
     <div className="soap-section-a rounded-lg p-4">
       <div className="flex items-center gap-2 mb-3">
@@ -285,9 +285,9 @@ function SOAPAssessmentSection({ record }: { record: MedicalRecord }) {
       </div>
     </div>
   );
-}
+});
 
-function SOAPPlanSection({ record }: { record: MedicalRecord }) {
+const SOAPPlanSection = memo(function SOAPPlanSection({ record }: { record: MedicalRecord }) {
   return (
     <div className="soap-section-p rounded-lg p-4">
       <div className="flex items-center gap-2 mb-3">
@@ -387,7 +387,7 @@ function SOAPPlanSection({ record }: { record: MedicalRecord }) {
       </div>
     </div>
   );
-}
+});
 
 function InfoBox({ label, value }: { label: string; value: string }) {
   return (
