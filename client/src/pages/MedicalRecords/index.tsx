@@ -72,8 +72,8 @@ export default function MedicalRecords() {
 
   // Filtrar registros
   const filteredRecords = useMemo(() => {
+    const searchLower = searchTerm.toLowerCase();
     return records.filter(record => {
-      const searchLower = searchTerm.toLowerCase();
       const matchesSearch = searchTerm === '' ||
         record.subjetivo?.queixaPrincipal?.toLowerCase().includes(searchLower) ||
         record.avaliacao?.diagnosticoPrincipal?.toLowerCase().includes(searchLower) ||
