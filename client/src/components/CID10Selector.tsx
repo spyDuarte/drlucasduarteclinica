@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { Search, X, Check } from 'lucide-react';
 import { searchCID10, getCID10Description } from '../data/cid10';
+import { useDebounce } from '../hooks/useDebounce';
 
 interface CID10SelectorProps {
   selectedCodes: string[];
@@ -14,12 +15,15 @@ export function CID10Selector({ selectedCodes, onChange, error }: CID10SelectorP
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const debouncedQuery = useDebounce(query, 300);
+  const isSearching = query !== debouncedQuery;
+
   const results = useMemo(() => {
-    if (query.length >= 2) {
-      return searchCID10(query);
+    if (debouncedQuery.length >= 2) {
+      return searchCID10(debouncedQuery);
     }
     return [];
-  }, [query]);
+  }, [debouncedQuery]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -141,7 +145,7 @@ export function CID10Selector({ selectedCodes, onChange, error }: CID10SelectorP
         </div>
       )}
 
-      {isOpen && results.length === 0 && query.length >= 2 && (
+      {isOpen && results.length === 0 && query.length >= 2 && !isSearching && (
         <button
           type="button"
           onClick={() => handleSelect(query)}

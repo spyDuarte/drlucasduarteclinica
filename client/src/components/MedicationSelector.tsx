@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { Search, Plus } from 'lucide-react';
 import { searchMedicamentos, type Medicamento } from '../data/medicamentos';
+import { useDebounce } from '../hooks/useDebounce';
 
 interface MedicationSelectorProps {
   value: string;
@@ -15,17 +16,20 @@ export function MedicationSelector({ value, onChange, placeholder = "Buscar medi
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const debouncedQuery = useDebounce(query, 300);
+  const isSearching = query !== debouncedQuery;
+
   // Sync internal query state with value prop
   useEffect(() => {
     setQuery(value);
   }, [value]);
 
   const results = useMemo(() => {
-    if (query.length >= 2) {
-      return searchMedicamentos(query);
+    if (debouncedQuery.length >= 2) {
+      return searchMedicamentos(debouncedQuery);
     }
     return [];
-  }, [query]);
+  }, [debouncedQuery]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -95,9 +99,11 @@ export function MedicationSelector({ value, onChange, placeholder = "Buscar medi
               </button>
             ))
           ) : (
-            <div className="p-3 text-center text-gray-500 text-sm">
-              Nenhum medicamento encontrado.
-            </div>
+            !isSearching && (
+              <div className="p-3 text-center text-gray-500 text-sm">
+                Nenhum medicamento encontrado.
+              </div>
+            )
           )}
 
           {query.length >= 2 && (
