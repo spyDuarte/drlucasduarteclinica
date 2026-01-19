@@ -142,27 +142,54 @@ export function DataProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Persistir dados no localStorage (consolidado com debounce e tratamento de erros)
+  // Persistir Pacientes
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       if (patients.length > 0) {
         safeSetItem(STORAGE_KEYS.PATIENTS, patients);
       }
+    }, 300);
+    return () => clearTimeout(timeoutId);
+  }, [patients]);
+
+  // Persistir Consultas
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
       if (appointments.length > 0) {
         safeSetItem(STORAGE_KEYS.APPOINTMENTS, appointments);
       }
+    }, 300);
+    return () => clearTimeout(timeoutId);
+  }, [appointments]);
+
+  // Persistir Prontuários
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
       if (medicalRecords.length > 0) {
         safeSetItem(STORAGE_KEYS.RECORDS, medicalRecords);
       }
+    }, 300);
+    return () => clearTimeout(timeoutId);
+  }, [medicalRecords]);
+
+  // Persistir Pagamentos
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
       if (payments.length > 0) {
         safeSetItem(STORAGE_KEYS.PAYMENTS, payments);
       }
+    }, 300);
+    return () => clearTimeout(timeoutId);
+  }, [payments]);
+
+  // Persistir Documentos
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
       // Salva documentos mesmo se vazio para limpar storage quando necessário
       safeSetItem(STORAGE_KEYS.DOCUMENTS, documents);
-    }, 300); // Debounce de 300ms
-
+    }, 300);
     return () => clearTimeout(timeoutId);
-  }, [patients, appointments, medicalRecords, payments, documents]);
+  }, [documents]);
 
   // Funções de Pacientes
   const addPatient = useCallback((patientData: Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>) => {
