@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Calendar, FileText, Activity, Pill, AlertCircle, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import type { MedicalRecord } from '../types';
 
@@ -7,7 +8,7 @@ interface PatientTimelineProps {
   showLimit?: number;
 }
 
-export function PatientTimeline({ medicalRecords, patientName, showLimit }: PatientTimelineProps) {
+export const PatientTimeline = memo(function PatientTimeline({ medicalRecords, patientName, showLimit }: PatientTimelineProps) {
   // Ordena por data decrescente
   const sortedRecords = [...medicalRecords].sort((a, b) =>
     new Date(b.data).getTime() - new Date(a.data).getTime()
@@ -61,7 +62,7 @@ export function PatientTimeline({ medicalRecords, patientName, showLimit }: Pati
       </div>
     </div>
   );
-}
+});
 
 function TimelineItem({ record, isFirst }: { record: MedicalRecord; isFirst: boolean }) {
   const recordDate = new Date(record.data);
