@@ -1,4 +1,4 @@
-import { useState, type ElementType } from 'react';
+import { useState, type ElementType, useMemo, memo } from 'react';
 import {
   Stethoscope,
   X,
@@ -18,7 +18,7 @@ import { ActiveProblemsManager } from '../../components/ActiveProblemsManager';
 import { PatientTimeline } from '../../components/PatientTimeline';
 import { useAuth } from '../../contexts/AuthContext';
 import { useData } from '../../contexts/DataContext';
-import { generateId, calculateAge, formatDate, formatCPF, formatPhone, sortBy } from '../../utils/helpers';
+import { generateId, calculateAge, formatDate, formatCPF, formatPhone } from '../../utils/helpers';
 import {
   GeneralInfoSection,
   SubjectiveSection,
@@ -41,8 +41,11 @@ type TabId = 'resumo' | 'geral' | 'subjetivo' | 'objetivo' | 'avaliacao' | 'plan
 export function MedicalRecordModal({ patientId, record, onClose, onSave }: MedicalRecordModalProps) {
   const { user } = useAuth();
   const { getPatient, updatePatient, getMedicalRecordsByPatient } = useData();
-  const currentPatient = getPatient(patientId);
-  const patientRecords = getMedicalRecordsByPatient(patientId);
+
+  // Memoize patient data to prevent unnecessary re-renders
+  const currentPatient = useMemo(() => getPatient(patientId), [getPatient, patientId]);
+  const patientRecords = useMemo(() => getMedicalRecordsByPatient(patientId), [getMedicalRecordsByPatient, patientId]);
+
   const [activeTab, setActiveTab] = useState<TabId>('resumo');
 
   const {
@@ -359,7 +362,7 @@ export function MedicalRecordModal({ patientId, record, onClose, onSave }: Medic
 // Sub-components (Redesigned)
 // ----------------------------------------------------------------------
 
-function SidebarItem({ label, icon: Icon, active, onClick, hasError }: {
+const SidebarItem = memo(function SidebarItem({ label, icon: Icon, active, onClick, hasError }: {
   label: string;
   icon: ElementType;
   active: boolean;
@@ -383,12 +386,12 @@ function SidebarItem({ label, icon: Icon, active, onClick, hasError }: {
       {hasError && <div className="w-2 h-2 rounded-full bg-red-500 shadow-sm animate-pulse" />}
     </button>
   );
-}
+});
 
 
-function PatientHeader({ patient, records }: { patient: Patient; records: MedicalRecord[] }) {
-  const sortedRecords = sortBy(records, 'data', 'desc');
-  const lastVisit = sortedRecords.length > 0 ? sortedRecords[0] : null;
+const PatientHeader = memo(function PatientHeader({ patient, records }: { patient: Patient; records: MedicalRecord[] }) {
+  // Records are already sorted by data desc in getMedicalRecordsByPatient
+  const lastVisit = records.length > 0 ? records[0] : null;
   const age = calculateAge(patient.dataNascimento);
 
   return (
@@ -441,5 +444,5 @@ function PatientHeader({ patient, records }: { patient: Patient; records: Medica
       </div>
     </div>
   );
-}
+});
 
