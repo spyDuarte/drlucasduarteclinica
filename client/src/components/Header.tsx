@@ -124,12 +124,14 @@ export default function Header({ onMenuClick }: HeaderProps) {
             onChange={(e) => setSearchTerm(e.target.value)}
             onFocus={() => setIsSearchFocused(true)}
             placeholder="Buscar pacientes..."
+            aria-label="Buscar pacientes"
             className="w-full pl-9 pr-10 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 focus:bg-white outline-none transition-all text-sm placeholder:text-slate-400"
           />
           {searchTerm ? (
             <button
               onClick={() => setSearchTerm('')}
               className="absolute right-2 top-1/2 -translate-y-1/2 p-1 hover:bg-slate-200 rounded-md transition-colors"
+              aria-label="Limpar busca"
             >
               <X className="w-3.5 h-3.5 text-slate-400" />
             </button>
@@ -179,8 +181,10 @@ export default function Header({ onMenuClick }: HeaderProps) {
             onClick={() => setShowNotifications(!showNotifications)}
             className="relative p-2 rounded-md hover:bg-slate-100 text-slate-500 hover:text-slate-700 transition-colors"
             title="Notificações"
+            aria-label="Notificações"
+            aria-expanded={showNotifications}
           >
-            <Bell className="w-5 h-5" />
+            <Bell className="w-5 h-5" aria-hidden="true" />
             {notifications.length > 0 && (
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-white" />
             )}
@@ -228,8 +232,9 @@ export default function Header({ onMenuClick }: HeaderProps) {
           onClick={handleLogout}
           className="flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-slate-100 text-slate-600 hover:text-rose-600 transition-colors text-sm font-medium"
           title="Sair do sistema"
+          aria-label="Sair do sistema"
         >
-          <LogOut className="w-4 h-4" />
+          <LogOut className="w-4 h-4" aria-hidden="true" />
           <span className="hidden md:inline">Sair</span>
         </button>
       </div>
