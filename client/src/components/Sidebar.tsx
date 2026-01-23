@@ -68,7 +68,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
+      <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto" aria-label="Menu principal">
         <div className="px-3 mb-2 mt-2">
           <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
             Menu Principal
@@ -89,7 +89,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             >
               {({ isActive }) => (
                 <>
-                  <item.icon className={`w-5 h-5 ${isActive ? 'text-primary-600' : 'text-slate-400 group-hover:text-slate-600'}`} />
+                  <item.icon className={`w-5 h-5 ${isActive ? 'text-primary-600' : 'text-slate-400 group-hover:text-slate-600'}`} aria-hidden="true" />
                   <span className="font-medium">{item.label}</span>
                 </>
               )}
