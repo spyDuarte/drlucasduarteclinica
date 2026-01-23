@@ -467,21 +467,29 @@ export function DataProvider({ children }: { children: ReactNode }) {
     const todayStr = now.toISOString().split('T')[0];
     const startOfWeek = new Date(now);
     startOfWeek.setDate(now.getDate() - now.getDay());
+    // Convert to string for faster comparison with appointment dates (YYYY-MM-DD)
+    const startOfWeekStr = startOfWeek.toISOString().split('T')[0];
+
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfMonthStr = startOfMonth.toISOString().split('T')[0];
 
-    const consultasHoje = appointments.filter(a =>
-      a.data === todayStr && a.status !== 'cancelada'
-    ).length;
+    // Otimização: Single pass loop for appointments stats
+    let consultasHoje = 0;
+    let consultasSemana = 0;
+    let consultasMes = 0;
+    let finalizadas = 0;
+    let faltou = 0;
 
-    const consultasSemana = appointments.filter(a => {
-      const appDate = new Date(a.data);
-      return appDate >= startOfWeek && a.status !== 'cancelada';
-    }).length;
+    for (const a of appointments) {
+      if (a.status === 'cancelada') continue;
 
-    const consultasMes = appointments.filter(a => {
-      const appDate = new Date(a.data);
-      return appDate >= startOfMonth && a.status !== 'cancelada';
-    }).length;
+      if (a.data === todayStr) consultasHoje++;
+      if (a.data >= startOfWeekStr) consultasSemana++;
+      if (a.data >= startOfMonthStr) consultasMes++;
+
+      if (a.status === 'finalizada') finalizadas++;
+      if (a.status === 'faltou') faltou++;
+    }
 
     const pacientesNovos = patients.filter(p => {
       const createdDate = new Date(p.createdAt);
@@ -493,12 +501,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
       return paymentDate >= startOfMonth && p.status === 'pago';
     }).reduce((sum, p) => sum + p.valor, 0);
 
-    const receitaPendente = payments.filter(p =>
-      p.status === 'pendente'
-    ).reduce((sum, p) => sum + p.valor, 0);
+    const receitaPendente = payments.reduce((sum, p) =>
+      p.status === 'pendente' ? sum + p.valor : sum, 0
+    );
 
-    const finalizadas = appointments.filter(a => a.status === 'finalizada').length;
-    const faltou = appointments.filter(a => a.status === 'faltou').length;
     const taxaComparecimento = finalizadas + faltou > 0
       ? (finalizadas / (finalizadas + faltou)) * 100
       : 100;
