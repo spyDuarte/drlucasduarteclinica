@@ -151,20 +151,22 @@ export default function Login() {
               Ambiente de Demonstração
             </p>
             <div className="grid grid-cols-2 gap-3">
-              <div
+              <button
+                type="button"
                 onClick={() => { setEmail('medico@clinica.com'); setPassword('123456'); }}
-                className="p-3 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:border-primary-300 hover:bg-primary-50/30 transition-all group"
+                className="p-3 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:border-primary-300 hover:bg-primary-50/30 transition-all group text-left"
               >
                 <p className="text-xs font-medium text-slate-500 group-hover:text-primary-600 mb-1">Médico</p>
                 <p className="text-xs text-slate-900 font-mono">medico@clinica.com</p>
-              </div>
-              <div
+              </button>
+              <button
+                type="button"
                 onClick={() => { setEmail('secretaria@clinica.com'); setPassword('123456'); }}
-                className="p-3 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:border-primary-300 hover:bg-primary-50/30 transition-all group"
+                className="p-3 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:border-primary-300 hover:bg-primary-50/30 transition-all group text-left"
               >
                 <p className="text-xs font-medium text-slate-500 group-hover:text-primary-600 mb-1">Secretária</p>
                 <p className="text-xs text-slate-900 font-mono">secretaria@clinica.com</p>
-              </div>
+              </button>
             </div>
             <p className="text-center text-xs text-slate-400 mt-3">Senha padrão: <span className="font-mono">123456</span></p>
           </div>

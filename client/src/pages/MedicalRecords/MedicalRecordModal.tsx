@@ -1,4 +1,4 @@
-import { useState, type ElementType } from 'react';
+import { useState } from 'react';
 import {
   Stethoscope,
   X,
@@ -12,13 +12,13 @@ import {
   CheckSquare,
   Paperclip
 } from 'lucide-react';
-import type { MedicalRecord, MedicalRecordAttachment, ActiveProblem, Patient } from '../../types';
+import type { MedicalRecord, MedicalRecordAttachment, ActiveProblem } from '../../types';
 import { useMedicalRecordForm } from './useMedicalRecordForm';
 import { ActiveProblemsManager } from '../../components/ActiveProblemsManager';
 import { PatientTimeline } from '../../components/PatientTimeline';
 import { useAuth } from '../../contexts/AuthContext';
 import { useData } from '../../contexts/DataContext';
-import { generateId, calculateAge, formatDate, formatCPF, formatPhone, sortBy } from '../../utils/helpers';
+import { generateId } from '../../utils/helpers';
 import {
   GeneralInfoSection,
   SubjectiveSection,
@@ -27,6 +27,8 @@ import {
   PlanSection,
   AttachmentsSection
 } from './sections';
+import { PatientHeader } from './components/PatientHeader';
+import { SidebarItem } from './components/SidebarItem';
 
 interface MedicalRecordModalProps {
   patientId: string;
@@ -355,91 +357,4 @@ export function MedicalRecordModal({ patientId, record, onClose, onSave }: Medic
   );
 }
 
-// ----------------------------------------------------------------------
-// Sub-components (Redesigned)
-// ----------------------------------------------------------------------
-
-function SidebarItem({ label, icon: Icon, active, onClick, hasError }: {
-  label: string;
-  icon: ElementType;
-  active: boolean;
-  onClick: () => void;
-  hasError?: boolean;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group relative
-        ${active
-          ? 'bg-primary-50 text-primary-700'
-          : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-        }`}
-    >
-      {active && <div className="absolute left-0 top-1.5 bottom-1.5 w-1 bg-primary-600 rounded-r-full" />}
-      <div className="flex items-center gap-3 ml-1">
-        <Icon className={`w-4 h-4 ${active ? 'text-primary-600' : 'text-slate-400 group-hover:text-slate-600'}`} />
-        <span>{label}</span>
-      </div>
-      {hasError && <div className="w-2 h-2 rounded-full bg-red-500 shadow-sm animate-pulse" />}
-    </button>
-  );
-}
-
-
-function PatientHeader({ patient, records }: { patient: Patient; records: MedicalRecord[] }) {
-  const sortedRecords = sortBy(records, 'data', 'desc');
-  const lastVisit = sortedRecords.length > 0 ? sortedRecords[0] : null;
-  const age = calculateAge(patient.dataNascimento);
-
-  return (
-    <div className="bg-white border-b border-slate-200 px-6 py-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 shrink-0">
-      <div className="flex flex-col justify-center">
-        <h2 className="text-base font-bold text-slate-900 leading-tight">{patient.nome}</h2>
-        <p className="text-xs text-slate-500 mt-1 font-mono">{formatCPF(patient.cpf)}</p>
-      </div>
-
-      <div className="flex flex-col justify-center border-l border-slate-100 pl-6 md:border-l-0 lg:border-l">
-        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Idade</span>
-        <div className="flex items-baseline gap-2">
-           <span className="text-sm font-semibold text-slate-700">{age} anos</span>
-           <span className="text-[11px] text-slate-400">{formatDate(patient.dataNascimento)}</span>
-        </div>
-      </div>
-
-      <div className="flex flex-col justify-center lg:border-l border-slate-100 lg:pl-6">
-         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Contato</span>
-         <div className="text-sm text-slate-700 font-medium">{formatPhone(patient.telefone)}</div>
-      </div>
-
-      <div className="flex flex-col justify-center lg:border-l border-slate-100 lg:pl-6">
-         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Alergias</span>
-         <div className="text-sm font-medium truncate">
-            {patient.alergias && patient.alergias.length > 0 ? (
-               <span className="text-red-600 bg-red-50 px-2 py-0.5 rounded-full text-xs" title={Array.isArray(patient.alergias) ? patient.alergias.join(', ') : patient.alergias}>
-                 {Array.isArray(patient.alergias) ? patient.alergias[0] + (patient.alergias.length > 1 ? '...' : '') : patient.alergias}
-               </span>
-            ) : (
-               <span className="text-slate-400 text-xs">Nenhuma registrada</span>
-            )}
-         </div>
-      </div>
-
-      <div className="flex flex-col justify-center lg:border-l border-slate-100 lg:pl-6">
-         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Histórico</span>
-         <div className="flex items-center gap-4">
-            <div>
-               <span className="text-lg font-bold text-primary-600">{records.length}</span>
-               <span className="text-[10px] text-slate-500 ml-1">Visitas</span>
-            </div>
-            {lastVisit && (
-               <div className="pl-4 border-l border-slate-100">
-                  <div className="text-[10px] text-slate-400 uppercase">Última</div>
-                  <div className="text-xs font-medium text-slate-700">{formatDate(lastVisit.data, 'dd/MM')}</div>
-               </div>
-            )}
-         </div>
-      </div>
-    </div>
-  );
-}
 
