@@ -72,17 +72,24 @@ export default function MedicalRecords() {
 
   // Filtrar registros
   const filteredRecords = useMemo(() => {
+    // Otimização: Hoist do toLowerCase e short-circuit de verificações mais baratas
+    const searchLower = searchTerm.toLowerCase();
+
     return records.filter(record => {
-      const searchLower = searchTerm.toLowerCase();
-      const matchesSearch = searchTerm === '' ||
-        record.subjetivo?.queixaPrincipal?.toLowerCase().includes(searchLower) ||
+      const matchesType = filterType === 'todos' || record.tipoAtendimento === filterType;
+
+      if (!matchesType) {
+        return false;
+      }
+
+      if (!searchTerm) {
+        return true;
+      }
+
+      return record.subjetivo?.queixaPrincipal?.toLowerCase().includes(searchLower) ||
         record.avaliacao?.diagnosticoPrincipal?.toLowerCase().includes(searchLower) ||
         record.avaliacao?.hipotesesDiagnosticas?.some(h => h.toLowerCase().includes(searchLower)) ||
         record.avaliacao?.cid10?.some(c => c.toLowerCase().includes(searchLower));
-
-      const matchesType = filterType === 'todos' || record.tipoAtendimento === filterType;
-
-      return matchesSearch && matchesType;
     });
   }, [records, searchTerm, filterType]);
 
