@@ -1,7 +1,9 @@
 import { Link } from 'react-router-dom';
 import { UserPlus, CalendarPlus, FileText } from 'lucide-react';
+import { memo } from 'react';
 
-export function QuickActions() {
+// Memoized as this component is static and should not re-render on parent updates
+export const QuickActions = memo(function QuickActions() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between px-1">
@@ -55,4 +57,4 @@ export function QuickActions() {
       </div>
     </div>
   );
-}
+});

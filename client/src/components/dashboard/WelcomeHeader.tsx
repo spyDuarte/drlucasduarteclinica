@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom';
 import { Calendar } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import { memo } from 'react';
 
-export function WelcomeHeader() {
+// Memoized to prevent re-renders when Dashboard updates (uses stable AuthContext)
+export const WelcomeHeader = memo(function WelcomeHeader() {
   const { user } = useAuth();
 
   const getGreeting = () => {
@@ -42,4 +44,4 @@ export function WelcomeHeader() {
       </div>
     </div>
   );
-}
+});
