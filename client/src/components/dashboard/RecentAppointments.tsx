@@ -2,13 +2,15 @@ import { Link } from 'react-router-dom';
 import { Calendar, Stethoscope } from 'lucide-react';
 import type { Appointment, Patient } from '../../types';
 import { getInitials, translateAppointmentStatus } from '../../utils/helpers';
+import { memo } from 'react';
 
 interface RecentAppointmentsProps {
   appointments: Appointment[];
   patients: Patient[];
 }
 
-export function RecentAppointments({ appointments, patients }: RecentAppointmentsProps) {
+// Memoized to prevent re-renders when parent Dashboard updates but appointments/patients remain stable
+export const RecentAppointments = memo(function RecentAppointments({ appointments, patients }: RecentAppointmentsProps) {
   return (
     <div className="lg:col-span-2 card p-0 overflow-hidden flex flex-col h-full border border-slate-200 shadow-sm">
       <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
@@ -76,4 +78,4 @@ export function RecentAppointments({ appointments, patients }: RecentAppointment
       </div>
     </div>
   );
-}
+});

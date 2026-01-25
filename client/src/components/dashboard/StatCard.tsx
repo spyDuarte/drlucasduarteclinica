@@ -1,4 +1,5 @@
 import { type LucideIcon, TrendingUp } from 'lucide-react';
+import { memo } from 'react';
 
 interface StatCardProps {
   label: string;
@@ -9,7 +10,8 @@ interface StatCardProps {
   colorClass: string;
 }
 
-export function StatCard({ label, value, icon: Icon, trend, trendUp, colorClass }: StatCardProps) {
+// Memoized to avoid re-rendering cards whose values haven't changed when other stats update
+export const StatCard = memo(function StatCard({ label, value, icon: Icon, trend, trendUp, colorClass }: StatCardProps) {
   return (
     <div className="card bg-white/95 backdrop-blur p-5 flex flex-col justify-between h-full hover:border-primary-200 hover:shadow-md transition-all">
       <div className="flex justify-between items-start mb-4">
@@ -27,4 +29,4 @@ export function StatCard({ label, value, icon: Icon, trend, trendUp, colorClass 
       </div>
     </div>
   );
-}
+});
