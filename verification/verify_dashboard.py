@@ -1,42 +1,43 @@
-from playwright.sync_api import sync_playwright
 
-def verify_dashboard(page):
-    print("Navigating to login page...")
+from playwright.sync_api import Page, expect, sync_playwright
+import time
+import os
+
+def verify_dashboard_stats(page: Page):
+    # 1. Arrange: Go to the Login page.
     page.goto("http://localhost:5173/")
 
-    # Wait for login page components to load
-    page.wait_for_selector("text=Bem-vindo de volta")
+    # 2. Act: Click Demo Credential for Medico
+    page.get_by_text("Médico", exact=True).click()
 
-    # Click demo doctor button (it fills email/pass)
-    # The button contains text "Médico"
-    print("Clicking demo credentials...")
-    page.click("button:has-text('Médico')")
+    # 3. Act: Click Login button "Acessar Sistema"
+    page.get_by_role("button", name="Acessar Sistema").click()
 
-    # Click submit button
-    print("Logging in...")
-    page.click("button:has-text('Acessar Sistema')")
+    # 4. Assert: Wait for Dashboard to load.
+    # Look for "Métricas principais" which is in Dashboard.tsx
+    expect(page.get_by_text("Métricas principais")).to_be_visible()
 
-    # Wait for Dashboard to load (look for "Métricas principais" or Welcome Header)
-    # WelcomeHeader has "Bom dia" or similar, and "Métricas principais" is in Dashboard.tsx
-    print("Waiting for dashboard...")
-    page.wait_for_selector("text=Métricas principais", timeout=10000)
+    # Verify Stats cards are visible
+    expect(page.get_by_text("Consultas Hoje")).to_be_visible()
+    expect(page.get_by_text("Pacientes Total")).to_be_visible()
+    expect(page.get_by_text("Receita do Mês")).to_be_visible()
 
-    # Take screenshot
-    page.screenshot(path="verification/dashboard.png")
-    print("Screenshot taken at verification/dashboard.png")
+    # Wait a bit for animations
+    time.sleep(2)
+
+    # 5. Screenshot
+    page.screenshot(path="verification/dashboard_stats.png")
 
 if __name__ == "__main__":
     with sync_playwright() as p:
-        browser = p.chromium.launch()
+        browser = p.chromium.launch(headless=True)
         page = browser.new_page()
         try:
-            verify_dashboard(page)
+            verify_dashboard_stats(page)
+            print("Verification script finished successfully.")
         except Exception as e:
-            print(f"Error: {e}")
-            # Take screenshot on error to see what happened
-            try:
-                page.screenshot(path="verification/error.png")
-            except:
-                pass
+            print(f"Verification script failed: {e}")
+            page.screenshot(path="verification/error.png")
+            raise
         finally:
             browser.close()
