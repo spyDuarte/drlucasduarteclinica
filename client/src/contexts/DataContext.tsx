@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback, useMemo, type ReactNode } from 'react';
+import { format } from 'date-fns';
 import type { Patient, Appointment, MedicalRecord, Payment, DashboardStats, MedicalDocument, DocumentType } from '../types';
 import { generateId, doTimesOverlap, normalizeForSearch, sortBy } from '../utils/helpers';
 import { STORAGE_KEYS } from '../constants/clinic';
@@ -464,41 +465,64 @@ export function DataProvider({ children }: { children: ReactNode }) {
   // Dashboard Stats - memoizado para evitar recálculos desnecessários
   const dashboardStats = useMemo((): DashboardStats => {
     const now = new Date();
-    const todayStr = now.toISOString().split('T')[0];
+    // Ensure today is treated as local date for string comparison consistency
+    const todayStr = format(now, 'yyyy-MM-dd');
+
     const startOfWeek = new Date(now);
     startOfWeek.setDate(now.getDate() - now.getDay());
+    // For string comparison, we need the YYYY-MM-DD of the start of week
+    const startOfWeekStr = format(startOfWeek, 'yyyy-MM-dd');
+
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfMonthStr = format(startOfMonth, 'yyyy-MM-dd');
+    const startOfMonthISO = startOfMonth.toISOString(); // Used for ISO string comparisons (patients/payments)
 
-    const consultasHoje = appointments.filter(a =>
-      a.data === todayStr && a.status !== 'cancelada'
-    ).length;
+    let consultasHoje = 0;
+    let consultasSemana = 0;
+    let consultasMes = 0;
+    let finalizadas = 0;
+    let faltou = 0;
 
-    const consultasSemana = appointments.filter(a => {
-      const appDate = new Date(a.data);
-      return appDate >= startOfWeek && a.status !== 'cancelada';
-    }).length;
+    for (const a of appointments) {
+      if (a.status === 'cancelada') continue;
 
-    const consultasMes = appointments.filter(a => {
-      const appDate = new Date(a.data);
-      return appDate >= startOfMonth && a.status !== 'cancelada';
-    }).length;
+      if (a.data === todayStr) {
+        consultasHoje++;
+      }
 
-    const pacientesNovos = patients.filter(p => {
-      const createdDate = new Date(p.createdAt);
-      return createdDate >= startOfMonth;
-    }).length;
+      // String comparison works for 'yyyy-MM-dd'
+      if (a.data >= startOfWeekStr) {
+        consultasSemana++;
+      }
 
-    const receitaMes = payments.filter(p => {
-      const paymentDate = new Date(p.createdAt);
-      return paymentDate >= startOfMonth && p.status === 'pago';
-    }).reduce((sum, p) => sum + p.valor, 0);
+      if (a.data >= startOfMonthStr) {
+        consultasMes++;
+      }
 
-    const receitaPendente = payments.filter(p =>
-      p.status === 'pendente'
-    ).reduce((sum, p) => sum + p.valor, 0);
+      if (a.status === 'finalizada') finalizadas++;
+      if (a.status === 'faltou') faltou++;
+    }
 
-    const finalizadas = appointments.filter(a => a.status === 'finalizada').length;
-    const faltou = appointments.filter(a => a.status === 'faltou').length;
+    let pacientesNovos = 0;
+    // Patient.createdAt is ISO string
+    for (const p of patients) {
+      if (p.createdAt >= startOfMonthISO) pacientesNovos++;
+    }
+
+    let receitaMes = 0;
+    let receitaPendente = 0;
+
+    for (const p of payments) {
+      if (p.status === 'pago') {
+        // Payment.createdAt is ISO string
+        if (p.createdAt >= startOfMonthISO) {
+          receitaMes += p.valor;
+        }
+      } else if (p.status === 'pendente') {
+        receitaPendente += p.valor;
+      }
+    }
+
     const taxaComparecimento = finalizadas + faltou > 0
       ? (finalizadas / (finalizadas + faltou)) * 100
       : 100;
