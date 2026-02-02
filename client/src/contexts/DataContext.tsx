@@ -465,40 +465,55 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const dashboardStats = useMemo((): DashboardStats => {
     const now = new Date();
     const todayStr = now.toISOString().split('T')[0];
+
     const startOfWeek = new Date(now);
     startOfWeek.setDate(now.getDate() - now.getDay());
+    const startOfWeekStr = startOfWeek.toISOString().split('T')[0];
+
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfMonthISO = startOfMonth.toISOString();
+    const startOfMonthStr = startOfMonthISO.split('T')[0];
 
-    const consultasHoje = appointments.filter(a =>
-      a.data === todayStr && a.status !== 'cancelada'
-    ).length;
+    // Otimização: Loop único para appointments (O(N)) e comparação de strings para datas
+    let consultasHoje = 0;
+    let consultasSemana = 0;
+    let consultasMes = 0;
+    let finalizadas = 0;
+    let faltou = 0;
 
-    const consultasSemana = appointments.filter(a => {
-      const appDate = new Date(a.data);
-      return appDate >= startOfWeek && a.status !== 'cancelada';
-    }).length;
+    for (const a of appointments) {
+      if (a.status === 'cancelada') continue;
 
-    const consultasMes = appointments.filter(a => {
-      const appDate = new Date(a.data);
-      return appDate >= startOfMonth && a.status !== 'cancelada';
-    }).length;
+      if (a.data === todayStr) consultasHoje++;
+      if (a.data >= startOfWeekStr) consultasSemana++;
+      if (a.data >= startOfMonthStr) consultasMes++;
 
-    const pacientesNovos = patients.filter(p => {
-      const createdDate = new Date(p.createdAt);
-      return createdDate >= startOfMonth;
-    }).length;
+      if (a.status === 'finalizada') finalizadas++;
+      if (a.status === 'faltou') faltou++;
+    }
 
-    const receitaMes = payments.filter(p => {
-      const paymentDate = new Date(p.createdAt);
-      return paymentDate >= startOfMonth && p.status === 'pago';
-    }).reduce((sum, p) => sum + p.valor, 0);
+    // Otimização: Loop único para pacientes
+    let pacientesNovos = 0;
+    for (const p of patients) {
+      if (p.createdAt >= startOfMonthISO) {
+        pacientesNovos++;
+      }
+    }
 
-    const receitaPendente = payments.filter(p =>
-      p.status === 'pendente'
-    ).reduce((sum, p) => sum + p.valor, 0);
+    // Otimização: Loop único para pagamentos
+    let receitaMes = 0;
+    let receitaPendente = 0;
 
-    const finalizadas = appointments.filter(a => a.status === 'finalizada').length;
-    const faltou = appointments.filter(a => a.status === 'faltou').length;
+    for (const p of payments) {
+      if (p.status === 'pendente') {
+        receitaPendente += p.valor;
+      } else if (p.status === 'pago') {
+        if (p.createdAt >= startOfMonthISO) {
+          receitaMes += p.valor;
+        }
+      }
+    }
+
     const taxaComparecimento = finalizadas + faltou > 0
       ? (finalizadas / (finalizadas + faltou)) * 100
       : 100;
