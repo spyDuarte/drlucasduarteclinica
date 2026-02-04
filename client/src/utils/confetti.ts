@@ -21,7 +21,7 @@ export function triggerVictory(type: VictoryType = 'basic') {
       return Math.random() * (max - min) + min;
     };
 
-    const interval: ReturnType<typeof setInterval> = setInterval(function () {
+    const interval: any = setInterval(function () {
       const timeLeft = animationEnd - Date.now();
 
       if (timeLeft <= 0) {
