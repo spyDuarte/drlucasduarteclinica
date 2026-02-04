@@ -14,15 +14,8 @@ const mockPatients: Patient[] = [
     updatedAt: '2023-01-01',
     email: 'john@example.com',
     dataNascimento: '1980-01-01',
-    sexo: 'M',
-    endereco: {
-      logradouro: 'Rua A',
-      numero: '123',
-      bairro: 'Centro',
-      cidade: 'Cidade',
-      estado: 'UF',
-      cep: '00000-000'
-    }
+    genero: 'masculino',
+    endereco: 'Rua A'
   }
 ];
 
@@ -35,7 +28,6 @@ const mockAppointments: Appointment[] = [
     horaFim: '10:30',
     motivo: 'Checkup',
     status: 'agendada',
-    tipo: 'primeira_consulta',
     createdAt: '2023-01-01',
     updatedAt: '2023-01-01',
     observacoes: ''
