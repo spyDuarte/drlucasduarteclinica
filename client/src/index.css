@@ -47,50 +47,20 @@
   --color-medical-light: #e0f0fe;
   --color-medical: #0069c7;
   --color-medical-dark: #0154a3;
-
-  /* Cores Semânticas Padronizadas */
-  --color-success-50: #ecfdf5;
-  --color-success-500: #10b981;
-  --color-success-600: #059669;
-  --color-success-700: #047857;
-
-  --color-danger-50: #fef2f2;
-  --color-danger-500: #ef4444;
-  --color-danger-600: #dc2626;
-  --color-danger-700: #b91c1c;
-
-  --color-warning-50: #fffbeb;
-  --color-warning-500: #f59e0b;
-  --color-warning-600: #d97706;
-  --color-warning-700: #b45309;
-
-  --color-info-50: #f0f9ff;
-  --color-info-500: #0ea5e9;
-  --color-info-600: #0284c7;
-  --color-info-700: #0369a1;
-
-  /* Fonte */
-  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 /* ========================================
-   ESTILOS GLOBAIS
+   GLOBAL & SCROLLBAR
    ======================================== */
 
 body {
-  background-color: var(--color-slate-50, #f8fafc);
-  color: var(--color-slate-900, #0f172a);
-  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  margin: 0;
-  min-height: 100vh;
 }
 
-/* Scrollbar Clean */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -98,52 +68,46 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-slate-300, #cbd5e1);
-  border-radius: 99px;
+  background: #cbd5e1; /* slate-300 */
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-slate-400, #94a3b8);
-}
-
-* {
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-slate-300, #cbd5e1) transparent;
+  background: #94a3b8; /* slate-400 */
 }
 
 /* ========================================
-   COMPONENTES BASE (REFINED)
+   COMPONENTS
    ======================================== */
 
-/* Botões */
+/* Buttons */
 .btn-primary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
   padding: 0.625rem 1.25rem;
-  background-color: var(--color-primary-600);
-  background-image: linear-gradient(to bottom, rgba(255,255,255,0.1), transparent);
+  background: linear-gradient(135deg, var(--color-primary-600), var(--color-primary-500));
   color: white;
   border-radius: 0.5rem;
   font-weight: 500;
   font-size: 0.875rem;
-  line-height: 1.25rem;
-  border: 1px solid var(--color-primary-700);
+  border: 1px solid transparent;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0,0,0,0.05) inset;
+  box-shadow: 0 2px 4px rgba(12, 135, 235, 0.25), 0 1px 2px rgba(12, 135, 235, 0.1);
 }
 
 .btn-primary:hover {
-  background-color: var(--color-primary-700);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  background: linear-gradient(135deg, var(--color-primary-700), var(--color-primary-600));
+  box-shadow: 0 4px 6px -1px rgba(12, 135, 235, 0.3), 0 2px 4px -1px rgba(12, 135, 235, 0.15);
   transform: translateY(-1px);
 }
 
 .btn-primary:active {
-  background-color: var(--color-primary-800);
+  background: var(--color-primary-800);
   transform: translateY(0);
+  box-shadow: none;
 }
 
 .btn-secondary {
@@ -167,6 +131,7 @@ body {
   background-color: var(--color-slate-50);
   border-color: var(--color-slate-300);
   color: var(--color-slate-900);
+  box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 .btn-danger {
@@ -175,20 +140,20 @@ body {
   justify-content: center;
   gap: 0.5rem;
   padding: 0.625rem 1.25rem;
-  background-color: var(--color-danger-600);
-  color: white;
+  background-color: white;
+  color: var(--color-danger-600);
+  border: 1px solid var(--color-danger-200);
   border-radius: 0.5rem;
   font-weight: 500;
   font-size: 0.875rem;
-  border: 1px solid transparent;
   cursor: pointer;
   transition: all 0.2s;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
 .btn-danger:hover {
-  background-color: var(--color-danger-700);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  background-color: var(--color-danger-50);
+  border-color: var(--color-danger-300);
+  color: var(--color-danger-700);
 }
 
 /* Inputs */
@@ -211,15 +176,17 @@ body {
 .input-field:focus {
   outline: none;
   border-color: var(--color-primary-500);
+  background-color: var(--color-primary-50);
+  background-color: #fafeff; /* Very subtle blue tint */
   box-shadow: 0 0 0 3px rgba(12, 135, 235, 0.15);
 }
 
 /* Cards */
 .card {
   background-color: white;
-  border-radius: 1rem; /* 16px */
-  border: 1px solid var(--color-slate-200);
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.02), 0 4px 6px -1px rgba(0, 0, 0, 0.01);
+  border-radius: 1rem;
+  border: 1px solid rgba(226, 232, 240, 0.8); /* slate-200 with opacity */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 10px 15px -3px rgba(0, 0, 0, 0.02);
   padding: 1.5rem;
 }
 
@@ -242,6 +209,7 @@ body {
   color: var(--color-slate-700);
   border-bottom: 1px solid var(--color-slate-100);
   vertical-align: middle;
+  font-feature-settings: "tnum";
 }
 
 .table-row:hover .table-cell {
@@ -256,14 +224,16 @@ body {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.625rem 0.875rem;
+  padding: 0.75rem 1rem;
   color: var(--color-slate-600);
-  border-radius: 0.5rem;
   font-size: 0.875rem;
   font-weight: 500;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   margin-bottom: 0.25rem;
-  border: 1px solid transparent;
+  border-left: 3px solid transparent;
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
+  border-radius: 0.5rem;
 }
 
 .sidebar-link:hover {
@@ -275,8 +245,9 @@ body {
   background-color: var(--color-primary-50);
   color: var(--color-primary-700);
   font-weight: 600;
-  border-color: rgba(12, 135, 235, 0.1);
-  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+  border-left-color: var(--color-primary-500);
+  border-top-left-radius: 0.25rem;
+  border-bottom-left-radius: 0.25rem;
 }
 
 /* ========================================
@@ -329,12 +300,12 @@ body {
    ======================================== */
 
 .medical-record-header {
-  background-color: white;
+  background: linear-gradient(to right, #ffffff, #f8fafc);
   border: 1px solid var(--color-slate-200);
   border-radius: 1rem;
   padding: 1.5rem;
   color: var(--color-slate-900);
-  box-shadow: 0 1px 3px 0 rgba(0,0,0,0.02);
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
 }
 
 .medical-record-header h1,
@@ -369,13 +340,13 @@ body {
    ======================================== */
 
 .modal-overlay {
-  background-color: rgba(15, 23, 42, 0.4); /* slate-900 */
+  background-color: rgba(15, 23, 42, 0.4);
   backdrop-filter: blur(4px);
 }
 
 .modal-container {
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-  border: 1px solid var(--color-slate-200);
+  border: 1px solid rgba(226, 232, 240, 0.8);
   border-radius: 1rem;
 }
 
@@ -389,7 +360,6 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .nav-icon-wrapper, .stat-icon-container, .brand-icon-animated, .card-gradient, .glass-card {
-  /* Resetando comportamentos complexos */
   transform: none !important;
   box-shadow: none !important;
   background-image: none !important;

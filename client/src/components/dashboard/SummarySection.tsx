@@ -8,7 +8,7 @@ interface SummarySectionProps {
 
 export function SummarySection({ stats }: SummarySectionProps) {
   return (
-    <div className="card p-0 overflow-hidden flex flex-col h-full border border-slate-200 shadow-sm">
+    <div className="card p-0 overflow-hidden flex flex-col h-full">
        <div className="p-5 border-b border-slate-100 bg-slate-50/50 flex items-center gap-2">
           <Activity className="w-5 h-5 text-slate-500" />
           <h2 className="font-bold text-slate-800">Resumo</h2>

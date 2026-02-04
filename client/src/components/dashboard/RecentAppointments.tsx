@@ -12,7 +12,7 @@ interface RecentAppointmentsProps {
 // Memoized to prevent re-renders when parent Dashboard updates but appointments/patients remain stable
 export const RecentAppointments = memo(function RecentAppointments({ appointments, patients }: RecentAppointmentsProps) {
   return (
-    <div className="lg:col-span-2 card p-0 overflow-hidden flex flex-col h-full border border-slate-200 shadow-sm">
+    <div className="lg:col-span-2 card p-0 overflow-hidden flex flex-col h-full">
       <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
          <div className="flex items-center gap-2">
             <Calendar className="w-5 h-5 text-slate-500" />
