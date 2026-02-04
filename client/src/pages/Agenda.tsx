@@ -239,10 +239,10 @@ export default function Agenda() {
             try {
               if (editingAppointment) {
                 updateAppointment(editingAppointment.id, data);
-                showToast('Consulta atualizada com sucesso!', 'success');
+                showToast('Consulta atualizada com sucesso!', 'success', true);
               } else {
                 addAppointment(data as Omit<Appointment, 'id' | 'createdAt' | 'updatedAt'>);
-                showToast('Consulta agendada com sucesso!', 'success');
+                showToast('Consulta agendada com sucesso!', 'success', true);
               }
               handleCloseModal();
             } catch (error) {

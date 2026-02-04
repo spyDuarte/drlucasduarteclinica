@@ -1,6 +1,7 @@
 import { useState, useMemo, memo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useData } from '../../contexts/DataContext';
+import { useToast } from '../../components/Toast';
 import {
   ArrowLeft,
   Plus,
@@ -34,6 +35,7 @@ type TabType = 'atendimentos' | 'documentos' | 'resumo';
 export default function MedicalRecords() {
   const { patientId } = useParams();
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const {
     getPatient,
     getMedicalRecordsByPatient,
@@ -108,8 +110,10 @@ export default function MedicalRecords() {
   const handleSaveRecord = (data: Partial<MedicalRecord>) => {
     if (editingRecord) {
       updateMedicalRecord(editingRecord.id, data);
+      showToast('Prontuário atualizado com sucesso!', 'success', true);
     } else {
       addMedicalRecord(data as Omit<MedicalRecord, 'id' | 'createdAt' | 'updatedAt'>);
+      showToast('Atendimento finalizado com sucesso!', 'success', true);
     }
     setShowNewRecord(false);
     setEditingRecord(null);
