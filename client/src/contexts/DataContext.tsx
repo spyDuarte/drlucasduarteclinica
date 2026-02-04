@@ -209,18 +209,32 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const getPatient = useCallback((id: string) => patients.find(p => p.id === id), [patients]);
 
+  // Optimization: Pre-compute search index to avoid repetitive normalization
+  const patientSearchIndex = useMemo(() => {
+    return patients.map(patient => ({
+      id: patient.id,
+      searchString: normalizeForSearch(
+        `${patient.nome} ${patient.cpf} ${patient.telefone} ${patient.email || ''}`
+      )
+    }));
+  }, [patients]);
+
   // Busca textual em pacientes (nome, CPF, telefone, email)
   const searchPatients = useCallback((query: string): Patient[] => {
     if (!query.trim()) return patients;
 
     const normalizedQuery = normalizeForSearch(query);
-    return patients.filter(patient => {
-      const searchableText = normalizeForSearch(
-        `${patient.nome} ${patient.cpf} ${patient.telefone} ${patient.email || ''}`
-      );
-      return searchableText.includes(normalizedQuery);
-    });
-  }, [patients]);
+
+    // Find matching IDs first using the pre-computed index
+    const matchedIds = new Set<string>();
+    for (const item of patientSearchIndex) {
+      if (item.searchString.includes(normalizedQuery)) {
+        matchedIds.add(item.id);
+      }
+    }
+
+    return patients.filter(p => matchedIds.has(p.id));
+  }, [patients, patientSearchIndex]);
 
   // Retorna paciente com suas consultas
   const getPatientWithAppointments = useCallback((id: string) => {
