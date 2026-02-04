@@ -1,6 +1,5 @@
 import { useState, useEffect, createContext, useContext, useCallback, type ReactNode } from 'react';
 import { CheckCircle, XCircle, AlertTriangle, Info, X } from 'lucide-react';
-import { triggerVictory } from '../utils/confetti';
 
 type ToastType = 'success' | 'error' | 'warning' | 'info';
 
@@ -8,11 +7,10 @@ interface Toast {
   id: string;
   message: string;
   type: ToastType;
-  celebrate?: boolean;
 }
 
 interface ToastContextType {
-  showToast: (message: string, type?: ToastType, celebrate?: boolean) => void;
+  showToast: (message: string, type?: ToastType) => void;
 }
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
@@ -45,30 +43,12 @@ const progressColors = {
   info: 'bg-sky-500',
 };
 
-// Animated Check Component
-const AnimatedCheck = () => (
-  <svg className="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={3}
-      d="M5 13l4 4L19 7"
-      className="animate-check-stroke"
-      style={{
-        strokeDasharray: 24,
-        strokeDashoffset: 24,
-        animation: 'check-stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards 0.2s'
-      }}
-    />
-  </svg>
-);
-
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
-  const showToast = useCallback((message: string, type: ToastType = 'info', celebrate: boolean = false) => {
+  const showToast = useCallback((message: string, type: ToastType = 'info') => {
     const id = Date.now().toString(36) + Math.random().toString(36).substring(2);
-    setToasts(prev => [...prev, { id, message, type, celebrate }]);
+    setToasts(prev => [...prev, { id, message, type }]);
   }, []);
 
   const removeToast = useCallback((id: string) => {
@@ -89,20 +69,14 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
 function ToastItem({ toast, onRemove }: { toast: Toast; onRemove: (id: string) => void }) {
   const Icon = icons[toast.type];
-  const isSuccess = toast.type === 'success';
 
   useEffect(() => {
-    // Trigger confetti if celebrate is true and type is success
-    if (isSuccess && toast.celebrate) {
-       triggerVictory('basic');
-    }
-
     const timer = setTimeout(() => {
       onRemove(toast.id);
     }, 4000);
 
     return () => clearTimeout(timer);
-  }, [toast.id, onRemove, isSuccess, toast.celebrate]);
+  }, [toast.id, onRemove]);
 
   return (
     <div
@@ -111,7 +85,7 @@ function ToastItem({ toast, onRemove }: { toast: Toast; onRemove: (id: string) =
     >
       {/* Icon with container */}
       <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${iconContainerColors[toast.type]}`}>
-        {isSuccess ? <AnimatedCheck /> : <Icon className="w-5 h-5" strokeWidth={2.5} />}
+        <Icon className="w-5 h-5" strokeWidth={2.5} />
       </div>
 
       {/* Message */}
@@ -138,10 +112,6 @@ function ToastItem({ toast, onRemove }: { toast: Toast; onRemove: (id: string) =
         @keyframes progress {
           from { width: 100%; }
           to { width: 0%; }
-        }
-        @keyframes check-stroke {
-          from { stroke-dashoffset: 24; opacity: 0; }
-          to { stroke-dashoffset: 0; opacity: 1; }
         }
       `}</style>
     </div>
