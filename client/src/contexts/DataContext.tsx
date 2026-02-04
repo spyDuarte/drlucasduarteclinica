@@ -464,53 +464,64 @@ export function DataProvider({ children }: { children: ReactNode }) {
   // Dashboard Stats - memoizado para evitar recálculos desnecessários
   const dashboardStats = useMemo((): DashboardStats => {
     const now = new Date();
-    const todayStr = now.toISOString().split('T')[0];
+
+    // Helper para formatar data local YYYY-MM-DD
+    const toDateStr = (date: Date) => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+
+    const todayStr = toDateStr(now);
+
     const startOfWeek = new Date(now);
     startOfWeek.setDate(now.getDate() - now.getDay());
+    const startOfWeekStr = toDateStr(startOfWeek);
+
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfMonthStr = toDateStr(startOfMonth);
+    const startOfMonthISO = startOfMonth.toISOString();
 
-    const consultasHoje = appointments.filter(a =>
-      a.data === todayStr && a.status !== 'cancelada'
-    ).length;
+    // Single pass para estatísticas de agendamentos
+    const appStats = appointments.reduce((acc, a) => {
+      if (a.status === 'cancelada') return acc;
 
-    const consultasSemana = appointments.filter(a => {
-      const appDate = new Date(a.data);
-      return appDate >= startOfWeek && a.status !== 'cancelada';
-    }).length;
+      if (a.data === todayStr) acc.hoje++;
+      if (a.data >= startOfWeekStr) acc.semana++;
+      if (a.data >= startOfMonthStr) acc.mes++;
 
-    const consultasMes = appointments.filter(a => {
-      const appDate = new Date(a.data);
-      return appDate >= startOfMonth && a.status !== 'cancelada';
-    }).length;
+      if (a.status === 'finalizada') acc.finalizadas++;
+      if (a.status === 'faltou') acc.faltou++;
 
-    const pacientesNovos = patients.filter(p => {
-      const createdDate = new Date(p.createdAt);
-      return createdDate >= startOfMonth;
-    }).length;
+      return acc;
+    }, { hoje: 0, semana: 0, mes: 0, finalizadas: 0, faltou: 0 });
 
-    const receitaMes = payments.filter(p => {
-      const paymentDate = new Date(p.createdAt);
-      return paymentDate >= startOfMonth && p.status === 'pago';
-    }).reduce((sum, p) => sum + p.valor, 0);
+    const pacientesNovos = patients.filter(p => p.createdAt >= startOfMonthISO).length;
 
-    const receitaPendente = payments.filter(p =>
-      p.status === 'pendente'
-    ).reduce((sum, p) => sum + p.valor, 0);
+    // Single pass para estatísticas de pagamentos
+    const payStats = payments.reduce((acc, p) => {
+      if (p.status === 'pago' && p.createdAt >= startOfMonthISO) {
+        acc.receitaMes += p.valor;
+      }
+      if (p.status === 'pendente') {
+        acc.receitaPendente += p.valor;
+      }
+      return acc;
+    }, { receitaMes: 0, receitaPendente: 0 });
 
-    const finalizadas = appointments.filter(a => a.status === 'finalizada').length;
-    const faltou = appointments.filter(a => a.status === 'faltou').length;
-    const taxaComparecimento = finalizadas + faltou > 0
-      ? (finalizadas / (finalizadas + faltou)) * 100
+    const taxaComparecimento = appStats.finalizadas + appStats.faltou > 0
+      ? (appStats.finalizadas / (appStats.finalizadas + appStats.faltou)) * 100
       : 100;
 
     return {
-      consultasHoje,
-      consultasSemana,
-      consultasMes,
+      consultasHoje: appStats.hoje,
+      consultasSemana: appStats.semana,
+      consultasMes: appStats.mes,
       pacientesTotal: patients.length,
       pacientesNovos,
-      receitaMes,
-      receitaPendente,
+      receitaMes: payStats.receitaMes,
+      receitaPendente: payStats.receitaPendente,
       taxaComparecimento
     };
   }, [appointments, patients, payments]);
