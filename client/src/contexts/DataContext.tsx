@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, useMemo, type ReactNode } from 'react';
 import type { Patient, Appointment, MedicalRecord, Payment, DashboardStats, MedicalDocument, DocumentType } from '../types';
 import { generateId, doTimesOverlap, normalizeForSearch, sortBy } from '../utils/helpers';
-import { STORAGE_KEYS } from '../constants/clinic';
+import { IS_PERSISTENT_STORAGE_ENABLED, STORAGE_KEYS } from '../constants/clinic';
 import {
   DEMO_PATIENTS,
   DEMO_MEDICAL_RECORDS,
@@ -68,65 +68,44 @@ interface DataContextType {
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
 export function DataProvider({ children }: { children: ReactNode }) {
-  const [patients, setPatients] = useState<Patient[]>(() => {
-    const savedPatients = localStorage.getItem(STORAGE_KEYS.PATIENTS);
-    if (savedPatients) {
-      try {
-        return JSON.parse(savedPatients);
-      } catch {
-        return DEMO_PATIENTS;
-      }
+  const readFromStorage = <T,>(key: string, fallback: T): T => {
+    if (!IS_PERSISTENT_STORAGE_ENABLED) {
+      return fallback;
     }
-    return DEMO_PATIENTS;
-  });
 
-  const [appointments, setAppointments] = useState<Appointment[]>(() => {
-    const savedAppointments = localStorage.getItem(STORAGE_KEYS.APPOINTMENTS);
-    if (savedAppointments) {
-      try {
-        return JSON.parse(savedAppointments);
-      } catch {
-        return generateDemoAppointments();
-      }
+    const rawData = localStorage.getItem(key);
+    if (!rawData) {
+      return fallback;
     }
-    return generateDemoAppointments();
-  });
 
-  const [medicalRecords, setMedicalRecords] = useState<MedicalRecord[]>(() => {
-    const savedRecords = localStorage.getItem(STORAGE_KEYS.RECORDS);
-    if (savedRecords) {
-      try {
-        return JSON.parse(savedRecords);
-      } catch {
-        return DEMO_MEDICAL_RECORDS;
-      }
+    try {
+      return JSON.parse(rawData) as T;
+    } catch {
+      return fallback;
     }
-    return DEMO_MEDICAL_RECORDS;
-  });
+  };
 
-  const [payments, setPayments] = useState<Payment[]>(() => {
-    const savedPayments = localStorage.getItem(STORAGE_KEYS.PAYMENTS);
-    if (savedPayments) {
-      try {
-        return JSON.parse(savedPayments);
-      } catch {
-        return generateDemoPayments();
-      }
-    }
-    return generateDemoPayments();
-  });
+  const [patients, setPatients] = useState<Patient[]>(() => readFromStorage(STORAGE_KEYS.PATIENTS, DEMO_PATIENTS));
 
-  const [documents, setDocuments] = useState<MedicalDocument[]>(() => {
-    const savedDocuments = localStorage.getItem(STORAGE_KEYS.DOCUMENTS);
-    if (savedDocuments) {
-      try {
-        return JSON.parse(savedDocuments);
-      } catch {
-        return [];
-      }
+  const [appointments, setAppointments] = useState<Appointment[]>(() =>
+    readFromStorage(STORAGE_KEYS.APPOINTMENTS, generateDemoAppointments())
+  );
+
+  const [medicalRecords, setMedicalRecords] = useState<MedicalRecord[]>(() =>
+    readFromStorage(STORAGE_KEYS.RECORDS, DEMO_MEDICAL_RECORDS)
+  );
+
+  const [payments, setPayments] = useState<Payment[]>(() =>
+    readFromStorage(STORAGE_KEYS.PAYMENTS, generateDemoPayments())
+  );
+
+  const [documents, setDocuments] = useState<MedicalDocument[]>(() => readFromStorage(STORAGE_KEYS.DOCUMENTS, []));
+
+  useEffect(() => {
+    if (!IS_PERSISTENT_STORAGE_ENABLED) {
+      console.info('[Storage] Persistência local desativada. Dados clínicos serão mantidos apenas em memória nesta sessão.');
     }
-    return [];
-  });
+  }, []);
 
   // Função auxiliar para salvar dados no localStorage com tratamento de erros
   const safeSetItem = (key: string, data: unknown) => {
@@ -144,6 +123,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   // Persistir dados no localStorage (consolidado com debounce e tratamento de erros)
   useEffect(() => {
+    if (!IS_PERSISTENT_STORAGE_ENABLED) {
+      return;
+    }
+
     const timeoutId = setTimeout(() => {
       if (patients.length > 0) {
         safeSetItem(STORAGE_KEYS.PATIENTS, patients);
@@ -546,12 +529,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setPayments(generateDemoPayments());
       setDocuments([]);
 
-      // Limpa localStorage
-      localStorage.removeItem(STORAGE_KEYS.PATIENTS);
-      localStorage.removeItem(STORAGE_KEYS.APPOINTMENTS);
-      localStorage.removeItem(STORAGE_KEYS.RECORDS);
-      localStorage.removeItem(STORAGE_KEYS.PAYMENTS);
-      localStorage.removeItem(STORAGE_KEYS.DOCUMENTS);
+      // Limpa localStorage quando persistência estiver habilitada
+      if (IS_PERSISTENT_STORAGE_ENABLED) {
+        localStorage.removeItem(STORAGE_KEYS.PATIENTS);
+        localStorage.removeItem(STORAGE_KEYS.APPOINTMENTS);
+        localStorage.removeItem(STORAGE_KEYS.RECORDS);
+        localStorage.removeItem(STORAGE_KEYS.PAYMENTS);
+        localStorage.removeItem(STORAGE_KEYS.DOCUMENTS);
+      }
     }
   }, []);
 

@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { IS_DEMO_AUTH_ENABLED } from '../constants/clinic';
 import { Stethoscope, Mail, Lock, AlertCircle, Loader2, ArrowRight, Eye, EyeOff } from 'lucide-react';
 
 export default function Login() {
@@ -146,30 +147,40 @@ export default function Login() {
           </form>
 
           {/* Demo credentials - Simplified */}
-          <div className="mt-10 pt-6 border-t border-slate-200">
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4 text-center">
-              Ambiente de Demonstração
-            </p>
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={() => { setEmail('medico@clinica.com'); setPassword('123456'); }}
-                className="p-3 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:border-primary-300 hover:bg-primary-50/30 transition-all group text-left"
-              >
-                <p className="text-xs font-medium text-slate-500 group-hover:text-primary-600 mb-1">Médico</p>
-                <p className="text-xs text-slate-900 font-mono">medico@clinica.com</p>
-              </button>
-              <button
-                type="button"
-                onClick={() => { setEmail('secretaria@clinica.com'); setPassword('123456'); }}
-                className="p-3 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:border-primary-300 hover:bg-primary-50/30 transition-all group text-left"
-              >
-                <p className="text-xs font-medium text-slate-500 group-hover:text-primary-600 mb-1">Secretária</p>
-                <p className="text-xs text-slate-900 font-mono">secretaria@clinica.com</p>
-              </button>
+          {IS_DEMO_AUTH_ENABLED && (
+            <div className="mt-10 pt-6 border-t border-slate-200">
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4 text-center">
+                Ambiente de Demonstração
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEmail(import.meta.env.VITE_DEMO_DOCTOR_EMAIL || 'medico@clinica.com');
+                    setPassword(import.meta.env.VITE_DEMO_DOCTOR_PASSWORD || '123456');
+                  }}
+                  className="p-3 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:border-primary-300 hover:bg-primary-50/30 transition-all group text-left"
+                >
+                  <p className="text-xs font-medium text-slate-500 group-hover:text-primary-600 mb-1">Médico</p>
+                  <p className="text-xs text-slate-900 font-mono">{import.meta.env.VITE_DEMO_DOCTOR_EMAIL || 'medico@clinica.com'}</p>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEmail(import.meta.env.VITE_DEMO_SECRETARY_EMAIL || 'secretaria@clinica.com');
+                    setPassword(import.meta.env.VITE_DEMO_SECRETARY_PASSWORD || '123456');
+                  }}
+                  className="p-3 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:border-primary-300 hover:bg-primary-50/30 transition-all group text-left"
+                >
+                  <p className="text-xs font-medium text-slate-500 group-hover:text-primary-600 mb-1">Secretária</p>
+                  <p className="text-xs text-slate-900 font-mono">{import.meta.env.VITE_DEMO_SECRETARY_EMAIL || 'secretaria@clinica.com'}</p>
+                </button>
+              </div>
+              <p className="text-center text-xs text-slate-400 mt-3">
+                Senha padrão: <span className="font-mono">{import.meta.env.VITE_DEMO_DOCTOR_PASSWORD || '123456'}</span>
+              </p>
             </div>
-            <p className="text-center text-xs text-slate-400 mt-3">Senha padrão: <span className="font-mono">123456</span></p>
-          </div>
+          )}
         </div>
       </div>
     </div>
