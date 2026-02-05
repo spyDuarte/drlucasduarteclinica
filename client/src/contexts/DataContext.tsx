@@ -37,6 +37,7 @@ interface DataContextType {
   updateMedicalRecord: (id: string, record: Partial<MedicalRecord>) => void;
   getMedicalRecordsByPatient: (patientId: string) => MedicalRecord[];
   getLastMedicalRecord: (patientId: string) => MedicalRecord | undefined;
+  registerMedicalRecordAccess: (recordId: string, action: 'view' | 'edit' | 'print' | 'export', userId: string, userName: string) => void;
 
   // Pagamentos
   payments: Payment[];
@@ -315,18 +316,58 @@ export function DataProvider({ children }: { children: ReactNode }) {
       ...recordData,
       id: generateId(),
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
+      audit: {
+        createdAt: recordData.audit?.createdAt || now,
+        createdBy: recordData.audit?.createdBy,
+        lastEditedAt: recordData.audit?.lastEditedAt,
+        lastEditedBy: recordData.audit?.lastEditedBy,
+        accessHistory: recordData.audit?.accessHistory || [],
+        versions: recordData.audit?.versions || []
+      }
     };
     setMedicalRecords(prev => [...prev, newRecord]);
     return newRecord;
   }, []);
 
   const updateMedicalRecord = useCallback((id: string, recordData: Partial<MedicalRecord>) => {
-    setMedicalRecords(prev => prev.map(r =>
-      r.id === id
-        ? { ...r, ...recordData, updatedAt: new Date().toISOString() }
-        : r
-    ));
+    const now = new Date().toISOString();
+
+    setMedicalRecords(prev => prev.map(r => {
+      if (r.id !== id) return r;
+
+      const { audit: _previousAudit, ...previousSnapshotBase } = r;
+      void _previousAudit;
+
+      const previousVersions = r.audit?.versions || [];
+      const nextVersion = previousVersions.length + 1;
+      const editorName = recordData.audit?.lastEditedBy || 'Usuário do Sistema';
+
+      const updatedRecord: MedicalRecord = {
+        ...r,
+        ...recordData,
+        updatedAt: now,
+        audit: {
+          createdAt: r.audit?.createdAt || r.createdAt,
+          createdBy: r.audit?.createdBy,
+          lastEditedBy: recordData.audit?.lastEditedBy || r.audit?.lastEditedBy || editorName,
+          lastEditedAt: recordData.audit?.lastEditedAt || now,
+          accessHistory: recordData.audit?.accessHistory || r.audit?.accessHistory || [],
+          versions: [
+            ...previousVersions,
+            {
+              version: nextVersion,
+              timestamp: now,
+              editedBy: editorName,
+              changes: 'Atualização de prontuário',
+              snapshot: previousSnapshotBase
+            }
+          ]
+        }
+      };
+
+      return updatedRecord;
+    }));
   }, []);
 
   const getMedicalRecordsByPatient = useCallback((patientId: string) =>
@@ -341,6 +382,40 @@ export function DataProvider({ children }: { children: ReactNode }) {
     const records = getMedicalRecordsByPatient(patientId);
     return records[0]; // Já ordenado por data decrescente
   }, [getMedicalRecordsByPatient]);
+
+  const registerMedicalRecordAccess = useCallback((
+    recordId: string,
+    action: 'view' | 'edit' | 'print' | 'export',
+    userId: string,
+    userName: string
+  ) => {
+    const now = new Date().toISOString();
+
+    setMedicalRecords(prev => prev.map(record => {
+      if (record.id !== recordId) return record;
+
+      const history = record.audit?.accessHistory || [];
+      return {
+        ...record,
+        audit: {
+          createdAt: record.audit?.createdAt || record.createdAt,
+          createdBy: record.audit?.createdBy,
+          lastEditedBy: record.audit?.lastEditedBy,
+          lastEditedAt: record.audit?.lastEditedAt,
+          versions: record.audit?.versions || [],
+          accessHistory: [
+            ...history,
+            {
+              userId,
+              userName,
+              timestamp: now,
+              action
+            }
+          ]
+        }
+      };
+    }));
+  }, []);
 
   // Funções de Pagamentos
   const addPayment = useCallback((paymentData: Omit<Payment, 'id' | 'createdAt' | 'updatedAt'>) => {
@@ -564,6 +639,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     updateMedicalRecord,
     getMedicalRecordsByPatient,
     getLastMedicalRecord,
+    registerMedicalRecordAccess,
     payments,
     addPayment,
     updatePayment,
@@ -586,7 +662,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     patients, addPatient, updatePatient, deletePatient, getPatient, searchPatients, getPatientWithAppointments,
     appointments, addAppointment, updateAppointment, deleteAppointment, getAppointment,
     getAppointmentsByDate, getAppointmentsByPatient, checkAppointmentConflict, getUpcomingAppointments, getTodayAppointments,
-    medicalRecords, addMedicalRecord, updateMedicalRecord, getMedicalRecordsByPatient, getLastMedicalRecord,
+    medicalRecords, addMedicalRecord, updateMedicalRecord, getMedicalRecordsByPatient, getLastMedicalRecord, registerMedicalRecordAccess,
     payments, addPayment, updatePayment, getPaymentsByPatient, getPendingPayments, markPaymentAsPaid,
     documents, addDocument, updateDocument, deleteDocument, getDocument, getDocumentsByPatient, getDocumentsByType, emitDocument, cancelDocument,
     dashboardStats, exportData, clearAllData
