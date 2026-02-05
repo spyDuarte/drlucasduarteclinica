@@ -1,4 +1,5 @@
 import type { Patient, Appointment, MedicalRecord, Payment, User } from '../types';
+import { IS_DEMO_AUTH_ENABLED } from '../constants/clinic';
 
 /**
  * Configuração de usuários de demonstração
@@ -23,8 +24,10 @@ const getDemoUsers = (): (User & { password: string })[] => [
   }
 ];
 
-// Usuários de demonstração (lazy initialization)
-export const DEMO_USERS: (User & { password: string })[] = getDemoUsers();
+// Usuários de demonstração (disponíveis apenas no modo demo)
+export const DEMO_USERS: (User & { password: string })[] = IS_DEMO_AUTH_ENABLED
+  ? getDemoUsers()
+  : [];
 
 // Pacientes de demonstração
 export const DEMO_PATIENTS: Patient[] = [
