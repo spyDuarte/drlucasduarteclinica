@@ -48,10 +48,12 @@ A aplicação foi desenvolvida com os seguintes propósitos principais:
 
 **URL de Acesso:** [https://spyDuarte.github.io/drlucasduarteclinica](https://spyDuarte.github.io/drlucasduarteclinica)
 
-| Perfil | Email | Senha |
-|--------|-------|-------|
-| Médico | medico@clinica.com | medico123 |
-| Secretária | secretaria@clinica.com | secretaria123 |
+| Perfil | Email (padrão) | Senha (padrão) |
+|--------|----------------|----------------|
+| Médico | `medico@clinica.com` | `123456` |
+| Secretária | `secretaria@clinica.com` | `123456` |
+
+> Essas credenciais são válidas apenas no modo demo (`VITE_AUTH_MODE=demo`). Em `VITE_AUTH_MODE=production`, o login demo fica desativado e deve-se usar backend de autenticação.
 
 ---
 

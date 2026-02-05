@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useCallback, useEffect, useMemo, type ReactNode } from 'react';
 import type { User, UserRole } from '../types';
 import { DEMO_USERS } from '../data/demoData';
-import { STORAGE_KEYS } from '../constants/clinic';
+import { IS_DEMO_AUTH_ENABLED, STORAGE_KEYS } from '../constants/clinic';
 
 // Tempo de inatividade para logout automático (30 minutos)
 const SESSION_TIMEOUT = 30 * 60 * 1000;
@@ -117,39 +117,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = useCallback(async (email: string, password: string) => {
     setIsLoading(true);
 
-    // Validação básica
-    if (!email || !password) {
+    try {
+      // Validação básica
+      if (!email || !password) {
+        throw new Error('Email e senha são obrigatórios');
+      }
+
+      if (!IS_DEMO_AUTH_ENABLED) {
+        throw new Error('Autenticação demo desativada. Configure um backend de autenticação para produção.');
+      }
+
+      // Simular delay de rede (também ajuda contra brute force)
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Normaliza email para comparação
+      const normalizedEmail = email.toLowerCase().trim();
+
+      const foundUser = DEMO_USERS.find(
+        u => u.email.toLowerCase() === normalizedEmail && u.password === password
+      );
+
+      if (!foundUser) {
+        throw new Error('Email ou senha inválidos');
+      }
+
+      const { password: _password, ...userWithoutPassword } = foundUser;
+      void _password; // Ignora a senha de propósito
+
+      setUser(userWithoutPassword);
+      localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(userWithoutPassword));
+
+      // Registra atividade inicial
+      const now = new Date();
+      setLastActivity(now);
+      localStorage.setItem(LAST_ACTIVITY_KEY, now.toISOString());
+    } finally {
       setIsLoading(false);
-      throw new Error('Email e senha são obrigatórios');
     }
-
-    // Simular delay de rede (também ajuda contra brute force)
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    // Normaliza email para comparação
-    const normalizedEmail = email.toLowerCase().trim();
-
-    const foundUser = DEMO_USERS.find(
-      u => u.email.toLowerCase() === normalizedEmail && u.password === password
-    );
-
-    if (!foundUser) {
-      setIsLoading(false);
-      throw new Error('Email ou senha inválidos');
-    }
-
-    const { password: _password, ...userWithoutPassword } = foundUser;
-    void _password; // Ignora a senha de propósito
-
-    setUser(userWithoutPassword);
-    localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(userWithoutPassword));
-
-    // Registra atividade inicial
-    const now = new Date();
-    setLastActivity(now);
-    localStorage.setItem(LAST_ACTIVITY_KEY, now.toISOString());
-
-    setIsLoading(false);
   }, []);
 
   const hasPermission = useCallback((requiredRole: UserRole | UserRole[]) => {

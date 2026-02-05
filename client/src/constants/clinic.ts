@@ -15,6 +15,11 @@ export const STORAGE_KEYS = {
   DOCUMENTS: 'clinica_documents',
 } as const;
 
+const rawAuthMode = (import.meta.env.VITE_AUTH_MODE || 'demo').toLowerCase();
+
+export const AUTH_MODE = rawAuthMode === 'production' ? 'production' : 'demo';
+export const IS_DEMO_AUTH_ENABLED = AUTH_MODE === 'demo';
+
 export const BRAZILIAN_STATES = [
   'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO',
   'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI',
