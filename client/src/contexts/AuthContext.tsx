@@ -7,20 +7,65 @@ import { IS_DEMO_AUTH_ENABLED, STORAGE_KEYS } from '../constants/clinic';
 const SESSION_TIMEOUT = 30 * 60 * 1000;
 const LAST_ACTIVITY_KEY = 'clinica_last_activity';
 
+// Proteção contra tentativas de login inválidas
+const LOGIN_SECURITY_KEY = 'clinica_login_security';
+const MAX_FAILED_ATTEMPTS = 5;
+const BASE_LOCK_MS = 60 * 1000;
+const MAX_LOCK_MS = 15 * 60 * 1000;
+
+interface LoginSecurityState {
+  failedAttempts: number;
+  lockUntil: number | null;
+}
+
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   lastActivity: Date | null;
   sessionExpiresAt: Date | null;
+  failedLoginAttempts: number;
+  isLoginLocked: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   hasPermission: (requiredRole: UserRole | UserRole[]) => boolean;
   updateActivity: () => void;
   getRemainingSessionTime: () => number;
+  getLoginLockRemainingTime: () => number;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+const getInitialLoginSecurityState = (): LoginSecurityState => {
+  const raw = localStorage.getItem(LOGIN_SECURITY_KEY);
+  if (!raw) {
+    return { failedAttempts: 0, lockUntil: null };
+  }
+
+  try {
+    const parsed = JSON.parse(raw) as Partial<LoginSecurityState>;
+    return {
+      failedAttempts: typeof parsed.failedAttempts === 'number' ? parsed.failedAttempts : 0,
+      lockUntil: typeof parsed.lockUntil === 'number' ? parsed.lockUntil : null
+    };
+  } catch {
+    return { failedAttempts: 0, lockUntil: null };
+  }
+};
+
+const persistLoginSecurityState = (state: LoginSecurityState) => {
+  localStorage.setItem(LOGIN_SECURITY_KEY, JSON.stringify(state));
+};
+
+const clearLoginSecurityState = () => {
+  localStorage.removeItem(LOGIN_SECURITY_KEY);
+};
+
+const getLockoutDuration = (failedAttempts: number): number => {
+  const escalationLevel = Math.max(0, failedAttempts - MAX_FAILED_ATTEMPTS);
+  const duration = BASE_LOCK_MS * (2 ** escalationLevel);
+  return Math.min(duration, MAX_LOCK_MS);
+};
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(() => {
@@ -55,6 +100,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const saved = localStorage.getItem(LAST_ACTIVITY_KEY);
     return saved ? new Date(saved) : null;
   });
+  const [loginSecurity, setLoginSecurity] = useState<LoginSecurityState>(() => getInitialLoginSecurityState());
+
+  const getLoginLockRemainingTime = useCallback(() => {
+    if (!loginSecurity.lockUntil) return 0;
+    return Math.max(0, loginSecurity.lockUntil - Date.now());
+  }, [loginSecurity.lockUntil]);
+
+  const isLoginLocked = getLoginLockRemainingTime() > 0;
+
+  useEffect(() => {
+    if (loginSecurity.failedAttempts === 0 && !loginSecurity.lockUntil) {
+      clearLoginSecurityState();
+      return;
+    }
+
+    persistLoginSecurityState(loginSecurity);
+  }, [loginSecurity]);
+
+  useEffect(() => {
+    if (!loginSecurity.lockUntil) return;
+
+    const remaining = getLoginLockRemainingTime();
+    if (remaining > 0) return;
+
+    setLoginSecurity(prev => ({ ...prev, lockUntil: null }));
+  }, [loginSecurity.lockUntil, getLoginLockRemainingTime]);
 
   // Atualiza a última atividade
   const updateActivity = useCallback(() => {
@@ -127,6 +198,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error('Autenticação demo desativada. Configure um backend de autenticação para produção.');
       }
 
+      const lockRemaining = getLoginLockRemainingTime();
+      if (lockRemaining > 0) {
+        const seconds = Math.ceil(lockRemaining / 1000);
+        throw new Error(`Muitas tentativas inválidas. Aguarde ${seconds}s para tentar novamente.`);
+      }
+
       // Simular delay de rede (também ajuda contra brute force)
       await new Promise(resolve => setTimeout(resolve, 500));
 
@@ -138,8 +215,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       );
 
       if (!foundUser) {
+        setLoginSecurity(prev => {
+          const nextAttempts = prev.failedAttempts + 1;
+          if (nextAttempts < MAX_FAILED_ATTEMPTS) {
+            return { ...prev, failedAttempts: nextAttempts };
+          }
+
+          const lockDuration = getLockoutDuration(nextAttempts);
+          return {
+            failedAttempts: nextAttempts,
+            lockUntil: Date.now() + lockDuration
+          };
+        });
+
         throw new Error('Email ou senha inválidos');
       }
+
+      // Sucesso no login: reset de tentativas inválidas
+      setLoginSecurity({ failedAttempts: 0, lockUntil: null });
 
       const { password: _password, ...userWithoutPassword } = foundUser;
       void _password; // Ignora a senha de propósito
@@ -154,7 +247,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [getLoginLockRemainingTime]);
 
   const hasPermission = useCallback((requiredRole: UserRole | UserRole[]) => {
     if (!user) return false;
@@ -169,12 +262,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isLoading,
     lastActivity,
     sessionExpiresAt,
+    failedLoginAttempts: loginSecurity.failedAttempts,
+    isLoginLocked,
     login,
     logout,
     hasPermission,
     updateActivity,
-    getRemainingSessionTime
-  }), [user, isLoading, lastActivity, sessionExpiresAt, login, logout, hasPermission, updateActivity, getRemainingSessionTime]);
+    getRemainingSessionTime,
+    getLoginLockRemainingTime
+  }), [
+    user,
+    isLoading,
+    lastActivity,
+    sessionExpiresAt,
+    loginSecurity.failedAttempts,
+    isLoginLocked,
+    login,
+    logout,
+    hasPermission,
+    updateActivity,
+    getRemainingSessionTime,
+    getLoginLockRemainingTime
+  ]);
 
   return (
     <AuthContext.Provider value={contextValue}>

@@ -146,6 +146,7 @@ O frontend agora suporta dois modos de autenticação via variável de ambiente:
 - `VITE_AUTH_MODE=demo` (padrão): habilita login local de demonstração.
 - `VITE_AUTH_MODE=production`: desativa autenticação demo e exige integração com backend.
 - `VITE_DATA_STORAGE_MODE=local|memory`: controla persistência de dados clínicos no frontend (padrão automático: `local` em demo e `memory` em produção).
+- Proteção contra força bruta no login demo com bloqueio temporário progressivo após múltiplas tentativas inválidas.
 
 ### Credenciais de Demonstração (somente `VITE_AUTH_MODE=demo`)
 
