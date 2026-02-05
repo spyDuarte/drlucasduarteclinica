@@ -139,12 +139,21 @@ Para que o GitHub Pages funcione corretamente:
    - Para deploy manual: **Deploy from a branch** e selecione `gh-pages`
 3. Aguarde alguns minutos e acesse: `https://seu-usuario.github.io/drlucasduarteclinica`
 
-## Credenciais de Demonstração
+## Autenticação: modos Demo e Produção
 
-| Perfil | Email | Senha |
-|--------|-------|-------|
-| Médico | medico@clinica.com | medico123 |
-| Secretária | secretaria@clinica.com | secretaria123 |
+O frontend agora suporta dois modos de autenticação via variável de ambiente:
+
+- `VITE_AUTH_MODE=demo` (padrão): habilita login local de demonstração.
+- `VITE_AUTH_MODE=production`: desativa autenticação demo e exige integração com backend.
+
+### Credenciais de Demonstração (somente `VITE_AUTH_MODE=demo`)
+
+| Perfil | Email (padrão) | Senha (padrão) |
+|--------|----------------|----------------|
+| Médico | `medico@clinica.com` | `123456` |
+| Secretária | `secretaria@clinica.com` | `123456` |
+
+> Você pode sobrescrever credenciais demo com variáveis `VITE_DEMO_*` no ambiente local.
 
 ## Estrutura do Projeto
 
