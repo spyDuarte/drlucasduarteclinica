@@ -145,6 +145,7 @@ O frontend agora suporta dois modos de autenticação via variável de ambiente:
 
 - `VITE_AUTH_MODE=demo` (padrão): habilita login local de demonstração.
 - `VITE_AUTH_MODE=production`: desativa autenticação demo e exige integração com backend.
+- `VITE_DATA_STORAGE_MODE=local|memory`: controla persistência de dados clínicos no frontend (padrão automático: `local` em demo e `memory` em produção).
 
 ### Credenciais de Demonstração (somente `VITE_AUTH_MODE=demo`)
 
@@ -154,6 +155,7 @@ O frontend agora suporta dois modos de autenticação via variável de ambiente:
 | Secretária | `secretaria@clinica.com` | `123456` |
 
 > Você pode sobrescrever credenciais demo com variáveis `VITE_DEMO_*` no ambiente local.
+> Em `VITE_DATA_STORAGE_MODE=memory`, dados de pacientes/consultas/prontuários não são gravados no `localStorage` e existem apenas durante a sessão ativa do navegador.
 
 ## Estrutura do Projeto
 

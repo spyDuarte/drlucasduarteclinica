@@ -20,6 +20,14 @@ const rawAuthMode = (import.meta.env.VITE_AUTH_MODE || 'demo').toLowerCase();
 export const AUTH_MODE = rawAuthMode === 'production' ? 'production' : 'demo';
 export const IS_DEMO_AUTH_ENABLED = AUTH_MODE === 'demo';
 
+
+const rawDataStorageMode = (
+  import.meta.env.VITE_DATA_STORAGE_MODE || (AUTH_MODE === 'demo' ? 'local' : 'memory')
+).toLowerCase();
+
+export const DATA_STORAGE_MODE = rawDataStorageMode === 'local' ? 'local' : 'memory';
+export const IS_PERSISTENT_STORAGE_ENABLED = DATA_STORAGE_MODE === 'local';
+
 export const BRAZILIAN_STATES = [
   'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO',
   'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI',

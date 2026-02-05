@@ -54,6 +54,7 @@ A aplicação foi desenvolvida com os seguintes propósitos principais:
 | Secretária | `secretaria@clinica.com` | `123456` |
 
 > Essas credenciais são válidas apenas no modo demo (`VITE_AUTH_MODE=demo`). Em `VITE_AUTH_MODE=production`, o login demo fica desativado e deve-se usar backend de autenticação.
+> Para dados clínicos no frontend, recomenda-se `VITE_DATA_STORAGE_MODE=memory` em produção (sem persistência em `localStorage`) até integração completa com backend seguro.
 
 ---
 
