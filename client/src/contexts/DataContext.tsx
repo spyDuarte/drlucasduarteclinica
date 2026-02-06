@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, useMemo, type ReactNode } from 'react';
 import type { Patient, Appointment, MedicalRecord, Payment, DashboardStats, MedicalDocument, DocumentType } from '../types';
 import { generateId, doTimesOverlap, normalizeForSearch, sortBy } from '../utils/helpers';
-import { IS_PERSISTENT_STORAGE_ENABLED, STORAGE_KEYS } from '../constants/clinic';
+import { DATA_RETENTION, IS_PERSISTENT_STORAGE_ENABLED, STORAGE_KEYS } from '../constants/clinic';
 import {
   DEMO_PATIENTS,
   DEMO_MEDICAL_RECORDS,
@@ -64,9 +64,37 @@ interface DataContextType {
   // Utilitários
   exportData: () => { patients: Patient[]; appointments: Appointment[]; medicalRecords: MedicalRecord[]; payments: Payment[]; documents: MedicalDocument[] };
   clearAllData: () => void;
+  applyDataRetentionPolicy: () => void;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
+
+
+const applyAuditRetention = (record: MedicalRecord): MedicalRecord => {
+  const audit = record.audit;
+  if (!audit) return record;
+
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - DATA_RETENTION.AUDIT_ACCESS_HISTORY_DAYS);
+  const cutoffMs = cutoff.getTime();
+
+  const filteredAccessHistory = (audit.accessHistory || []).filter(entry => {
+    const ts = new Date(entry.timestamp).getTime();
+    return Number.isFinite(ts) && ts >= cutoffMs;
+  });
+
+  const versions = audit.versions || [];
+  const trimmedVersions = versions.slice(-DATA_RETENTION.AUDIT_MAX_VERSIONS);
+
+  return {
+    ...record,
+    audit: {
+      ...audit,
+      accessHistory: filteredAccessHistory,
+      versions: trimmedVersions
+    }
+  };
+};
 
 export function DataProvider({ children }: { children: ReactNode }) {
   const readFromStorage = <T,>(key: string, fallback: T): T => {
@@ -93,7 +121,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   );
 
   const [medicalRecords, setMedicalRecords] = useState<MedicalRecord[]>(() =>
-    readFromStorage(STORAGE_KEYS.RECORDS, DEMO_MEDICAL_RECORDS)
+    readFromStorage(STORAGE_KEYS.RECORDS, DEMO_MEDICAL_RECORDS).map(applyAuditRetention)
   );
 
   const [payments, setPayments] = useState<Payment[]>(() =>
@@ -102,11 +130,16 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const [documents, setDocuments] = useState<MedicalDocument[]>(() => readFromStorage(STORAGE_KEYS.DOCUMENTS, []));
 
+  const applyDataRetentionPolicy = useCallback(() => {
+    setMedicalRecords(prev => prev.map(applyAuditRetention));
+  }, []);
+
   useEffect(() => {
     if (!IS_PERSISTENT_STORAGE_ENABLED) {
       console.info('[Storage] Persistência local desativada. Dados clínicos serão mantidos apenas em memória nesta sessão.');
     }
   }, []);
+
 
   // Função auxiliar para salvar dados no localStorage com tratamento de erros
   const safeSetItem = (key: string, data: unknown) => {
@@ -326,7 +359,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         versions: recordData.audit?.versions || []
       }
     };
-    setMedicalRecords(prev => [...prev, newRecord]);
+    setMedicalRecords(prev => [...prev, applyAuditRetention(newRecord)]);
     return newRecord;
   }, []);
 
@@ -366,7 +399,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         }
       };
 
-      return updatedRecord;
+      return applyAuditRetention(updatedRecord);
     }));
   }, []);
 
@@ -395,7 +428,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       if (record.id !== recordId) return record;
 
       const history = record.audit?.accessHistory || [];
-      return {
+      return applyAuditRetention({
         ...record,
         audit: {
           createdAt: record.audit?.createdAt || record.createdAt,
@@ -413,7 +446,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
             }
           ]
         }
-      };
+      });
     }));
   }, []);
 
@@ -657,7 +690,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
     cancelDocument,
     dashboardStats,
     exportData,
-    clearAllData
+    clearAllData,
+    applyDataRetentionPolicy
   }), [
     patients, addPatient, updatePatient, deletePatient, getPatient, searchPatients, getPatientWithAppointments,
     appointments, addAppointment, updateAppointment, deleteAppointment, getAppointment,
@@ -665,7 +699,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     medicalRecords, addMedicalRecord, updateMedicalRecord, getMedicalRecordsByPatient, getLastMedicalRecord, registerMedicalRecordAccess,
     payments, addPayment, updatePayment, getPaymentsByPatient, getPendingPayments, markPaymentAsPaid,
     documents, addDocument, updateDocument, deleteDocument, getDocument, getDocumentsByPatient, getDocumentsByType, emitDocument, cancelDocument,
-    dashboardStats, exportData, clearAllData
+    dashboardStats, exportData, clearAllData, applyDataRetentionPolicy
   ]);
 
   return (

@@ -57,6 +57,7 @@ A aplicação foi desenvolvida com os seguintes propósitos principais:
 > Para dados clínicos no frontend, recomenda-se `VITE_DATA_STORAGE_MODE=memory` em produção (sem persistência em `localStorage`) até integração completa com backend seguro.
 > O login demo possui proteção com bloqueio temporário progressivo após múltiplas tentativas inválidas consecutivas.
 > O prontuário registra trilha de auditoria para criação/edição e mantém histórico de acessos e versões.
+> A auditoria de prontuário aplica política de retenção (dias de histórico de acesso e limite de versões), configurável via variáveis `VITE_AUDIT_*`.
 
 ---
 

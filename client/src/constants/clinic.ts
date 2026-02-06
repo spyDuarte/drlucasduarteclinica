@@ -28,6 +28,17 @@ const rawDataStorageMode = (
 export const DATA_STORAGE_MODE = rawDataStorageMode === 'local' ? 'local' : 'memory';
 export const IS_PERSISTENT_STORAGE_ENABLED = DATA_STORAGE_MODE === 'local';
 
+
+const parsePositiveInt = (value: string | undefined, fallback: number): number => {
+  const parsed = Number.parseInt(value || '', 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+};
+
+export const DATA_RETENTION = {
+  AUDIT_ACCESS_HISTORY_DAYS: parsePositiveInt(import.meta.env.VITE_AUDIT_ACCESS_HISTORY_DAYS, 180),
+  AUDIT_MAX_VERSIONS: parsePositiveInt(import.meta.env.VITE_AUDIT_MAX_VERSIONS, 50)
+} as const;
+
 export const BRAZILIAN_STATES = [
   'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO',
   'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI',
