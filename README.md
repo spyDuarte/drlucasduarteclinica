@@ -139,12 +139,27 @@ Para que o GitHub Pages funcione corretamente:
    - Para deploy manual: **Deploy from a branch** e selecione `gh-pages`
 3. Aguarde alguns minutos e acesse: `https://seu-usuario.github.io/drlucasduarteclinica`
 
-## Credenciais de Demonstração
+## Autenticação: modos Demo e Produção
 
-| Perfil | Email | Senha |
-|--------|-------|-------|
-| Médico | medico@clinica.com | medico123 |
-| Secretária | secretaria@clinica.com | secretaria123 |
+O frontend agora suporta dois modos de autenticação via variável de ambiente:
+
+- `VITE_AUTH_MODE=demo` (padrão): habilita login local de demonstração.
+- `VITE_AUTH_MODE=production`: desativa autenticação demo e exige integração com backend.
+- `VITE_DATA_STORAGE_MODE=local|memory`: controla persistência de dados clínicos no frontend (padrão automático: `local` em demo e `memory` em produção).
+- Proteção contra força bruta no login demo com bloqueio temporário progressivo após múltiplas tentativas inválidas.
+- Auditoria de prontuário com trilha de criação/edição, histórico de acesso e versionamento de alterações.
+- Política de retenção de auditoria no frontend: histórico de acesso por janela de dias e limite de versões por prontuário (configurável por `VITE_AUDIT_*`).
+- Gestão de consentimentos LGPD no cadastro de pacientes (tratamento de dados sensíveis, compartilhamento e comunicação), com registro de concessão/revogação.
+
+### Credenciais de Demonstração (somente `VITE_AUTH_MODE=demo`)
+
+| Perfil | Email (padrão) | Senha (padrão) |
+|--------|----------------|----------------|
+| Médico | `medico@clinica.com` | `123456` |
+| Secretária | `secretaria@clinica.com` | `123456` |
+
+> Você pode sobrescrever credenciais demo com variáveis `VITE_DEMO_*` no ambiente local.
+> Em `VITE_DATA_STORAGE_MODE=memory`, dados de pacientes/consultas/prontuários não são gravados no `localStorage` e existem apenas durante a sessão ativa do navegador.
 
 ## Estrutura do Projeto
 

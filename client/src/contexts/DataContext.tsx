@@ -1,7 +1,8 @@
 import { createContext, useContext, useState, useEffect, useCallback, useMemo, type ReactNode } from 'react';
 import type { Patient, Appointment, MedicalRecord, Payment, DashboardStats, MedicalDocument, DocumentType } from '../types';
 import { generateId, doTimesOverlap, normalizeForSearch, sortBy } from '../utils/helpers';
-import { STORAGE_KEYS } from '../constants/clinic';
+import { applyAuditRetention, buildMedicalRecordAccessEntry, buildNewMedicalRecord, buildUpdatedMedicalRecord } from './modules/medicalRecordsModule';
+import { DATA_RETENTION, IS_PERSISTENT_STORAGE_ENABLED, STORAGE_KEYS } from '../constants/clinic';
 import {
   DEMO_PATIENTS,
   DEMO_MEDICAL_RECORDS,
@@ -37,6 +38,7 @@ interface DataContextType {
   updateMedicalRecord: (id: string, record: Partial<MedicalRecord>) => void;
   getMedicalRecordsByPatient: (patientId: string) => MedicalRecord[];
   getLastMedicalRecord: (patientId: string) => MedicalRecord | undefined;
+  registerMedicalRecordAccess: (recordId: string, action: 'view' | 'edit' | 'print' | 'export', userId: string, userName: string) => void;
 
   // Pagamentos
   payments: Payment[];
@@ -63,70 +65,66 @@ interface DataContextType {
   // Utilitários
   exportData: () => { patients: Patient[]; appointments: Appointment[]; medicalRecords: MedicalRecord[]; payments: Payment[]; documents: MedicalDocument[] };
   clearAllData: () => void;
+  applyDataRetentionPolicy: () => void;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
+
 export function DataProvider({ children }: { children: ReactNode }) {
-  const [patients, setPatients] = useState<Patient[]>(() => {
-    const savedPatients = localStorage.getItem(STORAGE_KEYS.PATIENTS);
-    if (savedPatients) {
-      try {
-        return JSON.parse(savedPatients);
-      } catch {
-        return DEMO_PATIENTS;
-      }
+  const readFromStorage = <T,>(key: string, fallback: T): T => {
+    if (!IS_PERSISTENT_STORAGE_ENABLED) {
+      return fallback;
     }
-    return DEMO_PATIENTS;
-  });
 
-  const [appointments, setAppointments] = useState<Appointment[]>(() => {
-    const savedAppointments = localStorage.getItem(STORAGE_KEYS.APPOINTMENTS);
-    if (savedAppointments) {
-      try {
-        return JSON.parse(savedAppointments);
-      } catch {
-        return generateDemoAppointments();
-      }
+    const rawData = localStorage.getItem(key);
+    if (!rawData) {
+      return fallback;
     }
-    return generateDemoAppointments();
-  });
 
-  const [medicalRecords, setMedicalRecords] = useState<MedicalRecord[]>(() => {
-    const savedRecords = localStorage.getItem(STORAGE_KEYS.RECORDS);
-    if (savedRecords) {
-      try {
-        return JSON.parse(savedRecords);
-      } catch {
-        return DEMO_MEDICAL_RECORDS;
-      }
+    try {
+      return JSON.parse(rawData) as T;
+    } catch {
+      return fallback;
     }
-    return DEMO_MEDICAL_RECORDS;
-  });
+  };
 
-  const [payments, setPayments] = useState<Payment[]>(() => {
-    const savedPayments = localStorage.getItem(STORAGE_KEYS.PAYMENTS);
-    if (savedPayments) {
-      try {
-        return JSON.parse(savedPayments);
-      } catch {
-        return generateDemoPayments();
-      }
-    }
-    return generateDemoPayments();
-  });
+  const [patients, setPatients] = useState<Patient[]>(() => readFromStorage(STORAGE_KEYS.PATIENTS, DEMO_PATIENTS));
 
-  const [documents, setDocuments] = useState<MedicalDocument[]>(() => {
-    const savedDocuments = localStorage.getItem(STORAGE_KEYS.DOCUMENTS);
-    if (savedDocuments) {
-      try {
-        return JSON.parse(savedDocuments);
-      } catch {
-        return [];
-      }
+  const [appointments, setAppointments] = useState<Appointment[]>(() =>
+    readFromStorage(STORAGE_KEYS.APPOINTMENTS, generateDemoAppointments())
+  );
+
+  const [medicalRecords, setMedicalRecords] = useState<MedicalRecord[]>(() =>
+    readFromStorage(STORAGE_KEYS.RECORDS, DEMO_MEDICAL_RECORDS).map(record =>
+      applyAuditRetention(record, {
+        accessHistoryDays: DATA_RETENTION.AUDIT_ACCESS_HISTORY_DAYS,
+        maxVersions: DATA_RETENTION.AUDIT_MAX_VERSIONS
+      })
+    )
+  );
+
+  const [payments, setPayments] = useState<Payment[]>(() =>
+    readFromStorage(STORAGE_KEYS.PAYMENTS, generateDemoPayments())
+  );
+
+  const [documents, setDocuments] = useState<MedicalDocument[]>(() => readFromStorage(STORAGE_KEYS.DOCUMENTS, []));
+
+  const applyDataRetentionPolicy = useCallback(() => {
+    setMedicalRecords(prev => prev.map(record =>
+      applyAuditRetention(record, {
+        accessHistoryDays: DATA_RETENTION.AUDIT_ACCESS_HISTORY_DAYS,
+        maxVersions: DATA_RETENTION.AUDIT_MAX_VERSIONS
+      })
+    ));
+  }, []);
+
+  useEffect(() => {
+    if (!IS_PERSISTENT_STORAGE_ENABLED) {
+      console.info('[Storage] Persistência local desativada. Dados clínicos serão mantidos apenas em memória nesta sessão.');
     }
-    return [];
-  });
+  }, []);
+
 
   // Função auxiliar para salvar dados no localStorage com tratamento de erros
   const safeSetItem = (key: string, data: unknown) => {
@@ -144,6 +142,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   // Persistir dados no localStorage (consolidado com debounce e tratamento de erros)
   useEffect(() => {
+    if (!IS_PERSISTENT_STORAGE_ENABLED) {
+      return;
+    }
+
     const timeoutId = setTimeout(() => {
       if (patients.length > 0) {
         safeSetItem(STORAGE_KEYS.PATIENTS, patients);
@@ -328,22 +330,31 @@ export function DataProvider({ children }: { children: ReactNode }) {
   // Funções de Prontuários
   const addMedicalRecord = useCallback((recordData: Omit<MedicalRecord, 'id' | 'createdAt' | 'updatedAt'>) => {
     const now = new Date().toISOString();
-    const newRecord: MedicalRecord = {
-      ...recordData,
-      id: generateId(),
-      createdAt: now,
-      updatedAt: now
-    };
-    setMedicalRecords(prev => [...prev, newRecord]);
+    const newRecord = buildNewMedicalRecord(recordData, now);
+
+    setMedicalRecords(prev => [
+      ...prev,
+      applyAuditRetention(newRecord, {
+        accessHistoryDays: DATA_RETENTION.AUDIT_ACCESS_HISTORY_DAYS,
+        maxVersions: DATA_RETENTION.AUDIT_MAX_VERSIONS
+      })
+    ]);
+
     return newRecord;
   }, []);
 
   const updateMedicalRecord = useCallback((id: string, recordData: Partial<MedicalRecord>) => {
-    setMedicalRecords(prev => prev.map(r =>
-      r.id === id
-        ? { ...r, ...recordData, updatedAt: new Date().toISOString() }
-        : r
-    ));
+    const now = new Date().toISOString();
+
+    setMedicalRecords(prev => prev.map(r => {
+      if (r.id !== id) return r;
+
+      const updatedRecord = buildUpdatedMedicalRecord(r, recordData, now);
+      return applyAuditRetention(updatedRecord, {
+        accessHistoryDays: DATA_RETENTION.AUDIT_ACCESS_HISTORY_DAYS,
+        maxVersions: DATA_RETENTION.AUDIT_MAX_VERSIONS
+      });
+    }));
   }, []);
 
   const getMedicalRecordsByPatient = useCallback((patientId: string) =>
@@ -358,6 +369,27 @@ export function DataProvider({ children }: { children: ReactNode }) {
     const records = getMedicalRecordsByPatient(patientId);
     return records[0]; // Já ordenado por data decrescente
   }, [getMedicalRecordsByPatient]);
+
+  const registerMedicalRecordAccess = useCallback((
+    recordId: string,
+    action: 'view' | 'edit' | 'print' | 'export',
+    userId: string,
+    userName: string
+  ) => {
+    const now = new Date().toISOString();
+
+    setMedicalRecords(prev => prev.map(record => {
+      if (record.id !== recordId) return record;
+
+      return applyAuditRetention(
+        buildMedicalRecordAccessEntry(record, action, userId, userName, now),
+        {
+          accessHistoryDays: DATA_RETENTION.AUDIT_ACCESS_HISTORY_DAYS,
+          maxVersions: DATA_RETENTION.AUDIT_MAX_VERSIONS
+        }
+      );
+    }));
+  }, []);
 
   // Funções de Pagamentos
   const addPayment = useCallback((paymentData: Omit<Payment, 'id' | 'createdAt' | 'updatedAt'>) => {
@@ -546,12 +578,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setPayments(generateDemoPayments());
       setDocuments([]);
 
-      // Limpa localStorage
-      localStorage.removeItem(STORAGE_KEYS.PATIENTS);
-      localStorage.removeItem(STORAGE_KEYS.APPOINTMENTS);
-      localStorage.removeItem(STORAGE_KEYS.RECORDS);
-      localStorage.removeItem(STORAGE_KEYS.PAYMENTS);
-      localStorage.removeItem(STORAGE_KEYS.DOCUMENTS);
+      // Limpa localStorage quando persistência estiver habilitada
+      if (IS_PERSISTENT_STORAGE_ENABLED) {
+        localStorage.removeItem(STORAGE_KEYS.PATIENTS);
+        localStorage.removeItem(STORAGE_KEYS.APPOINTMENTS);
+        localStorage.removeItem(STORAGE_KEYS.RECORDS);
+        localStorage.removeItem(STORAGE_KEYS.PAYMENTS);
+        localStorage.removeItem(STORAGE_KEYS.DOCUMENTS);
+      }
     }
   }, []);
 
@@ -579,6 +613,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     updateMedicalRecord,
     getMedicalRecordsByPatient,
     getLastMedicalRecord,
+    registerMedicalRecordAccess,
     payments,
     addPayment,
     updatePayment,
@@ -596,15 +631,16 @@ export function DataProvider({ children }: { children: ReactNode }) {
     cancelDocument,
     dashboardStats,
     exportData,
-    clearAllData
+    clearAllData,
+    applyDataRetentionPolicy
   }), [
     patients, addPatient, updatePatient, deletePatient, getPatient, searchPatients, getPatientWithAppointments,
     appointments, addAppointment, updateAppointment, deleteAppointment, getAppointment,
     getAppointmentsByDate, getAppointmentsByPatient, checkAppointmentConflict, getUpcomingAppointments, getTodayAppointments,
-    medicalRecords, addMedicalRecord, updateMedicalRecord, getMedicalRecordsByPatient, getLastMedicalRecord,
+    medicalRecords, addMedicalRecord, updateMedicalRecord, getMedicalRecordsByPatient, getLastMedicalRecord, registerMedicalRecordAccess,
     payments, addPayment, updatePayment, getPaymentsByPatient, getPendingPayments, markPaymentAsPaid,
     documents, addDocument, updateDocument, deleteDocument, getDocument, getDocumentsByPatient, getDocumentsByType, emitDocument, cancelDocument,
-    dashboardStats, exportData, clearAllData
+    dashboardStats, exportData, clearAllData, applyDataRetentionPolicy
   ]);
 
   return (

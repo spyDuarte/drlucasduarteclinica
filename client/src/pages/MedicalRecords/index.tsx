@@ -1,6 +1,7 @@
 import { useState, useMemo, memo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useData } from '../../contexts/DataContext';
+import { useAuth } from '../../contexts/AuthContext';
 import {
   ArrowLeft,
   Plus,
@@ -34,13 +35,15 @@ type TabType = 'atendimentos' | 'documentos' | 'resumo';
 export default function MedicalRecords() {
   const { patientId } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const {
     getPatient,
     getMedicalRecordsByPatient,
     addMedicalRecord,
     updateMedicalRecord,
     getDocumentsByPatient,
-    getAppointmentsByPatient
+    getAppointmentsByPatient,
+    registerMedicalRecordAccess
   } = useData();
 
   const patient = useMemo(() => (patientId ? getPatient(patientId) : null), [patientId, getPatient]);
@@ -118,6 +121,16 @@ export default function MedicalRecords() {
   const handleCloseModal = () => {
     setShowNewRecord(false);
     setEditingRecord(null);
+  };
+
+  const handleEditRecord = (record: MedicalRecord) => {
+    registerMedicalRecordAccess(
+      record.id,
+      'edit',
+      user?.id || 'sistema',
+      user?.nome || 'Usuário do Sistema'
+    );
+    setEditingRecord(record);
   };
 
   const handleQuickAction = (action: string) => {
@@ -425,7 +438,7 @@ export default function MedicalRecords() {
                       key={record.id}
                       record={record}
                       index={index}
-                      onEdit={setEditingRecord}
+                      onEdit={handleEditRecord}
                     />
                   ))}
                 </div>
@@ -484,7 +497,6 @@ function EmptyRecordsState({ onCreateNew }: { onCreateNew: () => void }) {
 // Tab de Documentos
 const DocumentsTab = memo(function DocumentsTab({ documents, patientId }: { documents: MedicalDocument[], patientId: string }) {
   const navigate = useNavigate();
-
   const getDocumentTypeInfo = (type: string) => {
     const types: Record<string, { label: string; color: string; bgColor: string }> = {
       atestado: { label: 'Atestado', color: 'text-blue-700', bgColor: 'bg-blue-100' },

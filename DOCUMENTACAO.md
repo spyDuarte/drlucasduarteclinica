@@ -48,10 +48,17 @@ A aplicação foi desenvolvida com os seguintes propósitos principais:
 
 **URL de Acesso:** [https://spyDuarte.github.io/drlucasduarteclinica](https://spyDuarte.github.io/drlucasduarteclinica)
 
-| Perfil | Email | Senha |
-|--------|-------|-------|
-| Médico | medico@clinica.com | medico123 |
-| Secretária | secretaria@clinica.com | secretaria123 |
+| Perfil | Email (padrão) | Senha (padrão) |
+|--------|----------------|----------------|
+| Médico | `medico@clinica.com` | `123456` |
+| Secretária | `secretaria@clinica.com` | `123456` |
+
+> Essas credenciais são válidas apenas no modo demo (`VITE_AUTH_MODE=demo`). Em `VITE_AUTH_MODE=production`, o login demo fica desativado e deve-se usar backend de autenticação.
+> Para dados clínicos no frontend, recomenda-se `VITE_DATA_STORAGE_MODE=memory` em produção (sem persistência em `localStorage`) até integração completa com backend seguro.
+> O login demo possui proteção com bloqueio temporário progressivo após múltiplas tentativas inválidas consecutivas.
+> O prontuário registra trilha de auditoria para criação/edição e mantém histórico de acessos e versões.
+> A auditoria de prontuário aplica política de retenção (dias de histórico de acesso e limite de versões), configurável via variáveis `VITE_AUDIT_*`.
+> O cadastro de paciente inclui gestão de consentimentos LGPD (tratamento, compartilhamento e comunicação), incluindo possibilidade de revogação.
 
 ---
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Phone, Mail, Edit2, Trash2, FileText } from 'lucide-react';
+import { Phone, Mail, Edit2, Trash2, FileText, ShieldCheck, ShieldAlert } from 'lucide-react';
 import { formatDate, calculateAge, formatCPF, formatPhone, getInitials } from '../utils/helpers';
 import type { Patient } from '../types';
 
@@ -21,6 +21,17 @@ export const PatientRow = React.memo(({ patient, onEdit, onDelete }: PatientRowP
           <div>
             <p className="font-semibold text-slate-900 group-hover:text-primary-700 transition-colors">{patient.nome}</p>
             <p className="text-xs text-slate-500 font-mono">{formatCPF(patient.cpf)}</p>
+            <div className="mt-1">
+              {patient.consents?.find(c => c.type === 'tratamento_dados_saude')?.granted ? (
+                <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-700">
+                  <ShieldCheck className="h-3 w-3" /> LGPD consentido
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-700">
+                  <ShieldAlert className="h-3 w-3" /> Sem consentimento LGPD
+                </span>
+              )}
+            </div>
           </div>
         </div>
       </td>
