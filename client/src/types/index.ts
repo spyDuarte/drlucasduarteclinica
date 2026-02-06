@@ -11,6 +11,18 @@ export interface User {
   crm?: string; // Apenas para médicos
 }
 
+
+export type ConsentType = 'tratamento_dados_saude' | 'compartilhamento_terceiros' | 'comunicacao' | 'pesquisa_satisfacao';
+
+export interface PatientConsent {
+  type: ConsentType;
+  granted: boolean;
+  grantedAt?: string;
+  revokedAt?: string;
+  revokedReason?: string;
+  legalBasis?: string;
+}
+
 export interface Patient {
   id: string;
   nome: string;
@@ -43,6 +55,9 @@ export interface Patient {
   activeProblems?: ActiveProblem[];
   // Alertas de segurança ativos
   safetyAlerts?: SafetyAlert[];
+
+  // LGPD - Consentimentos do titular
+  consents?: PatientConsent[];
 
   createdAt: string;
   updatedAt: string;

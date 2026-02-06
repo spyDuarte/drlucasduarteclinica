@@ -58,6 +58,7 @@ A aplicação foi desenvolvida com os seguintes propósitos principais:
 > O login demo possui proteção com bloqueio temporário progressivo após múltiplas tentativas inválidas consecutivas.
 > O prontuário registra trilha de auditoria para criação/edição e mantém histórico de acessos e versões.
 > A auditoria de prontuário aplica política de retenção (dias de histórico de acesso e limite de versões), configurável via variáveis `VITE_AUDIT_*`.
+> O cadastro de paciente inclui gestão de consentimentos LGPD (tratamento, compartilhamento e comunicação), incluindo possibilidade de revogação.
 
 ---
 

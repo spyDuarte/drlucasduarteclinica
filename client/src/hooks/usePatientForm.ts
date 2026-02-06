@@ -23,6 +23,10 @@ export interface PatientFormData {
   medicamentosEmUso: string;
   historicoFamiliar: string;
   observacoes: string;
+  consentTratamentoDados: boolean;
+  consentCompartilhamento: boolean;
+  consentComunicacao: boolean;
+  consentRevogadoMotivo: string;
 }
 
 export interface FormErrors {
@@ -53,7 +57,11 @@ function createInitialFormData(patient: Patient | null): PatientFormData {
     alergias: patient?.alergias?.join(', ') || '',
     medicamentosEmUso: patient?.medicamentosEmUso?.join(', ') || '',
     historicoFamiliar: patient?.historicoFamiliar || '',
-    observacoes: patient?.observacoes || ''
+    observacoes: patient?.observacoes || '',
+    consentTratamentoDados: patient?.consents?.find(c => c.type === 'tratamento_dados_saude')?.granted ?? false,
+    consentCompartilhamento: patient?.consents?.find(c => c.type === 'compartilhamento_terceiros')?.granted ?? false,
+    consentComunicacao: patient?.consents?.find(c => c.type === 'comunicacao')?.granted ?? false,
+    consentRevogadoMotivo: patient?.consents?.find(c => c.revokedReason)?.revokedReason || ''
   };
 }
 
@@ -149,6 +157,36 @@ export function usePatientForm(patient: Patient | null) {
         validade: formData.convenioValidade
       };
     }
+
+    const now = new Date().toISOString();
+    const revokedReason = formData.consentRevogadoMotivo.trim() || undefined;
+
+    data.consents = [
+      {
+        type: 'tratamento_dados_saude',
+        granted: formData.consentTratamentoDados,
+        grantedAt: formData.consentTratamentoDados ? now : undefined,
+        revokedAt: formData.consentTratamentoDados ? undefined : now,
+        revokedReason,
+        legalBasis: 'LGPD Art. 7º, I e Art. 11, I'
+      },
+      {
+        type: 'compartilhamento_terceiros',
+        granted: formData.consentCompartilhamento,
+        grantedAt: formData.consentCompartilhamento ? now : undefined,
+        revokedAt: formData.consentCompartilhamento ? undefined : now,
+        revokedReason,
+        legalBasis: 'LGPD Art. 7º, I'
+      },
+      {
+        type: 'comunicacao',
+        granted: formData.consentComunicacao,
+        grantedAt: formData.consentComunicacao ? now : undefined,
+        revokedAt: formData.consentComunicacao ? undefined : now,
+        revokedReason,
+        legalBasis: 'LGPD Art. 7º, I'
+      }
+    ];
 
     return data;
   }, [formData]);
