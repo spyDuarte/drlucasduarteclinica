@@ -287,6 +287,57 @@ export default function PatientModal({ patient, onClose, onSave, isLoading = fal
             </div>
           </FormSection>
 
+
+          {/* Consentimentos LGPD */}
+          <FormSection title="Consentimentos LGPD">
+            <div className="space-y-3 rounded-lg border border-slate-200 bg-slate-50/50 p-4">
+              <label className="flex items-start gap-3 text-sm text-slate-700">
+                <input
+                  type="checkbox"
+                  checked={formData.consentTratamentoDados}
+                  onChange={e => updateField('consentTratamentoDados', e.target.checked)}
+                  className="mt-1 h-4 w-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
+                />
+                <span>
+                  Autorizo o tratamento de dados pessoais sensíveis para fins assistenciais e continuidade do cuidado.
+                </span>
+              </label>
+
+              <label className="flex items-start gap-3 text-sm text-slate-700">
+                <input
+                  type="checkbox"
+                  checked={formData.consentCompartilhamento}
+                  onChange={e => updateField('consentCompartilhamento', e.target.checked)}
+                  className="mt-1 h-4 w-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
+                />
+                <span>
+                  Autorizo compartilhamento de dados com terceiros vinculados ao atendimento (ex.: laboratório, convênio).
+                </span>
+              </label>
+
+              <label className="flex items-start gap-3 text-sm text-slate-700">
+                <input
+                  type="checkbox"
+                  checked={formData.consentComunicacao}
+                  onChange={e => updateField('consentComunicacao', e.target.checked)}
+                  className="mt-1 h-4 w-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
+                />
+                <span>
+                  Autorizo contato por telefone/e-mail/WhatsApp para lembretes, orientações e comunicações da clínica.
+                </span>
+              </label>
+
+              <TextAreaField
+                id="consentRevogadoMotivo"
+                label="Motivo de revogação (opcional)"
+                value={formData.consentRevogadoMotivo}
+                onChange={v => updateField('consentRevogadoMotivo', v)}
+                rows={2}
+                placeholder="Preencha quando houver revogação de consentimento"
+              />
+            </div>
+          </FormSection>
+
           {/* Actions */}
           <div className="flex gap-3 justify-end pt-4 border-t border-gray-200">
             <button

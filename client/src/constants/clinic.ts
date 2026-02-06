@@ -15,6 +15,30 @@ export const STORAGE_KEYS = {
   DOCUMENTS: 'clinica_documents',
 } as const;
 
+const rawAuthMode = (import.meta.env.VITE_AUTH_MODE || 'demo').toLowerCase();
+
+export const AUTH_MODE = rawAuthMode === 'production' ? 'production' : 'demo';
+export const IS_DEMO_AUTH_ENABLED = AUTH_MODE === 'demo';
+
+
+const rawDataStorageMode = (
+  import.meta.env.VITE_DATA_STORAGE_MODE || (AUTH_MODE === 'demo' ? 'local' : 'memory')
+).toLowerCase();
+
+export const DATA_STORAGE_MODE = rawDataStorageMode === 'local' ? 'local' : 'memory';
+export const IS_PERSISTENT_STORAGE_ENABLED = DATA_STORAGE_MODE === 'local';
+
+
+const parsePositiveInt = (value: string | undefined, fallback: number): number => {
+  const parsed = Number.parseInt(value || '', 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+};
+
+export const DATA_RETENTION = {
+  AUDIT_ACCESS_HISTORY_DAYS: parsePositiveInt(import.meta.env.VITE_AUDIT_ACCESS_HISTORY_DAYS, 180),
+  AUDIT_MAX_VERSIONS: parsePositiveInt(import.meta.env.VITE_AUDIT_MAX_VERSIONS, 50)
+} as const;
+
 export const BRAZILIAN_STATES = [
   'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO',
   'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI',
