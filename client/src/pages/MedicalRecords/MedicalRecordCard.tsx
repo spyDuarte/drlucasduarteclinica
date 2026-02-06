@@ -84,6 +84,25 @@ export const MedicalRecordCard = memo(function MedicalRecordCard({ record, index
         <SOAPAssessmentSection record={record} />
         <SOAPPlanSection record={record} />
       </div>
+
+      <div className="px-5 pb-4 pt-2 border-t border-slate-100 bg-slate-50/60 text-xs text-slate-600 flex flex-wrap gap-x-4 gap-y-1">
+        <span>
+          Criado em: <strong>{formatDate(record.audit?.createdAt || record.createdAt, 'dd/MM/yyyy HH:mm')}</strong>
+          {record.audit?.createdBy && <> por <strong>{record.audit.createdBy}</strong></>}
+        </span>
+        {record.audit?.lastEditedAt && (
+          <span>
+            Última edição: <strong>{formatDate(record.audit.lastEditedAt, 'dd/MM/yyyy HH:mm')}</strong>
+            {record.audit.lastEditedBy && <> por <strong>{record.audit.lastEditedBy}</strong></>}
+          </span>
+        )}
+        <span>
+          Versões: <strong>{record.audit?.versions?.length || 0}</strong>
+        </span>
+        <span>
+          Acessos auditados: <strong>{record.audit?.accessHistory?.length || 0}</strong>
+        </span>
+      </div>
     </div>
   );
 });
